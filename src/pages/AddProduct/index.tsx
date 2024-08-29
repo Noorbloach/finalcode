@@ -11,6 +11,24 @@ import {
 } from "@/components/Base/Form";
 import { ClassicEditor } from "@/components/Base/Ckeditor";
 import Lucide from "@/components/Base/Lucide";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";  
+
+const getCreatorIdFromToken = () => {
+  // Assuming you have the token stored in localStorage or any other place
+  const token = localStorage.getItem("token"); // or wherever your token is stored
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      console.log(decodedToken)
+      return decodedToken.sub; // replace with actual field from your token
+    } catch (error) {
+      console.error("Error decoding token", error);
+    }
+  }
+  return null;
+};
+
 
 function Main() {
   const [subcategory, setSubcategory] = useState("");
@@ -24,6 +42,49 @@ function Main() {
   const [rfiAddendum, setRfiAddendum] = useState("");
   const [projectPlans, setProjectPlans] = useState("");
   const [projectType, setProjectType] = useState("");
+  const [projectName, setProjectName] = useState("");  // Added for Project Name
+
+  const handleSave = async () => {
+    const creatorId = getCreatorIdFromToken();
+  if (!creatorId) {
+    console.error("Creator ID is missing");
+    return;
+  }
+    try {
+      const response = await axios.post("http://localhost:3000/api/create", {
+        projectName,
+        status,
+        subcategory,
+        projectType,
+        clientDueDate,
+        opsDueDate,
+        editorData,
+        budget,
+        clientPermanentNotes,
+        rfiAddendum,
+        projectPlans,
+        clientType,
+      });
+  
+      console.log("Project created successfully:", response.data);
+      // Handle successful creation (e.g., show a success message or redirect)
+    } catch (error) {
+      if (error.response) {
+        // Request made and server responded with a status code that falls out of the range of 2xx
+        console.error("Error creating project:", error.response.data);
+        alert(`Error: ${error.response.data.message || "Unknown error occurred"}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error creating project: No response received");
+        alert("Error: No response received from the server");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error creating project:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+    }
+  };
+  
 
   return (
     <>
@@ -56,6 +117,8 @@ function Main() {
                       id="project-name"
                       type="text"
                       placeholder="Project name"
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
                     />
                   </div>
                 </FormInline>
@@ -315,6 +378,7 @@ function Main() {
             <Button
               type="button"
               className="w-full py-3 border-slate-300 dark:border-darkmode-400 text-slate-500 md:w-52"
+              onClick={handleSave}
             >
               Save & Add New Project
             </Button>
@@ -322,6 +386,7 @@ function Main() {
               variant="primary"
               type="button"
               className="w-full py-3 md:w-52"
+              onClick={handleSave}
             >
               Save
             </Button>
