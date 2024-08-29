@@ -162,6 +162,21 @@ function Main() {
                   <FormLabel className="xl:w-64 xl:!mr-10">
                     <div className="text-left">
                       <div className="flex items-center">
+                        <div className="font-medium">Project Description</div>
+                      </div>
+                    </div>
+                  </FormLabel>
+                  <div className="flex-1 w-full mt-3 xl:mt-0">
+                    <ClassicEditor
+                      value={editorData}
+                      onChange={setEditorData}
+                    />
+                  </div>
+                </FormInline>
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+                  <FormLabel className="xl:w-64 xl:!mr-10">
+                    <div className="text-left">
+                      <div className="flex items-center">
                         <div className="font-medium">Budget</div>
                       </div>
                     </div>
@@ -222,7 +237,7 @@ function Main() {
           <div className="p-5 mt-5 intro-y box">
             <div className="p-5 border rounded-md border-slate-200/60 dark:border-darkmode-400">
               <div className="flex items-center pb-5 text-base font-medium border-b border-slate-200/60 dark:border-darkmode-400">
-                <Lucide icon="ChevronDown" className="w-4 h-4 mr-2" /> Product
+                <Lucide icon="ChevronDown" className="w-4 h-4 mr-2" /> Project
                 Detail
               </div>
               <div className="mt-5">
@@ -268,21 +283,7 @@ function Main() {
                     </div>
                   </div>
                 </FormInline>
-                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
-                  <FormLabel className="xl:w-64 xl:!mr-10">
-                    <div className="text-left">
-                      <div className="flex items-center">
-                        <div className="font-medium">Project Description</div>
-                      </div>
-                    </div>
-                  </FormLabel>
-                  <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <ClassicEditor
-                      value={editorData}
-                      onChange={setEditorData}
-                    />
-                  </div>
-                </FormInline>
+                
                 <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
                   <FormLabel className="xl:w-64 xl:!mr-10">
                     <div className="text-left">
