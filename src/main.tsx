@@ -11,6 +11,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <Provider store={store}>
       <Router />
     </Provider>
-    <ScrollToTop />
+    <ScrollToTop /> 
   </BrowserRouter>
 );
