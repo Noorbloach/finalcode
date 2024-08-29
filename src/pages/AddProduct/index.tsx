@@ -13,16 +13,17 @@ import { ClassicEditor } from "@/components/Base/Ckeditor";
 import Lucide from "@/components/Base/Lucide";
 
 function Main() {
-  const [subcategory, setSubcategory] = useState("geoglyphs");
+  const [subcategory, setSubcategory] = useState("");
   const [status, setStatus] = useState("");
   const [clientType, setClientType] = useState("");
-  const [editorData, setEditorData] = useState("<p>Content of the editor.</p>");
+  const [editorData, setEditorData] = useState("");
   const [clientDueDate, setClientDueDate] = useState("");
   const [opsDueDate, setOpsDueDate] = useState("");
   const [budget, setBudget] = useState("");
   const [clientPermanentNotes, setClientPermanentNotes] = useState("");
   const [rfiAddendum, setRfiAddendum] = useState("");
   const [projectPlans, setProjectPlans] = useState("");
+  const [projectType, setProjectType] = useState("");
 
   return (
     <>
@@ -73,7 +74,8 @@ function Main() {
                     <FormSelect id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                       <option value="" disabled>Select Status</option>
                       <option value="ETA">ETA</option>
-                      <option value="Approved">Approved</option>
+                      <option value="Approved">Proposal Sent</option>
+                      <option value="Rejected">Approved</option>
                       <option value="Rejected">Rejected</option>
                     </FormSelect>
                   </div>
@@ -99,6 +101,29 @@ function Main() {
                     </select>
                   </div>
                 </FormInline>
+                {/* New Project Type Dropdown */}
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+                  <FormLabel className="xl:w-64 xl:!mr-10">
+                    <div className="text-left">
+                      <div className="flex items-center">
+                        <div className="font-medium">Project Type</div>
+                      </div>
+                    </div>
+                  </FormLabel>
+                  <div className="flex-1 w-full mt-3 xl:mt-0">
+                    <FormSelect 
+                      id="project-type" 
+                      value={projectType} 
+                      onChange={(e) => setProjectType(e.target.value)}>
+                      <option value="" disabled>Select Project Type</option>
+                      <option value="residential">Residential</option>
+                      <option value="commercial">Commercial</option>
+                      <option value="industrial">Industrial</option>
+                
+                    </FormSelect>
+                  </div>
+                </FormInline>
+
                 <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
                   <FormLabel className="xl:w-64 xl:!mr-10">
                     <div className="text-left">
@@ -290,7 +315,7 @@ function Main() {
               type="button"
               className="w-full py-3 border-slate-300 dark:border-darkmode-400 text-slate-500 md:w-52"
             >
-              Save & Add New Product
+              Save & Add New Project
             </Button>
             <Button
               variant="primary"
