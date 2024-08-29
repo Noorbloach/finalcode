@@ -38,15 +38,25 @@ import TomSelect from "../pages/TomSelect";
 import WysiwygEditor from "../pages/WysiwygEditor";
 import Validation from "../pages/Validation";
 import Chart from "../pages/Chart";
+import {  Navigate } from "react-router-dom";
 
 
 import Layout from "../themes";
+
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const isAuthenticated = !!localStorage.getItem("token");
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
 function Router() {
   const routes = [
     {
       path: "/",
-      element: <Layout />,
+      element: (
+        <PrivateRoute>
+          <Layout />
+        </PrivateRoute>
+      ),
       children: [
         {
           path: "/",

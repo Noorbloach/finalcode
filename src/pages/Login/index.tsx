@@ -1,3 +1,6 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import logoUrl from "@/assets/images/logo.svg";
 import illustrationUrl from "@/assets/images/illustration.svg";
@@ -6,6 +9,22 @@ import Button from "@/components/Base/Button";
 import clsx from "clsx";
 
 function Main() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/auth/login', { email, password });
+      const { token } = response.data;
+      localStorage.setItem('token', token); // Save the JWT token
+      navigate('/'); // Redirect to the home page or dashboard
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Optionally display an error message to the user
+    }
+  };
+
   return (
     <>
       <div
@@ -21,16 +40,12 @@ function Main() {
             {/* BEGIN: Login Info */}
             <div className="flex-col hidden min-h-screen xl:flex">
               <a href="" className="flex items-center pt-5 -intro-x">
-                <img
-                  alt="Midone Tailwind HTML Admin Template"
-                  className="w-6"
-                  src={logoUrl}
-                />
+                <img alt="Sufnoor" className="w-6" src={logoUrl} />
                 <span className="ml-3 text-lg text-white"> Sufnoor </span>
               </a>
               <div className="my-auto">
                 <img
-                  alt="Midone Tailwind HTML Admin Template"
+                  alt="Illustration"
                   className="w-1/2 -mt-16 -intro-x"
                   src={illustrationUrl}
                 />
@@ -58,11 +73,15 @@ function Main() {
                     type="text"
                     className="block px-4 py-3 intro-x min-w-full xl:min-w-[350px]"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                   <FormInput
                     type="password"
                     className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
                     placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
                 <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
@@ -85,6 +104,7 @@ function Main() {
                   <Button
                     variant="primary"
                     className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
+                    onClick={handleLogin}
                   >
                     Login
                   </Button>
