@@ -14,20 +14,6 @@ import Lucide from "@/components/Base/Lucide";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";  
 
-const getCreatorIdFromToken = () => {
-  // Assuming you have the token stored in localStorage or any other place
-  const token = localStorage.getItem("token"); // or wherever your token is stored
-  if (token) {
-    try {
-      const decodedToken = jwtDecode(token);
-      console.log(decodedToken)
-      return decodedToken.sub; // replace with actual field from your token
-    } catch (error) {
-      console.error("Error decoding token", error);
-    }
-  }
-  return null;
-};
 
 
 function Main() {
@@ -44,14 +30,19 @@ function Main() {
   const [projectType, setProjectType] = useState("");
   const [projectName, setProjectName] = useState("");  // Added for Project Name
 
+  const token = localStorage.getItem("token");
+  const decodedToken = jwtDecode(token);
+      console.log(decodedToken)
+
   const handleSave = async () => {
-    const creatorId = getCreatorIdFromToken();
-  if (!creatorId) {
+    const userId = decodedToken.userId
+  if (!userId) {
     console.error("Creator ID is missing");
     return;
   }
     try {
       const response = await axios.post("http://localhost:3000/api/create", {
+        creator: userId,
         projectName,
         status,
         subcategory,

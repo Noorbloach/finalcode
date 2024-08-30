@@ -1,4 +1,5 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment,useEffect } from "react";
+import axios from "axios";
 import Lucide from "@/components/Base/Lucide";
 import Breadcrumb from "@/components/Base/Breadcrumb";
 import { FormInput } from "@/components/Base/Form";
@@ -7,15 +8,57 @@ import fakerData from "@/utils/faker";
 import _ from "lodash";
 import clsx from "clsx";
 import { Transition } from "@headlessui/react";
+import {jwtDecode} from "jwt-decode";
+
+interface Notification {
+  _id: string;
+  message: string;
+}
 
 function Main() {
   const [searchDropdown, setSearchDropdown] = useState(false);
-  const showSearchDropdown = () => {
-    setSearchDropdown(true);
-  };
-  const hideSearchDropdown = () => {
-    setSearchDropdown(false);
-  };
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const showSearchDropdown = () => setSearchDropdown(true);
+  const hideSearchDropdown = () => setSearchDropdown(false);
+
+  const token = localStorage.getItem("token"); // Or get it from context or other storage
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Decode token to get user ID
+    if (token) {
+      try {
+        const decodedToken: { userId: string } = jwtDecode(token);
+        setUserId(decodedToken.userId); // Adjust this based on your token's structure
+        console.log(decodedToken.userId);
+      } catch (error) {
+        console.error("Failed to decode token", error);
+      }
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (userId) {
+      // Fetch notifications for the logged-in user
+      const fetchNotifications = async () => {
+        try {
+          const response = await axios.get<{ data: Notification[] }>(`http://localhost:3000/notifications/user/${userId}`);
+        setNotifications(response.data.data); // Access the 'data' key from the response
+        console.log(response.data.data); // Check if the data is logged correctly
+        setLoadingNotifications(false);
+        } catch (err) {
+          setError('Failed to load notifications');
+          setLoadingNotifications(false);
+        }
+      };
+
+      fetchNotifications();
+    }
+  }, [userId]);
+
 
   return (
     <>
@@ -135,37 +178,24 @@ function Main() {
           </Popover.Button>
           <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2">
             <div className="mb-5 font-medium">Notifications</div>
-            {_.take(fakerData, 5).map((faker, fakerKey) => (
-              <div
-                key={fakerKey}
-                className={clsx([
-                  "cursor-pointer relative flex items-center",
-                  { "mt-5": fakerKey },
-                ])}
-              >
-                <div className="relative flex-none w-12 h-12 mr-1 image-fit">
-                  <img
-                    alt="Midone Tailwind HTML Admin Template"
-                    className="rounded-full"
-                    src={faker.photos[0]}
-                  />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full bg-success dark:border-darkmode-600"></div>
-                </div>
-                <div className="ml-2 overflow-hidden">
-                  <div className="flex items-center">
-                    <a href="" className="mr-5 font-medium truncate">
-                      {faker.users[0].name}
-                    </a>
-                    <div className="ml-auto text-xs text-slate-400 whitespace-nowrap">
-                      {faker.times[0]}
+            {loadingNotifications ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div className="text-red-500">{error}</div>
+            ) : (
+              notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <div key={notification._id} className="flex items-center mt-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">
+                      <Lucide icon="Bell" className="w-4 h-4" />
                     </div>
+                    <div className="ml-3">{notification.message}</div>
                   </div>
-                  <div className="w-full truncate text-slate-500 mt-0.5">
-                    {faker.news[0].shortContent}
-                  </div>
-                </div>
-              </div>
-            ))}
+                ))
+              ) : (
+                <div>No notifications</div>
+              )
+            )}
           </Popover.Panel>
         </Popover>
         {/* END: Notifications  */}

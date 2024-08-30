@@ -154,7 +154,7 @@ function Main() {
               <Lucide icon="Bell" className="w-5 h-5 dark:text-slate-500" />
             </Popover.Button>
             <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2">
-              <div className="mb-5 font-medium">Notifications</div>
+              <div className="mb-5 font-medium">Notificationsh</div>
               {_.take(fakerData, 5).map((faker, fakerKey) => (
                 <div
                   key={fakerKey}

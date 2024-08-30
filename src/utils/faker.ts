@@ -145,15 +145,7 @@ const fakers = {
   fakeProducts() {
     const products = [
       { name: "Dell XPS 13", category: "PC & Laptop" },
-      { name: "Apple MacBook Pro 13", category: "PC & Laptop" },
-      { name: "Oppo Find X2 Pro", category: "Smartphone & Tablet" },
-      { name: "Samsung Galaxy S20 Ultra", category: "Smartphone & Tablet" },
-      { name: "Sony Master Series A9G", category: "Electronic" },
-      { name: "Samsung Q90 QLED TV", category: "Electronic" },
-      { name: "Nike Air Max 270", category: "Sport & Outdoor" },
-      { name: "Nike Tanjun", category: "Sport & Outdoor" },
-      { name: "Nikon Z6", category: "Photography" },
-      { name: "Sony A7 III", category: "Photography" },
+
     ];
     return _.shuffle(products);
   },
@@ -293,15 +285,7 @@ const fakers = {
   fakeFiles() {
     const files = [
       { fileName: "Celine Dion - Ashes.mp4", type: "MP4", size: "20 MB" },
-      { fileName: "Laravel 7", type: "Empty Folder", size: "120 MB" },
-      { fileName: fakers.fakeImages()[0], type: "Image", size: "1.2 MB" },
-      { fileName: "Repository", type: "Folder", size: "20 KB" },
-      { fileName: "Resources.txt", type: "TXT", size: "2.2 MB" },
-      { fileName: "Routes.php", type: "PHP", size: "1 KB" },
-      { fileName: "Dota 2", type: "Folder", size: "112 GB" },
-      { fileName: "Documentation", type: "Empty Folder", size: "4 MB" },
-      { fileName: fakers.fakeImages()[0], type: "Image", size: "1.4 MB" },
-      { fileName: fakers.fakeImages()[0], type: "Image", size: "1 MB" },
+
     ];
     return _.shuffle(files);
   },
