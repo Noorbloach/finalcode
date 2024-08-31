@@ -9,6 +9,8 @@ import Tippy from "@/components/Base/Tippy";
 import { Dialog, Menu } from "@/components/Base/Headless";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import fakerData from "@/utils/faker";
+import _ from "lodash";
 
 interface Project {
   _id: string;
@@ -121,83 +123,102 @@ function Main() {
           </div>
         </div>
         {/* BEGIN: Data List */}
-        <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-          <Table className="border-spacing-y-[10px] border-separate -mt-2">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th className="border-b-0 whitespace-nowrap">
-                  Project Title
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Budget
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Due Date
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status (Cloned)
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Actions
-                </Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {currentProjects.map((project) => (
-                <Table.Tr key={project._id} className="intro-x">
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <a href="" className="font-medium whitespace-nowrap">
-                      {project.projectName}
-                    </a>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    ${project.budget.toLocaleString()}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {new Date(project.clientDueDate).toLocaleDateString()}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {project.status}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {/* Cloned status with different styling or formatting */}
-                    <div className={clsx({
-                      'text-success': project.status === 'Approved',
-                      'text-warning': project.status === 'Proposal Sent',
-                      'text-danger': project.status === 'Rejected',
-                      'text-muted': project.status === 'ETA',
-                    })}>
-                      {project.status === 'Approved' ? '✓ Approved' :
-                       project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                       project.status === 'Rejected' ? '✘ Rejected' :
-                       '⏳ ETA'}
-                    </div>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <div className="flex items-center justify-center">
-                      <a className="flex items-center mr-3" href="#">
-                        <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                        Edit
-                      </a>
-                      <a
-                        className="flex items-center text-danger"
-                        href="#"
-                        onClick={() => setDeleteConfirmationModal(true)}
-                      >
-                        <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                        Delete
-                      </a>
-                    </div>
-                  </Table.Td>
-                </Table.Tr>
+<div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
+  <Table className="border-spacing-y-[10px] border-separate -mt-2">
+    <Table.Thead>
+      <Table.Tr>
+        <Table.Th className="border-b-0 whitespace-nowrap">
+          Project Title
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Budget
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Due Date
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Status
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Status1
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Joined Members
+        </Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">
+          Actions
+        </Table.Th>
+      </Table.Tr>
+    </Table.Thead>
+    <Table.Tbody>
+      {currentProjects.map((project) => (
+        <Table.Tr key={project._id} className="intro-x">
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            <a href="" className="font-medium whitespace-nowrap">
+              {project.projectName}
+            </a>
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            ${project.budget.toLocaleString()}
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            {new Date(project.clientDueDate).toLocaleDateString()}
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            {project.status}
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            {/* Cloned status with different styling or formatting */}
+            <div className={clsx({
+              'text-success': project.status === 'Approved',
+              'text-warning': project.status === 'Proposal Sent',
+              'text-danger': project.status === 'Rejected',
+              'text-muted': project.status === 'ETA',
+            })}>
+              {project.status === 'Approved' ? '✓ Approved' :
+               project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
+               project.status === 'Rejected' ? '✘ Rejected' :
+               '⏳ ETA'}
+            </div>
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            <div className="flex">
+              {_.take(fakerData, 9).map((faker, fakerKey) => (
+                <div key={fakerKey} className="w-10 h-10 image-fit zoom-in">
+                  <Tippy
+                    as="img"
+                    alt="Midone Tailwind HTML Admin Template"
+                    className="rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
+                    src={faker.images[0]}
+                    content={`Uploaded at ${faker.dates[0]}`}
+                  />
+                </div>
               ))}
-            </Table.Tbody>
-          </Table>
-        </div>
-        {/* END: Data List */}
+            </div>
+          </Table.Td>
+          <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+            <div className="flex items-center justify-center">
+              <a className="flex items-center mr-3" href="#">
+                <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
+                Edit
+              </a>
+              <a
+                className="flex items-center text-danger"
+                href="#"
+                onClick={() => setDeleteConfirmationModal(true)}
+              >
+                <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
+                Delete
+              </a>
+            </div>
+          </Table.Td>
+        </Table.Tr>
+      ))}
+    </Table.Tbody>
+  </Table>
+</div>
+{/* END: Data List */}
+
         {/* BEGIN: Pagination */}
         <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
           <Pagination className="w-full sm:w-auto sm:mr-auto">
