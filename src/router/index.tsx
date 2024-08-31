@@ -118,6 +118,7 @@ function Router() {
           path: "update-profile",
           element: <UpdateProfile />,
         },
+        
         {
           path: "change-password",
           element: <ChangePassword />,
