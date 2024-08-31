@@ -36,7 +36,7 @@ function Main() {
       try {
         const response = await axios.get("http://localhost:3000/api/projects");
         const projectData = response.data.data; // Access the array inside "data"
-        console.log(projectData)
+        console.log(projectData);
         if (Array.isArray(projectData)) { // Ensure the projectData is an array
           setProjects(projectData);
         } else {
@@ -51,6 +51,11 @@ function Main() {
 
     fetchProjects();
   }, []);
+
+  // Function to add a new project at the top
+  const addNewProject = (newProject: Project) => {
+    setProjects(prevProjects => [newProject, ...prevProjects]);
+  };
 
   if (loading) {
     return <div>Loading...</div>; // Handle loading state
@@ -114,7 +119,7 @@ function Main() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {projects.map((project) => (
+                {projects.slice().reverse().map((project) => (
                   <Table.Tr key={project._id} className="intro-x">
                     <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
                       <a href="" className="font-medium whitespace-nowrap">
