@@ -1,11 +1,88 @@
+import { useState, useEffect } from "react";
+import {jwtDecode} from "jwt-decode"; // Import jwt-decode
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import logoUrl from "@/assets/images/logo.svg";
 import illustrationUrl from "@/assets/images/illustration.svg";
-import { FormInput, FormCheck } from "@/components/Base/Form";
+import { FormInput, FormSelect } from "@/components/Base/Form"; // Assuming you have a FormSelect component
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
+import { useNavigate } from 'react-router-dom';
 
 function Main() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'employee'
+  });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [userRole, setUserRole] = useState(''); // To store the role of the logged-in user
+
+  // Fetch and decode the token to get the user's role
+  useEffect(() => {
+    const fetchUserRole = () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const decodedToken = jwtDecode(token);
+          console.log(decodedToken.role)
+          setUserRole(decodedToken.role); // Extract the role from the decoded token
+        }
+      } catch (err) {
+        setError('Error decoding token.');
+      }
+    };
+
+    fetchUserRole();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        setSuccess('Registration successful!');
+        setError(null);
+        // Optionally, you can redirect the user or clear the form
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          role: 'Employee'
+        });
+      } else {
+        setSuccess(null);
+        setError(result.message || 'Something went wrong!');
+      }
+    } catch (err) {
+      setSuccess(null);
+      setError('Server error. Please try again later.');
+    }
+  };
+  const handleregister = () => {
+    navigate('/users-layout-2'); // Navigate to the /register page
+  };
+
   return (
     <>
       <div
@@ -54,76 +131,73 @@ function Main() {
                   A few more clicks to sign in to your account. Manage all your
                   e-commerce accounts in one place
                 </div>
-                <div className="mt-8 intro-x">
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="First Name"
-                  />
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Last Name"
-                  />
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Email"
-                  />
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Password"
-                  />
-                  <div className="grid w-full h-1 grid-cols-12 gap-4 mt-3 intro-x">
-                    <div className="h-full col-span-3 rounded bg-success"></div>
-                    <div className="h-full col-span-3 rounded bg-success"></div>
-                    <div className="h-full col-span-3 rounded bg-success"></div>
-                    <div className="h-full col-span-3 rounded bg-slate-100 dark:bg-darkmode-800"></div>
+                <form onSubmit={handleSubmit}>
+                  <div className="mt-8 intro-x">
+                    <FormInput
+                      name="name"
+                      type="text"
+                      className="block px-4 py-3 intro-x min-w-full xl:min-w-[350px]"
+                      placeholder="Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                    <FormInput
+                      name="email"
+                      type="email"
+                      className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                    <FormInput
+                      name="password"
+                      type="password"
+                      className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <FormSelect
+                      name="role"
+                      className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
+                      value={formData.role}
+                      onChange={handleChange}
+                      disabled={userRole === 'admin'} // Disable select if userRole is 'Admin'
+                    >
+                      {userRole === 'superadmin' ? (
+                        <>
+                          <option value="admin">admin</option>
+                          <option value="employee">employee</option>
+                        </>
+                      ) : (
+                        <option value="employee">employee</option>
+                      )}
+                    </FormSelect>
                   </div>
-                  <a
-                    href=""
-                    className="block mt-2 text-xs intro-x text-slate-500 sm:text-sm"
-                  >
-                    What is a secure password?
-                  </a>
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Password Confirmation"
-                  />
-                </div>
-                <div className="flex items-center mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
-                  <FormCheck.Input
-                    id="remember-me"
-                    type="checkbox"
-                    className="mr-2 border"
-                  />
-                  <label
-                    className="cursor-pointer select-none"
-                    htmlFor="remember-me"
-                  >
-                    I agree to the Envato
-                  </label>
-                  <a className="ml-1 text-primary dark:text-slate-200" href="">
-                    Privacy Policy
-                  </a>
-                  .
-                </div>
-                <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
-                  <Button
-                    variant="primary"
-                    className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
-                  >
-                    Register
-                  </Button>
-                  <Button
-                    variant="outline-secondary"
-                    className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
-                  >
-                    Sign in
-                  </Button>
-                </div>
+
+                  <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
+                    <Button
+                      variant="primary"
+                      className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
+                      type="submit"
+                      onClick={handleregister}
+                    >
+                      Register
+                    </Button>
+                    <Button
+                      variant="outline-secondary"
+                      className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
+                    >
+                      Sign in
+                    </Button>
+                  </div>
+                </form>
+                {error && (
+                  <div className="mt-4 text-center text-red-500">{error}</div>
+                )}
+                {success && (
+                  <div className="mt-4 text-center text-green-500">{success}</div>
+                )}
               </div>
             </div>
             {/* END: Register Form */}
