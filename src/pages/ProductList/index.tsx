@@ -239,29 +239,44 @@ function Main() {
       {/* BEGIN: Delete Confirmation Modal */}
       <Dialog
         open={deleteConfirmationModal}
-        onClose={() => setDeleteConfirmationModal(false)}
+        onClose={() => {
+          setDeleteConfirmationModal(false);
+        }}
+        initialFocus={deleteButtonRef}
       >
-        <Dialog.Title>Delete Confirmation</Dialog.Title>
-        <Dialog.Description>
-          Are you sure you want to delete this project?
-        </Dialog.Description>
-        <Dialog.Actions>
-          <Button
-            variant="danger"
-            onClick={() => {
-              // Handle delete logic
-              setDeleteConfirmationModal(false);
-            }}
-          >
-            Delete
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => setDeleteConfirmationModal(false)}
-          >
-            Cancel
-          </Button>
-        </Dialog.Actions>
+        <Dialog.Panel>
+          <div className="p-5 text-center">
+            <Lucide
+              icon="XCircle"
+              className="w-16 h-16 mx-auto mt-3 text-danger"
+            />
+            <div className="mt-5 text-3xl">Are you sure?</div>
+            <div className="mt-2 text-slate-500">
+              Do you really want to delete these records? <br />
+              This process cannot be undone.
+            </div>
+          </div>
+          <div className="px-5 pb-8 text-center">
+            <Button
+              variant="outline-secondary"
+              type="button"
+              onClick={() => {
+                setDeleteConfirmationModal(false);
+              }}
+              className="w-24 mr-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              type="button"
+              className="w-24"
+              ref={deleteButtonRef}
+            >
+              Delete
+            </Button>
+          </div>
+        </Dialog.Panel>
       </Dialog>
       {/* END: Delete Confirmation Modal */}
     </>
