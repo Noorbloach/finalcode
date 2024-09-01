@@ -15,12 +15,13 @@ interface User {
 }
 
 function Main() {
-  const [users, setUsers] = useState<User[]>([]); // Use User[] to type the array
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    // Fetch users from the backend
     const fetchUsers = async () => {
       try {
         const response = await axios.get<User[]>('http://localhost:3000/api/auth/users');
@@ -36,13 +37,43 @@ function Main() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Show a loading state while fetching data
+    return <div>Loading...</div>; 
   }
 
-  // Function to handle navigation
-  const handleAddNewUser = () => {
-    navigate('/register'); // Navigate to the /register page
-  };
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  // Slice the users array to get users for the current page
+  const currentUsers = _.slice(
+    users,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Function to handle page changes
+ // Function to handle page changes
+ const handlePageChange = (page: number) => {
+  if (page < 1 || page > totalPages) return;
+  setCurrentPage(page);
+  console.log(`Current page set to: ${page}`);
+};
+
+const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  setItemsPerPage(Number(e.target.value));
+  setCurrentPage(1); // Reset to first page whenever items per page changes
+};
+
+const handleAddNewUser = () => {
+  navigate('/register');
+};
+
+const paginatedUsers = _.slice(
+  users,
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
+
+
 
   return (
     <>
@@ -52,7 +83,7 @@ function Main() {
           <Button 
             variant="primary" 
             className="mr-2 shadow-md" 
-            onClick={handleAddNewUser} // Add onClick handler for navigation
+            onClick={handleAddNewUser} 
           >
             Add New User
           </Button>
@@ -73,7 +104,7 @@ function Main() {
             </Menu.Items>
           </Menu>
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing 1 to 10 of {users.length} entries
+            Showing {itemsPerPage * (currentPage - 1) + 1} to {Math.min(currentPage * itemsPerPage, users.length)} of {users.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
@@ -90,7 +121,7 @@ function Main() {
           </div>
         </div>
         {/* BEGIN: Users Layout */}
-        {_.take(users, 10).map((user, index) => (
+        {currentUsers.map((user, index) => (
           <div key={index} className="col-span-12 intro-y md:col-span-6">
             <div className="box">
               <div className="flex flex-col items-center p-5 lg:flex-row">
@@ -98,7 +129,7 @@ function Main() {
                   <img
                     alt="User Avatar"
                     className="rounded-full"
-                    src={`https://api.adorable.io/avatars/285/${user.email}.png`} // Placeholder avatar
+                    src={`https://api.adorable.io/avatars/285/${user.email}.png`} 
                   />
                 </div>
                 <div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:text-left lg:mt-0">
@@ -121,35 +152,59 @@ function Main() {
             </div>
           </div>
         ))}
-        {/* END: Users Layout */}
-        {/* BEGIN: Pagination */}
-        <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
-          <Pagination className="w-full sm:w-auto sm:mr-auto">
-            <Pagination.Link>
+       
+       {/* BEGIN: Pagination */}
+<div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
+  <Pagination className="w-full sm:w-auto sm:mr-auto">
+  <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              
+            >
               <Lucide icon="ChevronsLeft" className="w-4 h-4" />
-            </Pagination.Link>
-            <Pagination.Link>
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
               <Lucide icon="ChevronLeft" className="w-4 h-4" />
-            </Pagination.Link>
-            <Pagination.Link>...</Pagination.Link>
-            <Pagination.Link>1</Pagination.Link>
-            <Pagination.Link active>2</Pagination.Link>
-            <Pagination.Link>3</Pagination.Link>
-            <Pagination.Link>...</Pagination.Link>
-            <Pagination.Link>
+            </button>
+    {Array.from({ length: totalPages }, (_, index) => (
+       <button
+       key={index}
+       className={`${
+         index + 1 === currentPage ? 'active' : ''
+       } pagination-link`}
+       onClick={() => handlePageChange(index + 1)}
+     >
+       {index + 1}
+     </button>
+    ))}
+    <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
               <Lucide icon="ChevronRight" className="w-4 h-4" />
-            </Pagination.Link>
-            <Pagination.Link>
+            </button>
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            >
               <Lucide icon="ChevronsRight" className="w-4 h-4" />
-            </Pagination.Link>
-          </Pagination>
-          <FormSelect className="w-20 mt-3 !box sm:mt-0">
-            <option>10</option>
-            <option>25</option>
-            <option>35</option>
-            <option>50</option>
-          </FormSelect>
-        </div>
+            </button>
+  </Pagination>
+  <FormSelect
+    className="w-20 mt-3 !box sm:mt-0"
+    value={itemsPerPage}
+    onChange={handleItemsPerPageChange}
+  >
+    <option value={10}>10</option>
+    <option value={25}>25</option>
+    <option value={50}>50</option>
+  </FormSelect>
+</div>
+{/* END: Pagination */}
+
         {/* END: Pagination */}
       </div>
     </>

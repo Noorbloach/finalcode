@@ -1,14 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import axios from "axios"; // Import axios for API calls
+import React, { useState, useEffect, ChangeEvent } from "react";
+import axios from "axios";
 import clsx from "clsx";
 import Button from "@/components/Base/Button";
 import Pagination from "@/components/Base/Pagination";
-import { FormInput, FormSelect } from "@/components/Base/Form";
+import { FormInput,FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
-import Tippy from "@/components/Base/Tippy";
-import { Dialog, Menu } from "@/components/Base/Headless";
 import Table from "@/components/Base/Table";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import EditProjectModal from "./EditProjectModal"; // Import the new modal component
 
 interface Project {
   _id: string;
@@ -27,22 +26,21 @@ interface Project {
 }
 
 function Main() {
-  const navigate = useNavigate(); // Initialize navigate
-  const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const deleteButtonRef = useRef(null);
-  const [projects, setProjects] = useState<Project[]>([]); // State to store projects
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [currentPage, setCurrentPage] = useState(1); // State to manage current page
-  const [itemsPerPage, setItemsPerPage] = useState(10); // State to manage items per page
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Fetch projects from API
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/projects");
-        const projectData = response.data.data; // Access the array inside "data"
-        console.log(projectData);
-        if (Array.isArray(projectData)) { // Ensure the projectData is an array
+        const projectData = response.data.data;
+        if (Array.isArray(projectData)) {
           setProjects(projectData);
         } else {
           console.error("Unexpected data format:", projectData);
@@ -57,14 +55,42 @@ function Main() {
     fetchProjects();
   }, []);
 
-  // Function to add a new project at the top
-  const addNewProject = (newProject: Project) => {
-    setProjects(prevProjects => [newProject, ...prevProjects]);
+  // Function to open the edit modal and fetch project details
+  const handleEditClick = async (projectId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
+      const projectData = response.data.data;
+      console.log(projectData)
+      setSelectedProject(projectData);
+      setEditModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
   };
 
-  // Handle click for adding a new project
-  const handleAddNewProjectClick = () => {
-    navigate('/add-product'); // Navigate to the Add Product page
+  // Function to handle project update
+  const handleUpdateProject = async () => {
+    if (selectedProject) {
+      try {
+        await axios.put(`http://localhost:3000/api/projects/${selectedProject._id}`, selectedProject);
+        // Update the project in the state
+       
+        setProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
+        setEditModalOpen(false);
+      } catch (error) {
+        console.error("Error updating project:", error);
+      }
+    }
+  };
+
+  // Handle input change for the form
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (selectedProject) {
+      setSelectedProject({
+        ...selectedProject,
+        [e.target.name]: e.target.value,
+      });
+    }
   };
 
   // Pagination logic
@@ -74,7 +100,7 @@ function Main() {
   const endIndex = Math.min(startIndex + itemsPerPage, projects.length);
 
   if (loading) {
-    return <div>Loading...</div>; // Handle loading state
+    return <div>Loading...</div>;
   }
 
   return (
@@ -82,27 +108,9 @@ function Main() {
       <h2 className="mt-10 text-lg font-medium intro-y">Project List</h2>
       <div className="grid grid-cols-12 gap-6 mt-5">
         <div className="flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap">
-          <Button variant="primary" className="mr-2 shadow-md" onClick={handleAddNewProjectClick}>
+          <Button variant="primary" className="mr-2 shadow-md" onClick={() => navigate('/add-product')}>
             Add New Project
           </Button>
-          <Menu>
-            <Menu.Button as={Button} className="px-2 !box">
-              <span className="flex items-center justify-center w-5 h-5">
-                <Lucide icon="Plus" className="w-4 h-4" />
-              </span>
-            </Menu.Button>
-            <Menu.Items className="w-40">
-              <Menu.Item>
-                <Lucide icon="Printer" className="w-4 h-4 mr-2" /> Print
-              </Menu.Item>
-              <Menu.Item>
-                <Lucide icon="FileText" className="w-4 h-4 mr-2" /> Export to Excel
-              </Menu.Item>
-              <Menu.Item>
-                <Lucide icon="FileText" className="w-4 h-4 mr-2" /> Export to PDF
-              </Menu.Item>
-            </Menu.Items>
-          </Menu>
           <div className="hidden mx-auto md:block text-slate-500">
             Showing {startIndex + 1} to {endIndex} of {projects.length} entries
           </div>
@@ -120,11 +128,10 @@ function Main() {
             </div>
           </div>
         </div>
-        {/* BEGIN: Data List */}
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
           <Table className="border-spacing-y-[10px] border-separate -mt-2">
             <Table.Thead>
-              <Table.Tr>
+            <Table.Tr>
                 <Table.Th className="border-b-0 whitespace-nowrap">
                   Project Title
                 </Table.Th>
@@ -147,59 +154,65 @@ function Main() {
             </Table.Thead>
             <Table.Tbody>
               {currentProjects.map((project) => (
-                <Table.Tr key={project._id} className="intro-x">
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <a href="" className="font-medium whitespace-nowrap">
-                      {project.projectName}
-                    </a>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    ${project.budget.toLocaleString()}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {new Date(project.clientDueDate).toLocaleDateString()}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {project.status}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {/* Cloned status with different styling or formatting */}
-                    <div className={clsx({
-                      'text-success': project.status === 'Approved',
-                      'text-warning': project.status === 'Proposal Sent',
-                      'text-danger': project.status === 'Rejected',
-                      'text-muted': project.status === 'ETA',
-                    })}>
-                      {project.status === 'Approved' ? '✓ Approved' :
-                       project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                       project.status === 'Rejected' ? '✘ Rejected' :
-                       '⏳ ETA'}
-                    </div>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <div className="flex items-center justify-center">
-                      <a className="flex items-center mr-3" href="#">
-                        <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                        Edit
-                      </a>
-                      <a
-                        className="flex items-center text-danger"
-                        href="#"
-                        onClick={() => setDeleteConfirmationModal(true)}
-                      >
-                        <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                        Delete
-                      </a>
-                    </div>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+                 <Table.Tr key={project._id} className="intro-x">
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   <a href="" className="font-medium whitespace-nowrap">
+                     {project.projectName}
+                   </a>
+                 </Table.Td>
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   ${project.budget.toLocaleString()}
+                 </Table.Td>
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   {new Date(project.clientDueDate).toLocaleDateString()}
+                 </Table.Td>
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   {project.status}
+                 </Table.Td>
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   {/* Cloned status with different styling or formatting */}
+                   <div className={clsx({
+                     'text-success': project.status === 'Approved',
+                     'text-warning': project.status === 'Proposal Sent',
+                     'text-danger': project.status === 'Rejected',
+                     'text-muted': project.status === 'ETA',
+                   })}>
+                     {project.status === 'Approved' ? '✓ Approved' :
+                      project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
+                      project.status === 'Rejected' ? '✘ Rejected' :
+                      '⏳ ETA'}
+                   </div>
+                 </Table.Td>
+                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                   <div className="flex items-center justify-center">
+                     <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                       <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
+                       Edit
+                     </a>
+                     <a
+                       className="flex items-center text-danger"
+                       href="#"
+                       
+                     >
+                       <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
+                       Delete
+                     </a>
+                   </div>
+                 </Table.Td>
+               </Table.Tr>              ))}
             </Table.Tbody>
           </Table>
+          <div className="flex flex-col items-center mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
         </div>
-        {/* END: Data List */}
-        {/* BEGIN: Pagination */}
-        <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
+      </div>
+       {/* BEGIN: Pagination */}
+       <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
           <Pagination className="w-full sm:w-auto sm:mr-auto">
             <Pagination.Link onClick={() => setCurrentPage(1)}>
               <Lucide icon="ChevronsLeft" className="w-4 h-4" />
@@ -235,35 +248,14 @@ function Main() {
           </FormSelect>
         </div>
         {/* END: Pagination */}
-      </div>
-      {/* BEGIN: Delete Confirmation Modal */}
-      <Dialog
-        open={deleteConfirmationModal}
-        onClose={() => setDeleteConfirmationModal(false)}
-      >
-        <Dialog.Title>Delete Confirmation</Dialog.Title>
-        <Dialog.Description>
-          Are you sure you want to delete this project?
-        </Dialog.Description>
-        <Dialog.Actions>
-          <Button
-            variant="danger"
-            onClick={() => {
-              // Handle delete logic
-              setDeleteConfirmationModal(false);
-            }}
-          >
-            Delete
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => setDeleteConfirmationModal(false)}
-          >
-            Cancel
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-      {/* END: Delete Confirmation Modal */}
+     
+      <EditProjectModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        project={selectedProject}
+        onInputChange={handleInputChange}
+        onUpdate={handleUpdateProject}
+      />
     </>
   );
 }
