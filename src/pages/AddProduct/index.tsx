@@ -80,7 +80,7 @@ function Main() {
   return (
     <>
       <div className="flex items-center mt-8 intro-y">
-        <h2 className="mr-auto text-lg font-medium">Add Product</h2>
+        <h2 className="mr-auto text-lg font-medium">Add Project</h2>
       </div>
       <div className="grid grid-cols-11 pb-20 mt-5 gap-x-6">
         <div className="col-span-11 intro-y 2xl:col-span-9">
