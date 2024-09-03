@@ -29,7 +29,8 @@ function Main() {
 
   const token = localStorage.getItem("token"); // Or get it from context or other storage
   const [userId, setUserId] = useState<string | null>(null);
-
+  const [userRole,setUserRole] = useState<string | null>(null);
+  const [userName,setUserName] = useState<string | null>(null);
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove the token from localStorage
     navigate("/"); // Navigate to the home page
@@ -40,9 +41,12 @@ function Main() {
     // Decode token to get user ID
     if (token) {
       try {
-        const decodedToken: { userId: string } = jwtDecode(token);
-        setUserId(decodedToken.userId); // Adjust this based on your token's structure
-        console.log(decodedToken.userId);
+        const decodedToken: { userId: string,role:string,name:string } = jwtDecode(token);
+      
+        setUserId(decodedToken.userId); 
+        setUserRole(decodedToken.role)// Adjust this based on your token's structure
+        setUserName(decodedToken.name)
+        console.log(decodedToken.role);
       } catch (error) {
         console.error("Failed to decode token", error);
       }
@@ -218,9 +222,9 @@ function Main() {
           </Menu.Button>
           <Menu.Items className="w-56 mt-px text-white bg-primary">
             <Menu.Header className="font-normal">
-              <div className="font-medium">{fakerData[0].users[0].name}</div>
+              <div className="font-medium">{userName}</div>
               <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                {fakerData[0].jobs[0]}
+                {userRole}
               </div>
             </Menu.Header>
             <Menu.Divider className="bg-white/[0.08]" />
