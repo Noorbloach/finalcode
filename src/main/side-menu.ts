@@ -31,6 +31,12 @@ const menu: Array<Menu | "divider"> = [
         pathname: "/products",
         title: "Projects",
         subMenu: [
+          
+          {
+            icon: "Zap",
+            pathname: "/project-approved",
+            title: "Project Approved",
+          },
           {
             icon: "Zap",
             pathname: "/product-list",
@@ -38,18 +44,15 @@ const menu: Array<Menu | "divider"> = [
           },
           {
             icon: "Zap",
-            pathname: "/product-grid",
-            title: "Project Grid",
+            pathname: "/project-details",
+            title: "Project Details",
           },
         ],
         
       },
      
     ],
-  },
-  
-  
-  
+  },  
   {
     icon: "MessageSquare",
     pathname: "/chat",
@@ -57,9 +60,9 @@ const menu: Array<Menu | "divider"> = [
   },
   
   {
-    icon: "Calendar",
+    icon: "Users",
     pathname: "/calendar",
-    title: "Calendar",
+    title: "Clients",
   },
   "divider",
   {

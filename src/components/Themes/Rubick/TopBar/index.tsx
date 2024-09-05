@@ -9,6 +9,7 @@ import _ from "lodash";
 import clsx from "clsx";
 import { Transition } from "@headlessui/react";
 import {jwtDecode} from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   _id: string;
@@ -21,12 +22,20 @@ function Main() {
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const showSearchDropdown = () => setSearchDropdown(true);
   const hideSearchDropdown = () => setSearchDropdown(false);
 
   const token = localStorage.getItem("token"); // Or get it from context or other storage
   const [userId, setUserId] = useState<string | null>(null);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the token from localStorage
+    navigate("/"); // Navigate to the home page
+  };
+
+  
   useEffect(() => {
     // Decode token to get user ID
     if (token) {
@@ -229,7 +238,13 @@ function Main() {
             </Menu.Item>
             <Menu.Divider className="bg-white/[0.08]" />
             <Menu.Item className="hover:bg-white/5">
-              <Lucide icon="ToggleRight" className="w-4 h-4 mr-2" /> Logout
+            <button
+                onClick={handleLogout}
+                className=" px-3 py-2 rounded-md hover:bg-slate-100 w-full text-left flex"
+              >
+                <Lucide icon="LogOut" className="w-4 h-4 mr-2" />
+                Logout
+              </button>
             </Menu.Item>
           </Menu.Items>
         </Menu>

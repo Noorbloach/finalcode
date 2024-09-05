@@ -4,24 +4,52 @@ import { useNavigate } from 'react-router-dom';
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import logoUrl from "@/assets/images/logo.svg";
 import illustrationUrl from "@/assets/images/illustration.svg";
-import { FormInput, FormCheck } from "@/components/Base/Form";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
 
 function Main() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email('Invalid email address')
+      .required('Email is required'),
+    password: Yup.string()
+      .min(6, 'Password must be at least 6 characters')
+      .required('Password is required'),
+  });
+
+  const handleLogin = async (values) => {
+    setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', { email, password });
+      const response = await axios.post('http://localhost:3000/api/auth/login', values);
       const { token } = response.data;
       localStorage.setItem('token', token); // Save the JWT token
+      setLoading(false);
+
+      // Success popup using SweetAlert2
+      Swal.fire({
+        icon: 'success',
+        title: 'Login Successful',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
       navigate('/'); // Redirect to the home page or dashboard
     } catch (error) {
+      setLoading(false);
       console.error('Login failed:', error);
-      // Optionally display an error message to the user
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Please check your email and password.',
+      });
     }
   };
 
@@ -37,7 +65,6 @@ function Main() {
         <ThemeSwitcher />
         <div className="container relative z-10 sm:px-10">
           <div className="block grid-cols-2 gap-4 xl:grid">
-            {/* BEGIN: Login Info */}
             <div className="flex-col hidden min-h-screen xl:flex">
               <a href="" className="flex items-center pt-5 -intro-x">
                 <img alt="Sufnoor" className="w-6" src={logoUrl} />
@@ -58,8 +85,6 @@ function Main() {
                 </div>
               </div>
             </div>
-            {/* END: Login Info */}
-            {/* BEGIN: Login Form */}
             <div className="flex h-screen py-5 my-10 xl:h-auto xl:py-0 xl:my-0">
               <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
@@ -68,56 +93,79 @@ function Main() {
                 <div className="mt-2 text-center intro-x text-slate-400 xl:hidden">
                   A few more clicks to sign in to your account.
                 </div>
-                <div className="mt-8 intro-x">
-                  <FormInput
-                    type="text"
-                    className="block px-4 py-3 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <FormInput
-                    type="password"
-                    className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
-                  <div className="flex items-center mr-auto">
-                    <FormCheck.Input
-                      id="remember-me"
-                      type="checkbox"
-                      className="mr-2 border"
-                    />
-                    <label
-                      className="cursor-pointer select-none"
-                      htmlFor="remember-me"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                  <a href="">Forgot Password?</a>
-                </div>
-                <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
-                  <Button
-                    variant="primary"
-                    className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
-                    onClick={handleLogin}
-                  >
-                    Login
-                  </Button>
-                  <Button
-                    variant="outline-secondary"
-                    className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
-                  >
-                    Register
-                  </Button>
-                </div>
+                <Formik
+                  initialValues={{ email: '', password: '' }}
+                  validationSchema={validationSchema}
+                  onSubmit={handleLogin}
+                >
+                  {({ errors, touched }) => (
+                    <Form className="mt-8 intro-x">
+                      <div>
+                        <Field
+                          name="email"
+                          type="text"
+                          className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", {
+                            'border-red-500': errors.email && touched.email,
+                            'border-slate-300 dark:border-darkmode-400': !errors.email || !touched.email
+                          })}
+                          placeholder="Email"
+                        />
+                        <ErrorMessage name="email" component="div" className="mt-2 text-red-500 text-xs" />
+                      </div>
+                      <div className="mt-4">
+                        <Field
+                          name="password"
+                          type="password"
+                          className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", {
+                            'border-red-500': errors.password && touched.password,
+                            'border-slate-300 dark:border-darkmode-400': !errors.password || !touched.password
+                          })}
+                          placeholder="Password"
+                        />
+                        <ErrorMessage name="password" component="div" className="mt-2 text-red-500 text-xs" />
+                      </div>
+                      <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
+                        <div className="flex items-center mr-auto">
+                          <input
+                            id="remember-me"
+                            type="checkbox"
+                            className="mr-2 border"
+                          />
+                          <label
+                            className="cursor-pointer select-none"
+                            htmlFor="remember-me"
+                          >
+                            Remember me
+                          </label>
+                        </div>
+                        <a href="">Forgot Password?</a>
+                      </div>
+                      <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
+                        <Button
+                          variant="primary"
+                          className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
+                          type="submit"
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <FontAwesomeIcon icon={faSpinner} spin />
+                          ) : (
+                            'Login'
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
+                          disabled={loading}
+                        >
+                          Register
+                        </Button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
               </div>
             </div>
-            {/* END: Login Form */}
           </div>
         </div>
       </div>

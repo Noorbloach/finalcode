@@ -3,9 +3,10 @@ import DashboardOverview1 from "../pages/DashboardOverview1";
 import Categories from "../pages/Categories";
 import AddProduct from "../pages/AddProduct";
 import ProductList from "../pages/ProductList";
-import ProductGrid from "../pages/ProductGrid";
+import ProductDetails from "../pages/ProjectDetails";
+import ProjectApproved from "../pages/ProjectApproved"
 import Chat from "../pages/Chat";
-import Calendar from "../pages/Calendar";
+import Calendar from "../pages/Clients";
 import CrudDataList from "../pages/CrudDataList";
 import CrudForm from "../pages/CrudForm";
 import UsersLayout2 from "../pages/UsersLayout2";
@@ -71,12 +72,16 @@ function Router() {
           element: <AddProduct />,
         },
         {
+          path: "project-approved",
+          element: <ProjectApproved />,
+        },
+        {
           path: "product-list",
           element: <ProductList />,
         },
         {
-          path: "product-grid",
-          element: <ProductGrid />,
+          path: "project-details",
+          element: <ProductDetails />,
         },    
               
         {

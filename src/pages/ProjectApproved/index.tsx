@@ -7,7 +7,7 @@ import { FormInput,FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom";
-import EditProjectModal from "./EditProjectModal"; // Import the new modal component
+import EditProjectModal from "../ProductList/EditProjectModal"; // Import the new modal component
 
 interface Project {
   _id: string;
