@@ -10,8 +10,6 @@ import Calendar from "../pages/Clients";
 import CrudDataList from "../pages/CrudDataList";
 import CrudForm from "../pages/CrudForm";
 import UsersLayout2 from "../pages/UsersLayout2";
-import ProfileOverview1 from "../pages/ProfileOverview1";
-import ProfileOverview2 from "../pages/ProfileOverview2";
 import ProfileOverview3 from "../pages/ProfileOverview3";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -107,14 +105,7 @@ function Router() {
           element: <UsersLayout2 />,
         },
        
-        {
-          path: "profile-overview-1",
-          element: <ProfileOverview1 />,
-        },
-        {
-          path: "profile-overview-2",
-          element: <ProfileOverview2 />,
-        },
+       
         {
           path: "profile-overview-3",
           element: <ProfileOverview3 />,
