@@ -57,9 +57,9 @@ const menu: Array<Menu | "divider"> = [
   },
   
   {
-    icon: "Calendar",
+    icon: "Users",
     pathname: "/calendar",
-    title: "Calendar",
+    title: "Clients",
   },
   "divider",
   {

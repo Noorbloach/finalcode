@@ -8,13 +8,12 @@ import {
   FormSelect,
   FormLabel,
   FormCheck,
+  FormHelp,
 } from "@/components/Base/Form";
 import { ClassicEditor } from "@/components/Base/Ckeditor";
 import Lucide from "@/components/Base/Lucide";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";  
-
-
 
 function Main() {
   const [subcategory, setSubcategory] = useState("");
@@ -23,7 +22,9 @@ function Main() {
   const [editorData, setEditorData] = useState("");
   const [clientDueDate, setClientDueDate] = useState("");
   const [opsDueDate, setOpsDueDate] = useState("");
-  const [budget, setBudget] = useState("");
+  const [initialAmount, setInitialAmount] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [remainingAmount, setRemainingAmount] = useState("");
   const [clientPermanentNotes, setClientPermanentNotes] = useState("");
   const [rfiAddendum, setRfiAddendum] = useState("");
   const [projectPlans, setProjectPlans] = useState("");
@@ -32,14 +33,21 @@ function Main() {
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
-      console.log(decodedToken)
+  console.log(decodedToken);
+
+  // Function to calculate remaining amount
+  const calculateRemainingAmount = (initial, total) => {
+    const initialAmountNum = parseFloat(initial) || 0;
+    const totalAmountNum = parseFloat(total) || 0;
+    setRemainingAmount(totalAmountNum - initialAmountNum);
+  };
 
   const handleSave = async () => {
-    const userId = decodedToken.userId
-  if (!userId) {
-    console.error("Creator ID is missing");
-    return;
-  }
+    const userId = decodedToken.userId;
+    if (!userId) {
+      console.error("Creator ID is missing");
+      return;
+    }
     try {
       const response = await axios.post("http://localhost:3000/api/create", {
         creator: userId,
@@ -50,13 +58,15 @@ function Main() {
         clientDueDate,
         opsDueDate,
         editorData,
-        budget,
+        initialAmount,
+        totalAmount,
+        remainingAmount,
         clientPermanentNotes,
         rfiAddendum,
         projectPlans,
         clientType,
       });
-  
+
       console.log("Project created successfully:", response.data);
       // Handle successful creation (e.g., show a success message or redirect)
     } catch (error) {
@@ -75,12 +85,11 @@ function Main() {
       }
     }
   };
-  
 
   return (
     <>
       <div className="flex items-center mt-8 intro-y">
-        <h2 className="mr-auto text-lg font-medium">Add Product</h2>
+        <h2 className="mr-auto text-lg font-medium">Add Project</h2>
       </div>
       <div className="grid grid-cols-11 pb-20 mt-5 gap-x-6">
         <div className="col-span-11 intro-y 2xl:col-span-9">
@@ -109,10 +118,18 @@ function Main() {
                       type="text"
                       placeholder="Project name"
                       value={projectName}
-                      onChange={(e) => setProjectName(e.target.value)}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 150) {
+                          setProjectName(e.target.value);
+                        }
+                      }}
                     />
+                    <FormHelp className="text-right">
+                      Maximum character {projectName.length}/150
+                    </FormHelp>
                   </div>
                 </FormInline>
+
                 <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
                   <FormLabel className="xl:w-64 xl:!mr-10">
                     <div className="text-left">
@@ -127,10 +144,12 @@ function Main() {
                   <div className="flex-1 w-full mt-3 xl:mt-0">
                     <FormSelect id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                       <option value="" disabled>Select Status</option>
-                      <option value="ETA">ETA</option>
-                      <option value="Approved">Proposal Sent</option>
-                      <option value="Rejected">Approved</option>
+                      <option value="ETA">ETA</option>                      
+                      <option value="Approved">Approved</option>
                       <option value="Rejected">Rejected</option>
+                      <option value="ProposalSent">Proposal Sent</option>
+                      <option value="ProposalApproved">Proposal Approved</option>
+                      <option value="ProposalRejected">Proposal Rejected</option>
                     </FormSelect>
                   </div>
                 </FormInline>
@@ -173,7 +192,6 @@ function Main() {
                       <option value="residential">Residential</option>
                       <option value="commercial">Commercial</option>
                       <option value="industrial">Industrial</option>
-                
                     </FormSelect>
                   </div>
                 </FormInline>
@@ -231,17 +249,59 @@ function Main() {
                   <FormLabel className="xl:w-64 xl:!mr-10">
                     <div className="text-left">
                       <div className="flex items-center">
-                        <div className="font-medium">Budget</div>
+                        <div className="font-medium">Initial Amount</div>
                       </div>
                     </div>
                   </FormLabel>
                   <div className="flex-1 w-full mt-3 xl:mt-0">
                     <FormInput
-                      id="budget"
+                      id="initial-amount"
+                      type="number"
+                      placeholder="Enter initial amount"
+                      value={initialAmount}
+                      onChange={(e) => {
+                        setInitialAmount(e.target.value);
+                        calculateRemainingAmount(e.target.value, totalAmount);
+                      }}
+                    />
+                  </div>
+                </FormInline>
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+                  <FormLabel className="xl:w-64 xl:!mr-10">
+                    <div className="text-left">
+                      <div className="flex items-center">
+                        <div className="font-medium">Total Amount</div>
+                      </div>
+                    </div>
+                  </FormLabel>
+                  <div className="flex-1 w-full mt-3 xl:mt-0">
+                    <FormInput
+                      id="total-amount"
+                      type="number"
+                      placeholder="Enter total amount"
+                      value={totalAmount}
+                      onChange={(e) => {
+                        setTotalAmount(e.target.value);
+                        calculateRemainingAmount(initialAmount, e.target.value);
+                      }}
+                    />
+                  </div>
+                </FormInline>
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+                  <FormLabel className="xl:w-64 xl:!mr-10">
+                    <div className="text-left">
+                      <div className="flex items-center">
+                        <div className="font-medium">Remaining Amount</div>
+                      </div>
+                    </div>
+                  </FormLabel>
+                  <div className="flex-1 w-full mt-3 xl:mt-0">
+                    <FormInput
+                      id="remaining-amount"
                       type="text"
-                      placeholder="Enter rate"
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
+                      placeholder="Remaining amount"
+                      value={remainingAmount}
+                      readOnly
                     />
                   </div>
                 </FormInline>
@@ -307,34 +367,15 @@ function Main() {
                     </div>
                   </FormLabel>
                   <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <div className="flex flex-col sm:flex-row">
-                      <FormCheck className="mr-4">
-                        <FormCheck.Input
-                          id="condition-new"
-                          type="radio"
-                          name="client_type"
-                          value="new"
-                          checked={clientType === "new"}
-                          onChange={() => setClientType("new")}
-                        />
-                        <FormCheck.Label htmlFor="condition-new">
-                          New
-                        </FormCheck.Label>
-                      </FormCheck>
-                      <FormCheck className="mt-2 mr-4 sm:mt-0">
-                        <FormCheck.Input
-                          id="condition-old"
-                          type="radio"
-                          name="client_type"
-                          value="old"
-                          checked={clientType === "old"}
-                          onChange={() => setClientType("old")}
-                        />
-                        <FormCheck.Label htmlFor="condition-old">
-                          Old
-                        </FormCheck.Label>
-                      </FormCheck>
-                    </div>
+                    <FormSelect
+                      id="client-type"
+                      value={clientType}
+                      onChange={(e) => setClientType(e.target.value)}
+                    >
+                      <option value="" disabled>Select Client Type</option>
+                      <option value="new">New</option>
+                      <option value="old">Old</option>
+                    </FormSelect>
                   </div>
                 </FormInline>
                 
@@ -389,3 +430,5 @@ function Main() {
 }
 
 export default Main;
+
+

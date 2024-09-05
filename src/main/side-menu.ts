@@ -31,6 +31,12 @@ const menu: Array<Menu | "divider"> = [
         pathname: "/products",
         title: "Projects",
         subMenu: [
+          
+          {
+            icon: "Zap",
+            pathname: "/project-approved",
+            title: "Project Approved",
+          },
           {
             icon: "Zap",
             pathname: "/product-list",
@@ -38,18 +44,15 @@ const menu: Array<Menu | "divider"> = [
           },
           {
             icon: "Zap",
-            pathname: "/product-grid",
-            title: "Project Grid",
+            pathname: "/project-details",
+            title: "Project Details",
           },
         ],
         
       },
      
     ],
-  },
-  
-  
-  
+  },  
   {
     icon: "MessageSquare",
     pathname: "/chat",
@@ -57,9 +60,9 @@ const menu: Array<Menu | "divider"> = [
   },
   
   {
-    icon: "Calendar",
+    icon: "Users",
     pathname: "/calendar",
-    title: "Calendar",
+    title: "Clients",
   },
   "divider",
   {
@@ -83,27 +86,12 @@ const menu: Array<Menu | "divider"> = [
     pathname: "/users-layout-2",
     title: "Users",
   },
-  {
-    icon: "Trello",
-    title: "Profile",
-    subMenu: [
-      {
-        icon: "Activity",
-        pathname: "/profile-overview-1",
-        title: "Overview 1",
-      },
-      {
-        icon: "Activity",
-        pathname: "/profile-overview-2",
-        title: "Overview 2",
-      },
+  
       {
         icon: "Activity",
         pathname: "/profile-overview-3",
-        title: "Overview 3",
+        title: "Profile",
       },
-    ],
-  },
   {
     icon: "PanelsTopLeft",
     title: "Pages",

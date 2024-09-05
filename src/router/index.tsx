@@ -3,14 +3,13 @@ import DashboardOverview1 from "../pages/DashboardOverview1";
 import Categories from "../pages/Categories";
 import AddProduct from "../pages/AddProduct";
 import ProductList from "../pages/ProductList";
-import ProductGrid from "../pages/ProductGrid";
+import ProductDetails from "../pages/ProjectDetails";
+import ProjectApproved from "../pages/ProjectApproved"
 import Chat from "../pages/Chat";
-import Calendar from "../pages/Calendar";
+import Calendar from "../pages/Clients";
 import CrudDataList from "../pages/CrudDataList";
 import CrudForm from "../pages/CrudForm";
 import UsersLayout2 from "../pages/UsersLayout2";
-import ProfileOverview1 from "../pages/ProfileOverview1";
-import ProfileOverview2 from "../pages/ProfileOverview2";
 import ProfileOverview3 from "../pages/ProfileOverview3";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -71,12 +70,16 @@ function Router() {
           element: <AddProduct />,
         },
         {
+          path: "project-approved",
+          element: <ProjectApproved />,
+        },
+        {
           path: "product-list",
           element: <ProductList />,
         },
         {
-          path: "product-grid",
-          element: <ProductGrid />,
+          path: "project-details",
+          element: <ProductDetails />,
         },    
               
         {
@@ -102,14 +105,7 @@ function Router() {
           element: <UsersLayout2 />,
         },
        
-        {
-          path: "profile-overview-1",
-          element: <ProfileOverview1 />,
-        },
-        {
-          path: "profile-overview-2",
-          element: <ProfileOverview2 />,
-        },
+       
         {
           path: "profile-overview-3",
           element: <ProfileOverview3 />,

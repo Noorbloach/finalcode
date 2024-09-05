@@ -39,6 +39,7 @@ function Main() {
     clientPermanentNotes: "Important notes about the project.",
     rfiAddendum: "RFI details or path.",
     clientType: "new",
+    projectlink: "www.sufnoor.com",
   };
 
   const projectDetails = project || dummyProject;
@@ -129,6 +130,12 @@ function Main() {
                   <FormLabel className="xl:w-64 xl:!mr-10">Client Type</FormLabel>
                   <div className="flex-1 w-full mt-3 xl:mt-0">
                     <FormInput type="text" value={projectDetails.clientType} readOnly />
+                  </div>
+                </FormInline>
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+                  <FormLabel className="xl:w-64 xl:!mr-10">Project Link</FormLabel>
+                  <div className="flex-1 w-full mt-3 xl:mt-0">
+                    <FormInput type="text" value={projectDetails.projectlink} readOnly />
                   </div>
                 </FormInline>
               </div>
