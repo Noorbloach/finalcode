@@ -1,19 +1,12 @@
-import _ from "lodash";
 import { useState } from "react";
-import fakerData from "@/utils/faker";
 import Button from "@/components/Base/Button";
-import {
-  FormInput,
-  FormInline,
-  FormSelect,
-  FormLabel,
-  FormCheck,
-  FormHelp,
-} from "@/components/Base/Form";
+import { FormInput, FormInline, FormSelect, FormLabel, FormHelp } from "@/components/Base/Form";
 import { ClassicEditor } from "@/components/Base/Ckeditor";
 import Lucide from "@/components/Base/Lucide";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";  
+import {jwtDecode} from "jwt-decode";
+import AddClientModal from "./AddClientModal";
+import SelectClientModal from "./SelectClientModal";
 
 function Main() {
   const [subcategory, setSubcategory] = useState("");
@@ -27,19 +20,40 @@ function Main() {
   const [remainingAmount, setRemainingAmount] = useState("");
   const [clientPermanentNotes, setClientPermanentNotes] = useState("");
   const [rfiAddendum, setRfiAddendum] = useState("");
-  const [projectPlans, setProjectPlans] = useState("");
   const [projectType, setProjectType] = useState("");
-  const [projectName, setProjectName] = useState("");  // Added for Project Name
+  const [projectName, setProjectName] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectClientModalOpen, setSelectClientModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
-  console.log(decodedToken);
 
-  // Function to calculate remaining amount
   const calculateRemainingAmount = (initial, total) => {
     const initialAmountNum = parseFloat(initial) || 0;
     const totalAmountNum = parseFloat(total) || 0;
     setRemainingAmount(totalAmountNum - initialAmountNum);
+  };
+
+  const handleClientTypeChange = (e) => {
+    const selectedType = e.target.value;
+    setClientType(selectedType);
+
+    if (selectedType === "new") {
+      setModalOpen(true); // Open AddClientModal for new client
+    } else if (selectedType === "old") {
+      setSelectClientModalOpen(true); // Open SelectClientModal for existing clients
+    }
+  };
+
+  const handleSaveClient = (clientData) => {
+    setSelectedClient(clientData);
+    setModalOpen(false);
+  };
+
+  const handleClientSelection = (client) => {
+    setSelectedClient(client);
+    setSelectClientModalOpen(false);
   };
 
   const handleSave = async () => {
@@ -63,26 +77,15 @@ function Main() {
         remainingAmount,
         clientPermanentNotes,
         rfiAddendum,
-        projectPlans,
         clientType,
+        clientDetails: clientType === "new" ? selectedClient : undefined,
+        selectedClientId: clientType === "old" ? selectedClient._id : undefined,
       });
 
       console.log("Project created successfully:", response.data);
-      // Handle successful creation (e.g., show a success message or redirect)
     } catch (error) {
-      if (error.response) {
-        // Request made and server responded with a status code that falls out of the range of 2xx
-        console.error("Error creating project:", error.response.data);
-        alert(`Error: ${error.response.data.message || "Unknown error occurred"}`);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("Error creating project: No response received");
-        alert("Error: No response received from the server");
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error creating project:", error.message);
-        alert(`Error: ${error.message}`);
-      }
+      console.error("Error creating project:", error);
+      alert(`Error: ${error.response?.data?.message || "Unknown error occurred"}`);
     }
   };
 
@@ -370,7 +373,7 @@ function Main() {
                     <FormSelect
                       id="client-type"
                       value={clientType}
-                      onChange={(e) => setClientType(e.target.value)}
+                      onChange={handleClientTypeChange}
                     >
                       <option value="" disabled>Select Client Type</option>
                       <option value="new">New</option>
@@ -425,6 +428,9 @@ function Main() {
           </div>
         </div>
       </div>
+      <AddClientModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSaveClient} />
+      {/* Existing Client Modal */}
+      <SelectClientModal open={selectClientModalOpen} onClose={() => setSelectClientModalOpen(false)} onClientSelect={handleClientSelection} />
     </>
   );
 }
