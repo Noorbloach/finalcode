@@ -9,9 +9,11 @@ interface EditProjectModalProps {
   project: Project | null;
   onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onUpdate: () => void;
+  role: string;
+  
 }
 
-const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, project, onInputChange, onUpdate }) => {
+const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, project, onInputChange, onUpdate,role }) => {
   if (!open || !project) return null;
 
   // Handle select change
@@ -19,6 +21,62 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
     onInputChange(e);
   };
   console.log("Client Type Value:", project.status); 
+
+   // Render status options based on role
+    // Render status options based on role and current status
+  const renderStatusOptions = () => {
+    if (role === 'admin') {
+      if (project.status === 'Proposal Sent') {
+        // Admin cannot change status if it's Proposal Sent
+        return (
+          <option value={project.status} disabled>{project.status}</option>
+        );
+      }
+      if (project.status === 'ETA') {
+        return (
+          <>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </>
+        );
+      }
+      return (
+        <>
+          <option value="ETA">ETA</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </>
+      );
+    } else if (role === 'superadmin') {
+      if (project.status === 'Proposal Sent') {
+        return (
+          <>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Proposal Approved">Proposal Approved</option>
+            <option value="Proposal Rejected">Proposal Rejected</option>
+          </>
+        );
+      }
+      return (
+        <>
+          <option value="ETA">ETA</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </>
+      );
+    }
+    return (
+      <>
+        <option value="ETA">ETA</option>
+        <option value="Proposal Sent">Proposal Sent</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </>
+    );
+  };
+
 
   return (
     <>
@@ -40,17 +98,13 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
             <div style={formGroupStyles}>
               <label style={labelStyles}>Status:</label>
               <FormSelect
-  name="status"
-  value={project.status} // Ensure the status is correctly passed here
-  onChange={onInputChange}
-  style={selectStyles}
->
-  <option value="ETA">ETA</option>
-  <option value="Proposal Sent">Proposal Sent</option>
-  <option value="Approved">Approved</option>
-  <option value="Rejected">Rejected</option>
-</FormSelect>
-
+                name="status"
+                value={project.status}
+                onChange={handleSelectChange}
+                style={selectStyles}
+              >
+                {renderStatusOptions()}
+              </FormSelect>
             </div>
             <div style={formGroupStyles}>
               <label style={labelStyles}>Budget:</label>

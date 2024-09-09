@@ -1,20 +1,91 @@
-import _ from "lodash";
-import { useState } from "react";
-import fakerData from "@/utils/faker";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {jwtDecode} from "jwt-decode"; // Import jwt-decode for decoding the token
 import Button from "@/components/Base/Button";
 import {
   FormInput,
   FormLabel,
-  FormSelect,
   FormTextarea,
 } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
-import Tippy from "@/components/Base/Tippy";
-import TomSelect from "@/components/Base/TomSelect";
-import { Menu } from "@/components/Base/Headless";
+import { decode } from "punycode";
 
 function Main() {
-  const [select, setSelect] = useState("1");
+  const [userData, setUserData] = useState({
+    displayName: "",
+    email: "",
+    role: "",
+    address: "",
+    phoneNo: "",
+  });
+
+  const [isEditing, setIsEditing] = useState(false); // State to manage edit mode
+
+  // Decode the JWT token and extract the userId
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem("token"); // Fetch the token from localStorage (or sessionStorage)
+    if (token) {
+      const decodedToken = jwtDecode(token); // Decode the token
+      
+      return decodedToken.userId; // Extract and return userId
+    }
+    return null;
+  };
+
+  // Fetch user data from the backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userId = getUserIdFromToken(); // Get the userId from the token
+      if (!userId) {
+        console.error("User is not authenticated");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
+        setUserData({
+          displayName: response.data.user.name,
+          email: response.data.user.email,
+          role: response.data.user.role,
+          address: response.data.user.address,
+          phoneNo: response.data.user.phoneNo,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Handle form changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUserData({
+      ...userData,
+      [name]: value,
+    });
+  };
+
+  // Enable edit mode for address and phoneNo
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  // Update user details
+  const handleUpdateClick = async () => {
+    const userId = getUserIdFromToken(); // Get the userId from the token
+    try {
+      const response = await axios.put(`http://localhost:3000/api/auth/update-details/${userId}`, {
+        phoneNo: userData.phoneNo,
+        address: userData.address,
+      });
+      setIsEditing(false); // Disable editing after update
+      console.log("User details updated:", response.data);
+    } catch (error) {
+      console.error("Error updating user details:", error);
+    }
+  };
 
   return (
     <>
@@ -30,14 +101,14 @@ function Main() {
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   className="rounded-full"
-                  src={fakerData[0].photos[0]}
+                 
                 />
               </div>
               <div className="ml-4 mr-auto">
                 <div className="text-base font-medium">
-                  {fakerData[0].users[0].name}
+                  s
                 </div>
-                <div className="text-slate-500">{fakerData[0].jobs[0]}</div>
+                <div className="text-slate-500">{}</div>
               </div>
               
             </div>
@@ -61,7 +132,6 @@ function Main() {
             
           </div>
         </div>
-        {/* END: Profile Menu */}
         <div className="col-span-12 lg:col-span-8 2xl:col-span-9">
           {/* BEGIN: Display Information */}
           <div className="intro-y box lg:mt-5">
@@ -76,123 +146,91 @@ function Main() {
                   <div className="grid grid-cols-12 gap-x-5">
                     <div className="col-span-12 2xl:col-span-6">
                       <div>
-                        <FormLabel htmlFor="update-profile-form-1">
-                          Display Name
-                        </FormLabel>
+                        <FormLabel htmlFor="display-name">Display Name</FormLabel>
                         <FormInput
-                          id="update-profile-form-1"
+                          id="display-name"
                           type="text"
-                          placeholder="Input text"
-                          value={fakerData[0].users[0].name}
-                          onChange={() => {}}
+                          name="displayName"
+                          value={userData.displayName}
+                          onChange={handleInputChange}
                           disabled
                         />
                       </div>
                       <div className="mt-3">
-                        <FormLabel htmlFor="update-profile-form-4">
-                          Role
-                        </FormLabel>
+                        <FormLabel htmlFor="role">Role</FormLabel>
                         <FormInput
-                          id="update-profile-form-4"
+                          id="role"
                           type="text"
-                          placeholder="Input text"
-                          value="65570828"
-                          onChange={() => {}}
+                          name="role"
+                          value={userData.role}
+                          onChange={handleInputChange}
                           disabled
                         />
                       </div>
                     </div>
                     <div className="col-span-12 2xl:col-span-6">
-                    <div>
-                    <FormLabel htmlFor="update-profile-form-6">Email</FormLabel>
-                    <FormInput
-                      id="update-profile-form-6"
-                      type="text"
-                      placeholder="Input text"
-                      value={fakerData[0].users[0].email}
-                      onChange={() => {}}
-                      disabled
-                    />
-                  </div>
-                      <div className="mt-3">
-                        <FormLabel htmlFor="update-profile-form-4">
-                          Phone Number
-                        </FormLabel>
+                      <div>
+                        <FormLabel htmlFor="email">Email</FormLabel>
                         <FormInput
-                          id="update-profile-form-4"
+                          id="email"
+                          type="email"
+                          name="email"
+                          value={userData.email}
+                          onChange={handleInputChange}
+                          disabled
+                        />
+                      </div>
+                      <div className="mt-3">
+                        <FormLabel htmlFor="phoneNo">Phone Number</FormLabel>
+                        <FormInput
+                          id="phoneNo"
                           type="text"
-                          placeholder="Input text"
-                          value="65570828"
-                          onChange={() => {}}
+                          name="phoneNo"
+                          value={userData.phoneNo}
+                          onChange={handleInputChange}
+                          disabled={!isEditing} // Enable only in edit mode
                         />
                       </div>
                     </div>
                     <div className="col-span-12">
                       <div className="mt-3">
-                        <FormLabel htmlFor="update-profile-form-5">
-                          Address
-                        </FormLabel>
+                        <FormLabel htmlFor="address">Address</FormLabel>
                         <FormTextarea
-                          id="update-profile-form-5"
-                          placeholder="Adress"
-                          value="10 Anson Road, International Plaza, #10-11, 079903
-                            Singapore, Singapore"
-                          onChange={() => {}}
-                        ></FormTextarea>
+                          id="address"
+                          name="address"
+                          value={userData.address}
+                          onChange={handleInputChange}
+                          disabled={!isEditing} // Enable only in edit mode
+                        />
                       </div>
                     </div>
                   </div>
-                  <Button variant="primary" type="button" className="w-20 mt-3">
-                    Save
-                  </Button>
-                  
-                </div>
-                <div className="mx-auto w-52 xl:mr-0 xl:ml-6">
-                  <div className="p-5 border-2 border-dashed rounded-md shadow-sm border-slate-200/60 dark:border-darkmode-400">
-                    <div className="relative h-40 mx-auto cursor-pointer image-fit zoom-in">
-                      <img
-                        className="rounded-md"
-                        alt="Midone Tailwind HTML Admin Template"
-                        src={fakerData[0].photos[0]}
-                      />
-                      <Tippy
-                        as="div"
-                        content="Remove this profile photo?"
-                        className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 -mt-2 -mr-2 text-white rounded-full bg-danger"
-                      >
-                        <Lucide icon="X" className="w-4 h-4" />
-                      </Tippy>
-                    </div>
-                    <div className="relative mx-auto mt-5 cursor-pointer">
-                      <Button
-                        variant="primary"
-                        type="button"
-                        className="w-full"
-                      >
-                        Change Photo
-                      </Button>
-                      
-                      <FormInput
-                        type="file"
-                        className="absolute top-0 left-0 w-full h-full opacity-0"
-                      />
-                      <a href="" className="flex items-center text-danger">
-                  <Lucide icon="Trash2" className="w-4 h-9 mr-1" /> Delete
-                  Account
-                </a>
-                    </div>
-                    
-                  </div>
+
+                  {/* Button toggling between Edit and Update */}
+                  {!isEditing ? (
+                    <Button
+                      variant="primary"
+                      type="button"
+                      className="w-20 mt-3"
+                      onClick={handleEditClick}
+                    >
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      type="button"
+                      className="w-20 mt-3"
+                      onClick={handleUpdateClick}
+                    >
+                      Update
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-          
           {/* END: Display Information */}
-          
-                
-              
-          {/* END: Personal Information */}
         </div>
       </div>
     </>

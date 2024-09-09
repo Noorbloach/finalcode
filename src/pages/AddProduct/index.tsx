@@ -1,11 +1,20 @@
+import _ from "lodash";
 import { useState } from "react";
+import fakerData from "@/utils/faker";
 import Button from "@/components/Base/Button";
-import { FormInput, FormInline, FormSelect, FormLabel, FormHelp } from "@/components/Base/Form";
+import {
+  FormInput,
+  FormInline,
+  FormSelect,
+  FormLabel,
+  FormCheck,
+  FormHelp,
+} from "@/components/Base/Form";
 import { ClassicEditor } from "@/components/Base/Ckeditor";
 import Lucide from "@/components/Base/Lucide";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
-import AddClientModal from "./AddClientModal";
+import { jwtDecode } from "jwt-decode";  
+import AddClientModal from './AddClientModal';
 import SelectClientModal from "./SelectClientModal";
 
 function Main() {
@@ -20,40 +29,37 @@ function Main() {
   const [remainingAmount, setRemainingAmount] = useState("");
   const [clientPermanentNotes, setClientPermanentNotes] = useState("");
   const [rfiAddendum, setRfiAddendum] = useState("");
+  const [projectPlans, setProjectPlans] = useState("");
   const [projectType, setProjectType] = useState("");
-  const [projectName, setProjectName] = useState("");
+  const [projectName, setProjectName] = useState("");  // Added for Project Name
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectClientModalOpen, setSelectClientModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
+  console.log(decodedToken);
 
+  // Function to calculate remaining amount
   const calculateRemainingAmount = (initial, total) => {
     const initialAmountNum = parseFloat(initial) || 0;
     const totalAmountNum = parseFloat(total) || 0;
     setRemainingAmount(totalAmountNum - initialAmountNum);
   };
 
-  const handleClientTypeChange = (e) => {
+  const handleClientTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedType = e.target.value;
     setClientType(selectedType);
-
+console.log("new pressed")
     if (selectedType === "new") {
-      setModalOpen(true); // Open AddClientModal for new client
-    } else if (selectedType === "old") {
-      setSelectClientModalOpen(true); // Open SelectClientModal for existing clients
+      console.log("new pressed")
+      setModalOpen(true); // Open modal when "New" is selected
     }
+   
   };
 
-  const handleSaveClient = (clientData) => {
-    setSelectedClient(clientData);
-    setModalOpen(false);
-  };
-
-  const handleClientSelection = (client) => {
-    setSelectedClient(client);
-    setSelectClientModalOpen(false);
+  const handleSaveClient = (clientData: { name: string, email: string, phone: string, location: string }) => {
+    console.log("New client data:", clientData);
+    // You can send the new client data to your server or update the state here
+    // For example, setClientType(clientData.name); to select the newly created client.
   };
 
   const handleSave = async () => {
@@ -77,15 +83,26 @@ function Main() {
         remainingAmount,
         clientPermanentNotes,
         rfiAddendum,
+        projectPlans,
         clientType,
-        clientDetails: clientType === "new" ? selectedClient : undefined,
-        selectedClientId: clientType === "old" ? selectedClient._id : undefined,
       });
 
       console.log("Project created successfully:", response.data);
+      // Handle successful creation (e.g., show a success message or redirect)
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert(`Error: ${error.response?.data?.message || "Unknown error occurred"}`);
+      if (error.response) {
+        // Request made and server responded with a status code that falls out of the range of 2xx
+        console.error("Error creating project:", error.response.data);
+        alert(`Error: ${error.response.data.message || "Unknown error occurred"}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error creating project: No response received");
+        alert("Error: No response received from the server");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error creating project:", error.message);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -148,11 +165,7 @@ function Main() {
                     <FormSelect id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                       <option value="" disabled>Select Status</option>
                       <option value="ETA">ETA</option>                      
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected">Rejected</option>
-                      <option value="ProposalSent">Proposal Sent</option>
-                      <option value="ProposalApproved">Proposal Approved</option>
-                      <option value="ProposalRejected">Proposal Rejected</option>
+
                     </FormSelect>
                   </div>
                 </FormInline>
@@ -428,9 +441,12 @@ function Main() {
           </div>
         </div>
       </div>
-      <AddClientModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSaveClient} />
-      {/* Existing Client Modal */}
-      <SelectClientModal open={selectClientModalOpen} onClose={() => setSelectClientModalOpen(false)} onClientSelect={handleClientSelection} />
+      <AddClientModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveClient}
+      />
+      
     </>
   );
 }

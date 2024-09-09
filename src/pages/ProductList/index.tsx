@@ -7,6 +7,7 @@ import { FormInput,FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 import EditProjectModal from "./EditProjectModal"; // Import the new modal component
 
 interface Project {
@@ -25,6 +26,10 @@ interface Project {
   creator: string;
 }
 
+interface DecodedToken {
+  role: string; // Expecting a string role from the JWT token
+}
+
 function Main() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -33,7 +38,21 @@ function Main() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [role, setRole] = useState<string>("");// State to track if the user is admin
 
+  // Decode JWT to check if the user is an admin
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+    if (token) {
+      try {
+        const decoded: DecodedToken = jwtDecode(token);
+        console.log(decoded.role)
+        setRole(decoded.role); // Set role directly based on decoded token
+      } catch (error) {
+        console.error("Invalid token", error);
+      }
+    }
+  }, []);
   // Fetch projects from API
   useEffect(() => {
     const fetchProjects = async () => {
@@ -255,6 +274,7 @@ function Main() {
         project={selectedProject}
         onInputChange={handleInputChange}
         onUpdate={handleUpdateProject}
+        role={role} 
       />
     </>
   );
