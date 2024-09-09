@@ -12,7 +12,7 @@ import { decode } from "punycode";
 
 function Main() {
   const [userData, setUserData] = useState({
-    displayName: "",
+    name: "",
     email: "",
     role: "",
     address: "",
@@ -44,7 +44,7 @@ function Main() {
       try {
         const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
         setUserData({
-          displayName: response.data.user.name,
+          name: response.data.user.name,
           email: response.data.user.email,
           role: response.data.user.role,
           address: response.data.user.address,
@@ -77,6 +77,7 @@ function Main() {
     const userId = getUserIdFromToken(); // Get the userId from the token
     try {
       const response = await axios.put(`http://localhost:3000/api/auth/update-details/${userId}`, {
+        name:userData.name,
         phoneNo: userData.phoneNo,
         address: userData.address,
       });
@@ -150,10 +151,10 @@ function Main() {
                         <FormInput
                           id="display-name"
                           type="text"
-                          name="displayName"
-                          value={userData.displayName}
+                          name="name"
+                          value={userData.name}
                           onChange={handleInputChange}
-                          disabled
+                          disabled={!isEditing}
                         />
                       </div>
                       <div className="mt-3">

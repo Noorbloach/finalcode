@@ -29,29 +29,56 @@ function Main() {
 
   const token = localStorage.getItem("token"); // Or get it from context or other storage
   const [userId, setUserId] = useState<string | null>(null);
-  const [userRole,setUserRole] = useState<string | null>(null);
-  const [userName,setUserName] = useState<string | null>(null);
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    role: "",
+    address: "",
+    phoneNo: "",
+  });
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove the token from localStorage
     navigate("/"); // Navigate to the home page
   };
 
   
-  useEffect(() => {
-    // Decode token to get user ID
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem("token"); // Fetch the token from localStorage (or sessionStorage)
     if (token) {
-      try {
-        const decodedToken: { userId: string,role:string,name:string } = jwtDecode(token);
+      const decodedToken = jwtDecode(token); // Decode the token
       
-        setUserId(decodedToken.userId); 
-        setUserRole(decodedToken.role)// Adjust this based on your token's structure
-        setUserName(decodedToken.name)
-        console.log(decodedToken.role);
-      } catch (error) {
-        console.error("Failed to decode token", error);
-      }
+      return decodedToken.userId; // Extract and return userId
     }
-  }, [token]);
+    return null;
+  };
+
+  // Fetch user data from the backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userId = getUserIdFromToken(); // Get the userId from the token
+      if (!userId) {
+        console.error("User is not authenticated");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
+        setUserData({
+          name: response.data.user.name,
+          email: response.data.user.email,
+          role: response.data.user.role,
+          address: response.data.user.address,
+          phoneNo: response.data.user.phoneNo,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  
 
   useEffect(() => {
     if (userId) {
@@ -222,9 +249,9 @@ function Main() {
           </Menu.Button>
           <Menu.Items className="w-56 mt-px text-white bg-primary">
             <Menu.Header className="font-normal">
-              <div className="font-medium">{userName}</div>
+              <div className="font-medium">{userData.name}</div>
               <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                {userRole}
+                {userData.role}
               </div>
             </Menu.Header>
             <Menu.Divider className="bg-white/[0.08]" />
