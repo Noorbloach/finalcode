@@ -2,7 +2,19 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Button from '@/components/Base/Button';
 
-const SelectClientModal = ({ open, onClose, onClientSelect }) => {
+interface Client {
+  _id: string;
+  name: string;
+  email: string;
+}
+
+interface SelectClientModalProps {
+  open: boolean;
+  onClose: () => void;
+  onClientSelect: (client: Client) => void;
+}
+
+const SelectClientModal: React.FC<SelectClientModalProps> = ({ open, onClose, onClientSelect }) => {
   const [clients, setClients] = useState([]);
 
   useEffect(() => {

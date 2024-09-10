@@ -33,6 +33,8 @@ function Main() {
   const [projectType, setProjectType] = useState("");
   const [projectName, setProjectName] = useState("");  // Added for Project Name
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectClientModalOpen, setSelectClientModalOpen] = useState(false); 
+  const [selectedClient, setSelectedClient] = useState(null); 
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
@@ -52,14 +54,28 @@ console.log("new pressed")
     if (selectedType === "new") {
       console.log("new pressed")
       setModalOpen(true); // Open modal when "New" is selected
+    } else if (selectedType === "old") {
+      setSelectClientModalOpen(true); // Open SelectClientModal for existing clients
     }
    
   };
+  const handleClientSelection = (client) => {
+    setSelectedClient(client);  // Save selected old client
+    setSelectClientModalOpen(false);
+  };
+  const handleSaveClient = async (clientData) => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/clients/create", clientData);
+      const newClient = response.data;
 
-  const handleSaveClient = (clientData: { name: string, email: string, phone: string, location: string }) => {
-    console.log("New client data:", clientData);
-    // You can send the new client data to your server or update the state here
-    // For example, setClientType(clientData.name); to select the newly created client.
+
+      // Set the selected client as the newly created client
+      setSelectedClient(newClient);
+      setModalOpen(false); // Close the modal after saving
+    } catch (error) {
+      console.error("Error saving client:", error);
+      alert("Error saving client.");
+    }
   };
 
   const handleSave = async () => {
@@ -85,7 +101,11 @@ console.log("new pressed")
         rfiAddendum,
         projectPlans,
         clientType,
+        clientDetails: clientType === "new" ? selectedClient : undefined,  // Send new client details
+        selectedClientId: clientType === "old" ? selectedClient._id : undefined,  // Send old client ID
       });
+      if (subcategory) projectData.subcategory = subcategory;
+  if (projectType) projectData.projectType = projectType;
 
       console.log("Project created successfully:", response.data);
       // Handle successful creation (e.g., show a success message or redirect)
@@ -446,6 +466,7 @@ console.log("new pressed")
         onClose={() => setModalOpen(false)}
         onSave={handleSaveClient}
       />
+      <SelectClientModal open={selectClientModalOpen} onClose={() => setSelectClientModalOpen(false)} onClientSelect={handleClientSelection} />
       
     </>
   );

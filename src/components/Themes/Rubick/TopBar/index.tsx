@@ -31,10 +31,8 @@ function Main() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userData, setUserData] = useState({
     name: "",
-    email: "",
     role: "",
-    address: "",
-    phoneNo: "",
+
   });
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove the token from localStorage
@@ -46,12 +44,12 @@ function Main() {
     const token = localStorage.getItem("token"); // Fetch the token from localStorage (or sessionStorage)
     if (token) {
       const decodedToken = jwtDecode(token); // Decode the token
-      
+      setUserId(decodedToken.userId)
       return decodedToken.userId; // Extract and return userId
     }
     return null;
   };
-
+console.log(userId)
   // Fetch user data from the backend
   useEffect(() => {
     const fetchUserData = async () => {
@@ -65,10 +63,8 @@ function Main() {
         const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
         setUserData({
           name: response.data.user.name,
-          email: response.data.user.email,
           role: response.data.user.role,
-          address: response.data.user.address,
-          phoneNo: response.data.user.phoneNo,
+
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
