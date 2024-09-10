@@ -104,8 +104,7 @@ console.log("new pressed")
         clientDetails: clientType === "new" ? selectedClient : undefined,  // Send new client details
         selectedClientId: clientType === "old" ? selectedClient._id : undefined,  // Send old client ID
       });
-      if (subcategory) projectData.subcategory = subcategory;
-  if (projectType) projectData.projectType = projectType;
+      
 
       console.log("Project created successfully:", response.data);
       // Handle successful creation (e.g., show a success message or redirect)
