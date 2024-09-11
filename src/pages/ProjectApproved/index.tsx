@@ -41,7 +41,9 @@ function Main() {
         const response = await axios.get("http://localhost:3000/api/projects");
         const projectData = response.data.data;
         if (Array.isArray(projectData)) {
-          setProjects(projectData);
+          // Filter projects with status 'Project Started'
+          const filteredProjects = projectData.filter((project: Project) => project.status === 'Project Started');
+          setProjects(filteredProjects);
         } else {
           console.error("Unexpected data format:", projectData);
         }
@@ -161,7 +163,7 @@ function Main() {
                    </a>
                  </Table.Td>
                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   ${project.budget.toLocaleString()}
+                   ${project.budget}
                  </Table.Td>
                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
                    {new Date(project.clientDueDate).toLocaleDateString()}

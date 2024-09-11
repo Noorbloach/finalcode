@@ -16,7 +16,8 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";  
 import AddClientModal from './AddClientModal';
 import SelectClientModal from "./SelectClientModal";
-
+import { FaSpinner } from "react-icons/fa";  // Spinner icon
+import Swal from "sweetalert2";  // SweetAlert2
 function Main() {
   const [subcategory, setSubcategory] = useState("");
   const [status, setStatus] = useState("");
@@ -35,6 +36,7 @@ function Main() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectClientModalOpen, setSelectClientModalOpen] = useState(false); 
   const [selectedClient, setSelectedClient] = useState(null); 
+  const [loading, setLoading] = useState(false);  // Loading state
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
@@ -68,22 +70,24 @@ console.log("new pressed")
       const response = await axios.post("http://localhost:3000/api/clients/create", clientData);
       const newClient = response.data;
 
-
-      // Set the selected client as the newly created client
       setSelectedClient(newClient);
-      setModalOpen(false); // Close the modal after saving
+      setModalOpen(false); 
     } catch (error) {
       console.error("Error saving client:", error);
-      alert("Error saving client.");
+      Swal.fire("Error", "Error saving client.", "error");
     }
   };
 
   const handleSave = async () => {
+    setLoading(true);  // Set loading to true when save is initiated
+
     const userId = decodedToken.userId;
     if (!userId) {
       console.error("Creator ID is missing");
+      setLoading(false);
       return;
     }
+
     try {
       const response = await axios.post("http://localhost:3000/api/create", {
         creator: userId,
@@ -101,29 +105,45 @@ console.log("new pressed")
         rfiAddendum,
         projectPlans,
         clientType,
-        clientDetails: clientType === "new" ? selectedClient : undefined,  // Send new client details
-        selectedClientId: clientType === "old" ? selectedClient._id : undefined,  // Send old client ID
+        clientDetails: clientType === "new" ? selectedClient : undefined,  
+        selectedClientId: clientType === "old" ? selectedClient._id : undefined,  
       });
-      if (subcategory) projectData.subcategory = subcategory;
-  if (projectType) projectData.projectType = projectType;
 
-      console.log("Project created successfully:", response.data);
-      // Handle successful creation (e.g., show a success message or redirect)
+      Swal.fire({
+        title: "Success",
+        text: "Project created successfully!",
+        icon: "success",
+        confirmButtonText: "OK"
+      });
+
+       // Clear form fields
+       setProjectName("");
+       setStatus("");
+       setSubcategory("");
+       setProjectType("");
+       setClientDueDate("");
+       setOpsDueDate("");
+       setEditorData("");
+       setInitialAmount("");
+       setTotalAmount("");
+       setRemainingAmount("");
+       setClientPermanentNotes("");
+       setRfiAddendum("");
+       setProjectPlans("");
+       setClientType("");
+       setSelectedClient(null);  // Clear selected client
+
     } catch (error) {
       if (error.response) {
-        // Request made and server responded with a status code that falls out of the range of 2xx
-        console.error("Error creating project:", error.response.data);
-        alert(`Error: ${error.response.data.message || "Unknown error occurred"}`);
+        Swal.fire("Error", error.response.data.message || "Unknown error occurred", "error");
       } else if (error.request) {
-        // The request was made but no response was received
-        console.error("Error creating project: No response received");
-        alert("Error: No response received from the server");
+        Swal.fire("Error", "No response received from the server", "error");
       } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error creating project:", error.message);
-        alert(`Error: ${error.message}`);
+        Swal.fire("Error", error.message, "error");
       }
     }
+
+    setLoading(false);  // Stop loading when save is completed
   };
 
   return (
@@ -455,8 +475,9 @@ console.log("new pressed")
               type="button"
               className="w-full py-3 md:w-52"
               onClick={handleSave}
+              disabled={loading}  // Disable the button while loading
             >
-              Save
+              {loading ? <FaSpinner className="animate-spin" /> : "Save"}
             </Button>
           </div>
         </div>

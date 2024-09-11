@@ -21,10 +21,33 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
     onInputChange(e);
   };
   console.log("Client Type Value:", project.status); 
-
+ 
    // Render status options based on role
     // Render status options based on role and current status
   const renderStatusOptions = () => {
+
+    if (role === 'superadmin') {
+      if (project.status === 'Proposal Sent') {
+        return (
+          <>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Project Started">Project Started</option>
+           
+          </>
+        );
+      }
+      return (
+        <>
+          <option value="ETA">ETA</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Project Started">Project Started</option>
+        </>
+      );
+    }
+
+
     if (role === 'admin') {
       if (project.status === 'Proposal Sent') {
         // Admin cannot change status if it's Proposal Sent
@@ -35,6 +58,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
       if (project.status === 'ETA') {
         return (
           <>
+            <option value="">Select</option>
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
           </>
@@ -53,11 +77,12 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
         return (
           <>
             <option value="Proposal Sent">Proposal Sent</option>
-            <option value="Proposal Approved">Proposal Approved</option>
-            <option value="Proposal Rejected">Proposal Rejected</option>
+           
           </>
         );
       }
+        // Determine if the field should be disabled for admin (superadmin can edit all)
+  
       return (
         <>
           <option value="ETA">ETA</option>
@@ -77,7 +102,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
     );
   };
 
-
+  const isFieldDisabled = role === "admin";
   return (
     <>
       <div style={overlayStyles} onClick={onClose}></div>
@@ -93,6 +118,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="text"
                 style={inputStyles}
+                disabled={isFieldDisabled}
               />
             </div>
             <div style={formGroupStyles}>
@@ -102,6 +128,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 value={project.status}
                 onChange={handleSelectChange}
                 style={selectStyles}
+                disabled={false}
               >
                 {renderStatusOptions()}
               </FormSelect>
@@ -114,6 +141,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="number"
                 style={inputStyles}
+                disabled={isFieldDisabled}
               />
             </div>
             <div style={formGroupStyles}>
@@ -124,6 +152,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="date"
                 style={inputStyles}
+                disabled={isFieldDisabled}
               />
             </div>
             <div style={formGroupStyles}>
@@ -134,6 +163,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="date"
                 style={inputStyles}
+                disabled={isFieldDisabled}
               />
             </div>
             <div style={formGroupStyles}>
@@ -144,6 +174,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="text"
                 style={inputStyles}
+                disabled={isFieldDisabled}
               />
             </div>
             <div style={formGroupStyles}>
@@ -154,6 +185,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 onChange={onInputChange}
                 type="text"
                 style={inputStyles}
+                disabled={isFieldDisabled} 
               />
             </div>
             <div style={formGroupStyles}>
@@ -163,6 +195,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 value={project.clientType}
                 onChange={handleSelectChange}
                 style={selectStyles}
+                disabled={isFieldDisabled}
               >
                 <option value="New">New</option>
                 <option value="Old">Old</option>
