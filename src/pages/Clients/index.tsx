@@ -223,46 +223,44 @@ import { Menu } from '@/components/Base/Headless';
 import axios from 'axios'; // For making HTTP requests
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-interface User {
+interface Client {
   name: string;
-  role: string;
   email: string;
-  phone: string; // Added phone property
-  location: string; // Added location property
+  phone: string;
+  location: string;
 }
 
 function Main() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1); // State for current page
   const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
   const navigate = useNavigate(); 
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchClients = async () => {
       try {
-        const response = await axios.get<User[]>('http://localhost:3000/api/auth/users');
-        setUsers(response.data);
+        const response = await axios.get<Client[]>('http://localhost:3000/api/clients/clients');
+        console.log(response.data)
+        setClients(response.data.clients);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching clients:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchClients();
   }, []);
 
   if (loading) {
     return <div>Loading...</div>; 
   }
 
-  // Calculate the total number of pages
-  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const totalPages = Math.ceil(clients.length / itemsPerPage);
 
-  // Slice the users array to get users for the current page
-  const currentUsers = _.slice(
-    users,
+  const currentClients = _.slice(
+    clients,
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -278,8 +276,8 @@ function Main() {
     setCurrentPage(1); // Reset to first page whenever items per page changes
   };
 
-  const handleAddNewUser = () => {
-    navigate('/register');
+  const handleAddNewClient = () => {
+    navigate('/register'); // Update route to add new client
   };
 
   return (
@@ -290,9 +288,9 @@ function Main() {
           <Button 
             variant="primary" 
             className="mr-2 shadow-md" 
-            onClick={handleAddNewUser} 
+            onClick={handleAddNewClient} 
           >
-            Add New User
+            Add New Client
           </Button>
           <Menu>
             <Menu.Button as={Button} className="px-2 !box">
@@ -311,7 +309,7 @@ function Main() {
             </Menu.Items>
           </Menu>
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing {itemsPerPage * (currentPage - 1) + 1} to {Math.min(currentPage * itemsPerPage, users.length)} of {users.length} entries
+            Showing {itemsPerPage * (currentPage - 1) + 1} to {Math.min(currentPage * itemsPerPage, clients.length)} of {clients.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
@@ -327,45 +325,40 @@ function Main() {
             </div>
           </div>
         </div>
-        {/* BEGIN: Users Layout */}
-        {currentUsers.map((user, index) => (
+        {/* BEGIN: Clients Layout */}
+        {currentClients.map((client, index) => (
           <div key={index} className="col-span-12 intro-y md:col-span-6">
             <div className="box p-5">
               <div className="flex flex-col items-center">
                 <div className="w-24 h-24 image-fit">
                   <img
-                    alt="User Avatar"
+                    alt="Client Avatar"
                     className="rounded-full"
-                    src={`https://api.adorable.io/avatars/285/${user.email}.png`} 
+                    src={`https://api.adorable.io/avatars/285/${client.email}.png`} 
                   />
                 </div>
                 <div className="mt-4 text-center">
                   <a href="#" className="font-medium text-lg">
-                    {user.name}
+                    {client.name}
                   </a>
                   <div className="text-slate-500 text-sm mt-1">
-                    {user.role}
+                    {client.email}
                   </div>
                   <div className="flex justify-center mt-2 space-x-4">
                     <div className="text-slate-500 text-sm">
-                      Email: {user.email}
+                      Phone: {client.phone}
                     </div>
                     <div className="text-slate-500 text-sm">
-                      Phone: {user.phone}
-                    </div>
-                    <div className="text-slate-500 text-sm">
-                      Location: {user.location}
+                      Location: {client.location}
                     </div>
                   </div>
                 </div>
-                {/* Remove the button section */}
               </div>
             </div>
           </div>
         ))}
-       
-       {/* BEGIN: Pagination */}
-       <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
+        {/* BEGIN: Pagination */}
+        <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
           <Pagination className="w-full sm:w-auto sm:mr-auto">
             <button
               onClick={() => handlePageChange(1)}
@@ -418,4 +411,5 @@ function Main() {
     </>
   );
 }
+
 export default Main;
