@@ -108,10 +108,7 @@ console.log("new pressed")
         clientDetails: clientType === "new" ? selectedClient : undefined,  
         selectedClientId: clientType === "old" ? selectedClient._id : undefined,  
       });
-<<<<<<< HEAD
-      
-=======
->>>>>>> 995fb63700f2f26c1a17ac920a04a678e1c6c27a
+
 
       Swal.fire({
         title: "Success",

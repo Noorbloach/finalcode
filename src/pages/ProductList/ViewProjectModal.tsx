@@ -3,95 +3,48 @@ import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import { Project } from "./Main"; // Import the Project type
 
-interface EditProjectModalProps {
+interface ViewProjectModalProps {
   open: boolean;
   onClose: () => void;
   project: Project | null;
-  onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onUpdate: () => void;
-  role: string;
 }
 
-const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, project, onInputChange, onUpdate, role }) => {
+const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, project }) => {
   if (!open || !project) return null;
 
-  // Handle select change
-  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onInputChange(e);
-  };
-
-  // Render status options based on role
+  // Render status options based on the project status
   const renderStatusOptions = () => {
-    if (role === 'superadmin') {
-      if (project.status === 'Proposal Sent') {
-        return (
-          <option value="Proposal Sent">Proposal Sent</option>
-        );
-      }
-      return (
-        <>
-          <option value="ETA">ETA</option>
-          <option value="Proposal Sent">Proposal Sent</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-          <option value="Project Started">Project Started</option>
-        </>
-      );
-    }
-
-    if (role === 'admin') {
-      if (project.status === 'Proposal Sent') {
-        return (
-          <option value={project.status} disabled>{project.status}</option>
-        );
-      }
-      if (project.status === 'ETA') {
-        return (
-          <>
-            <option value="">Select</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
-          </>
-        );
-      }
-      return (
-        <>
-          <option value="ETA">ETA</option>
-          <option value="Proposal Sent">Proposal Sent</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </>
-      );
-    }
+    const options = [
+      "ETA", "Proposal Sent", "Approved", "Rejected", "Project Started"
+    ];
     
-    return (
-      <>
-        <option value="ETA">ETA</option>
-        <option value="Proposal Sent">Proposal Sent</option>
-        <option value="Approved">Approved</option>
-        <option value="Rejected">Rejected</option>
-      </>
-    );
+    return options.map(status => (
+      <option
+        key={status}
+        value={status}
+        selected={status === project.status}
+        disabled
+      >
+        {status}
+      </option>
+    ));
   };
 
-  const isFieldDisabled = role === "admin";
-  
   return (
     <>
       <div style={overlayStyles} onClick={onClose}></div>
       <div style={modalContainerStyles}>
         <div style={modalStyles}>
-          <h2 style={headingStyles}>Edit Project</h2>
+          <h2 style={headingStyles}>View Project</h2>
           <div style={formContainerStyles}>
             <div style={formGroupStyles}>
               <label style={labelStyles}>Project Name:</label>
               <FormInput
                 name="projectName"
                 value={project.projectName}
-                onChange={onInputChange}
                 type="text"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -99,9 +52,8 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormSelect
                 name="status"
                 value={project.status}
-                onChange={handleSelectChange}
                 style={selectStyles}
-                disabled={false}
+                disabled
               >
                 {renderStatusOptions()}
               </FormSelect>
@@ -111,10 +63,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="initialAmount"
                 value={project.initialAmount}
-                onChange={onInputChange}
                 type="number"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -122,10 +73,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="totalAmount"
                 value={project.totalAmount}
-                onChange={onInputChange}
                 type="number"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -133,10 +83,18 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="remainingAmount"
                 value={project.remainingAmount}
-                onChange={onInputChange}
                 type="number"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
+              />
+            </div>
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Project Description:</label>
+              <textarea
+                name="description"
+                value={project.description}
+                style={textareaStyles}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -144,10 +102,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="clientDueDate"
                 value={new Date(project.clientDueDate).toISOString().substring(0, 10)}
-                onChange={onInputChange}
                 type="date"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -155,10 +112,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="opsDueDate"
                 value={new Date(project.opsDueDate).toISOString().substring(0, 10)}
-                onChange={onInputChange}
                 type="date"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -166,10 +122,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="clientPermanentNotes"
                 value={project.clientPermanentNotes}
-                onChange={onInputChange}
                 type="text"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -177,10 +132,9 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormInput
                 name="rfiAddendum"
                 value={project.rfiAddendum}
-                onChange={onInputChange}
                 type="text"
                 style={inputStyles}
-                disabled={isFieldDisabled}
+                disabled
               />
             </div>
             <div style={formGroupStyles}>
@@ -188,33 +142,17 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
               <FormSelect
                 name="clientType"
                 value={project.clientType}
-                onChange={handleSelectChange}
                 style={selectStyles}
-                disabled={isFieldDisabled}
+                disabled
               >
-                <option value="New">New</option>
-                <option value="Old">Old</option>
+                <option value="New" selected={project.clientType === 'New'} disabled>New</option>
+                <option value="Old" selected={project.clientType === 'Old'} disabled>Old</option>
               </FormSelect>
-            </div>
-            {/* Added Estimator Link Field */}
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Estimator Link:</label>
-              <FormInput
-                name="estimatorLink"
-                value={project.estimatorLink || ''} // Provide default empty string if undefined
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
             </div>
           </div>
           <div style={footerStyles}>
-            <Button variant="secondary" onClick={onClose} style={buttonStyles}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={onUpdate} style={buttonStyles}>
-              Save Changes
+            <Button variant="primary" onClick={onClose} style={buttonStyles}>
+              Close
             </Button>
           </div>
         </div>
@@ -252,9 +190,9 @@ const modalStyles: React.CSSProperties = {
   padding: '30px',
   borderRadius: '10px',
   boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-  width: '500px',
+  width: '800px', // Adjusted width
   maxWidth: '90%',
-  maxHeight: '80vh', // Limit height and enable scrolling
+  maxHeight: '90vh', // Adjusted height and enable scrolling
   overflowY: 'auto', // Enable vertical scrolling
 };
 
@@ -273,42 +211,48 @@ const formContainerStyles: React.CSSProperties = {
 
 const formGroupStyles: React.CSSProperties = {
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column', // Changed to column for better layout
   gap: '15px',
 };
 
 const labelStyles: React.CSSProperties = {
-  flex: '0 0 150px', // Fixed width for labels
   fontWeight: '500',
-  color: '#555',
+  marginBottom: '5px',
 };
 
 const inputStyles: React.CSSProperties = {
-  flex: '1', // Takes remaining space
-  marginBottom: '15px',
+  padding: '10px',
+  border: '1px solid #ddd',
+  borderRadius: '4px',
+  fontSize: '16px',
 };
 
 const selectStyles: React.CSSProperties = {
-  flex: '1', // Takes remaining space
-  marginBottom: '15px',
+  padding: '10px',
+  border: '1px solid #ddd',
+  borderRadius: '4px',
+  fontSize: '16px',
 };
 
 const textareaStyles: React.CSSProperties = {
-  flex: '1', // Takes remaining space
-  marginBottom: '15px',
-  minHeight: '100px', // Minimum height for textarea
-  resize: 'vertical', // Allow vertical resizing
+  padding: '10px',
+  border: '1px solid #ddd',
+  borderRadius: '4px',
+  fontSize: '16px',
+  minHeight: '150px', // Increased vertical height
+  width: '100%', // Ensures the textarea is as wide as the modal
+  resize: 'none', // Prevent horizontal resizing
 };
 
 const footerStyles: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'flex-end',
-  marginTop: '20px',
   gap: '10px',
+  marginTop: '20px',
 };
 
 const buttonStyles: React.CSSProperties = {
   padding: '10px 20px',
 };
 
-export default EditProjectModal;
+export default ViewProjectModal;

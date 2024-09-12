@@ -3,12 +3,17 @@ import axios from "axios";
 import clsx from "clsx";
 import Button from "@/components/Base/Button";
 import Pagination from "@/components/Base/Pagination";
-import { FormInput,FormSelect } from "@/components/Base/Form";
+import { FormInput, FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
-import EditProjectModal from "./EditProjectModal"; // Import the new modal component
+import { jwtDecode } from "jwt-decode";
+import fakerData from "@/utils/faker";
+import _ from "lodash";
+import Tippy from "@/components/Base/Tippy";
+
+import EditProjectModal from "./EditProjectModal";
+import ViewProjectModal from "./ViewProjectModal";
 
 interface Project {
   _id: string;
@@ -37,8 +42,9 @@ function Main() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [role, setRole] = useState<string>("");// State to track if the user is admin
+  const [role, setRole] = useState<string>(""); // State to track if the user is admin
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -46,13 +52,13 @@ function Main() {
     if (token) {
       try {
         const decoded: DecodedToken = jwtDecode(token);
-        console.log(decoded.role)
         setRole(decoded.role); // Set role directly based on decoded token
       } catch (error) {
         console.error("Invalid token", error);
       }
     }
   }, []);
+
   // Fetch projects from API
   useEffect(() => {
     const fetchProjects = async () => {
@@ -79,9 +85,20 @@ function Main() {
     try {
       const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
       const projectData = response.data.data;
-      console.log(projectData)
       setSelectedProject(projectData);
       setEditModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
+  // Function to open the view modal and fetch project details
+  const handleViewClick = async (projectId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
+      const projectData = response.data.data;
+      setSelectedProject(projectData);
+      setViewModalOpen(true);
     } catch (error) {
       console.error("Error fetching project details:", error);
     }
@@ -93,10 +110,10 @@ function Main() {
       try {
         await axios.put(`http://localhost:3000/api/projects/${selectedProject._id}`, selectedProject);
         // Update the project in the state
-       
-        setProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
+        setProjects(prevProjects =>
+          prevProjects.map(p => (p._id === selectedProject._id ? selectedProject : p))
+        );
         setEditModalOpen(false);
-        
       } catch (error) {
         console.error("Error updating project:", error);
       }
@@ -111,6 +128,13 @@ function Main() {
         [e.target.name]: e.target.value,
       });
     }
+  };
+
+  // Calculate days remaining until the client due date
+  const calculateDaysRemaining = (dueDate: Date) => {
+    const today = new Date();
+    const timeDiff = new Date(dueDate).getTime() - today.getTime();
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
   };
 
   // Pagination logic
@@ -149,81 +173,88 @@ function Main() {
           </div>
         </div>
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-          <Table className="border-spacing-y-[10px] border-separate -mt-2">
-            <Table.Thead>
-            <Table.Tr>
-                <Table.Th className="border-b-0 whitespace-nowrap">
-                  Project Title
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Budget
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Due Date
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status (Cloned)
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Actions
-                </Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {currentProjects.map((project) => (
-                 <Table.Tr key={project._id} className="intro-x">
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <a href="" className="font-medium whitespace-nowrap">
-                     {project.projectName}
-                   </a>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   ${project.budget}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {new Date(project.clientDueDate).toLocaleDateString()}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                 {role === 'admin' && project.status === 'Proposal Sent'
-                      ? 'On Hold'
-                      : project.status}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {/* Cloned status with different styling or formatting */}
-                   <div className={clsx({
-                     'text-success': project.status === 'Approved',
-                     'text-warning': project.status === 'Proposal Sent',
-                     'text-danger': project.status === 'Rejected',
-                     'text-muted': project.status === 'ETA',
-                   })}>
-                     {project.status === 'Approved' ? '✓ Approved' :
-                      project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                      project.status === 'Rejected' ? '✘ Rejected' :
-                      '⏳ ETA'}
-                   </div>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <div className="flex items-center justify-center">
-                     <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
-                       <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                       Edit
-                     </a>
-                     <a
-                       className="flex items-center text-danger"
-                       href="#"
-                       
-                     >
-                       <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                       Delete
-                     </a>
-                   </div>
-                 </Table.Td>
-               </Table.Tr>              ))}
-            </Table.Tbody>
-          </Table>
+        <div className="overflow-x-auto"> {/* Wrapper to allow horizontal scrolling */}
+  <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
+    <Table.Thead>
+      <Table.Tr>
+        <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Days Remaining</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Admin Link</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
+      </Table.Tr>
+    </Table.Thead>
+    <Table.Tbody>
+      {currentProjects.map((project) => (
+        <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
+          <Table.Td className="text-center">{project.projectName}</Table.Td>
+          <Table.Td className="text-center">${project.budget}</Table.Td>
+          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>
+          <Table.Td className="text-center">{project.status}</Table.Td>
+          <Table.Td className="text-center">
+            <div className={clsx({
+              'text-success': project.status === 'Approved',
+              'text-warning': project.status === 'Proposal Sent',
+              'text-danger': project.status === 'Rejected',
+              'text-muted': project.status === 'ETA',
+            })}>
+              {project.status === 'Approved' ? '✓ Approved' :
+               project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
+               project.status === 'Rejected' ? '✘ Rejected' : '⏳ ETA'}
+            </div>
+          </Table.Td>
+          <Table.Td className="text-center">{calculateDaysRemaining(project.clientDueDate)}</Table.Td>
+          <Table.Td className="text-center max-w-[60px]">
+            <div className="relative flex">
+              {_.take(fakerData, 3).map((faker, fakerKey) => (
+                <div
+                  key={fakerKey}
+                  className="w-8 h-8 image-fit zoom-in"
+                  style={{ position: 'relative', zIndex: 5 - fakerKey, marginLeft: fakerKey === 0 ? '0' : '-8px' }}
+                >
+                  <Tippy
+                    as="img"
+                    alt="Midone Tailwind HTML Admin Template"
+                    className="rounded-full"
+                    src={faker.images[0]}
+                    content={`Uploaded at ${faker.dates[0]}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </Table.Td>
+          <Table.Td className="text-center">
+            <a href="#">Admin Link</a>
+          </Table.Td>
+          <Table.Td className="text-center">
+            <a href="#">Estimator Link</a>
+          </Table.Td>
+          <Table.Td className="text-center">{project.template}</Table.Td>
+          <Table.Td className="text-center">
+            <div className="flex items-center justify-center">
+              <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
+                <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
+              </a>
+              <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
+              </a>
+              <a className="flex items-center text-danger" href="#">
+                <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
+              </a>
+            </div>
+          </Table.Td>
+        </Table.Tr>
+      ))}
+    </Table.Tbody>
+  </Table>
+</div>
+
           <div className="flex flex-col items-center mt-4">
             <Pagination
               currentPage={currentPage}
@@ -233,51 +264,20 @@ function Main() {
           </div>
         </div>
       </div>
-       {/* BEGIN: Pagination */}
-       <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
-          <Pagination className="w-full sm:w-auto sm:mr-auto">
-            <Pagination.Link onClick={() => setCurrentPage(1)}>
-              <Lucide icon="ChevronsLeft" className="w-4 h-4" />
-            </Pagination.Link>
-            <Pagination.Link onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}>
-              <Lucide icon="ChevronLeft" className="w-4 h-4" />
-            </Pagination.Link>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <Pagination.Link
-                key={index}
-                active={index + 1 === currentPage}
-                onClick={() => setCurrentPage(index + 1)}
-              >
-                {index + 1}
-              </Pagination.Link>
-            ))}
-            <Pagination.Link onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}>
-              <Lucide icon="ChevronRight" className="w-4 h-4" />
-            </Pagination.Link>
-            <Pagination.Link onClick={() => setCurrentPage(totalPages)}>
-              <Lucide icon="ChevronsRight" className="w-4 h-4" />
-            </Pagination.Link>
-          </Pagination>
-          <FormSelect
-            className="w-20 mt-3 !box sm:mt-0"
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            value={itemsPerPage}
-          >
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="35">35</option>
-            <option value="50">50</option>
-          </FormSelect>
-        </div>
-        {/* END: Pagination */}
-     
+
       <EditProjectModal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         project={selectedProject}
         onInputChange={handleInputChange}
         onUpdate={handleUpdateProject}
-        role={role} 
+        role={role}
+      />
+
+      <ViewProjectModal
+        open={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        project={selectedProject}
       />
     </>
   );
