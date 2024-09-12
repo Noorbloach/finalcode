@@ -381,24 +381,6 @@ console.log("new pressed")
                     />
                   </div>
                 </FormInline>
-                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
-                  <FormLabel className="xl:w-64 xl:!mr-10">
-                    <div className="text-left">
-                      <div className="flex items-center">
-                        <div className="font-medium">RFI/Addendum Upload</div>
-                      </div>
-                    </div>
-                  </FormLabel>
-                  <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <FormInput
-                      id="rfi-addendum-upload"
-                      type="text"
-                      placeholder="Enter RFI/Addendum path or notes"
-                      value={rfiAddendum}
-                      onChange={(e) => setRfiAddendum(e.target.value)}
-                    />
-                  </div>
-                </FormInline>
               </div>
             </div>
           </div>

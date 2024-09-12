@@ -25,7 +25,6 @@ interface Project {
   opsDueDate: Date;
   budget: number;
   clientPermanentNotes: string;
-  rfiAddendum: string;
   clientType: 'New' | 'Old';
   createdAt: Date;
   creator: string;

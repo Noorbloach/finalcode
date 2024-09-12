@@ -172,17 +172,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 disabled={isFieldDisabled}
               />
             </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>RFI Addendum:</label>
-              <FormInput
-                name="rfiAddendum"
-                value={project.rfiAddendum}
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
+           
             <div style={formGroupStyles}>
               <label style={labelStyles}>Client Type:</label>
               <FormSelect
@@ -196,12 +186,23 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 <option value="Old">Old</option>
               </FormSelect>
             </div>
-            {/* Added Estimator Link Field */}
             <div style={formGroupStyles}>
               <label style={labelStyles}>Estimator Link:</label>
               <FormInput
                 name="estimatorLink"
                 value={project.estimatorLink || ''} // Provide default empty string if undefined
+                onChange={onInputChange}
+                type="text"
+                style={inputStyles}
+                disabled={isFieldDisabled}
+              />
+            </div>
+            {/* Added Template Field */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Template:</label>
+              <FormInput
+                name="template"
+                value={project.template || ''} // Provide default empty string if undefined
                 onChange={onInputChange}
                 type="text"
                 style={inputStyles}
