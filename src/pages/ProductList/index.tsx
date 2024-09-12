@@ -14,6 +14,7 @@ interface Project {
   _id: string;
   projectName: string;
   status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started' | 'Proposal Rejected';
+  adminStatus: 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision';
   subcategory: 'Geoglyphs' | 'Stellar' | 'Perfect';
   projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
@@ -39,6 +40,8 @@ function Main() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [role, setRole] = useState<string>("");// State to track if the user is admin
+
+  const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -74,6 +77,21 @@ function Main() {
     fetchProjects();
   }, []);
 
+  const handleDeleteClick = async (projectId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
+    if (confirmDelete) {
+      try {
+        await axios.delete(`http://localhost:3000/api/projects/${projectId}`);
+        // Update the projects state by filtering out the deleted project
+        setProjects(prevProjects => prevProjects.filter(project => project._id !== projectId));
+        alert("Project deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("Failed to delete project.");
+      }
+    }
+  };
+  
   // Function to open the edit modal and fetch project details
   const handleEditClick = async (projectId: string) => {
     try {
@@ -86,6 +104,29 @@ function Main() {
       console.error("Error fetching project details:", error);
     }
   };
+
+  const handleAdminStatusChange = async (event: ChangeEvent<HTMLSelectElement>, projectId: string) => {
+    const newAdminStatus = event.target.value as 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision'; // Type assertion
+  
+    try {
+      await axios.put(`http://localhost:3000/api/projects/${projectId}/admin-status`, {
+        adminStatus: newAdminStatus,
+      });
+  
+      // Update the project in the state
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project._id === projectId ? { ...project, adminStatus: newAdminStatus } : project
+        )
+      );
+  
+      alert('Project admin status updated successfully.');
+    } catch (error) {
+      console.error('Error updating admin status:', error);
+      alert('Failed to update admin status.');
+    }
+  };
+  
 
   // Function to handle project update
   const handleUpdateProject = async () => {
@@ -193,17 +234,17 @@ function Main() {
                  </Table.Td>
                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
                    {/* Cloned status with different styling or formatting */}
-                   <div className={clsx({
-                     'text-success': project.status === 'Approved',
-                     'text-warning': project.status === 'Proposal Sent',
-                     'text-danger': project.status === 'Rejected',
-                     'text-muted': project.status === 'ETA',
-                   })}>
-                     {project.status === 'Approved' ? '✓ Approved' :
-                      project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                      project.status === 'Rejected' ? '✘ Rejected' :
-                      '⏳ ETA'}
-                   </div>
+                   <select
+                      value={project.adminStatus}
+                      onChange={(e) => handleAdminStatusChange(e, project._id)}
+                      className="form-select !box"
+                    >
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
                  </Table.Td>
                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
                    <div className="flex items-center justify-center">
@@ -214,7 +255,7 @@ function Main() {
                      <a
                        className="flex items-center text-danger"
                        href="#"
-                       
+                       onClick={() => handleDeleteClick(project._id)}
                      >
                        <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
                        Delete

@@ -49,6 +49,12 @@ function Main() {
     setRemainingAmount(totalAmountNum - initialAmountNum);
   };
 
+  const handleCloseSelectClientModal = () => {
+    setSelectClientModalOpen(false);
+    setClientType(""); // Reset clientType when closing SelectClientModal
+  };
+
+
   const handleClientTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedType = e.target.value;
     setClientType(selectedType);
@@ -484,10 +490,13 @@ console.log("new pressed")
       </div>
       <AddClientModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setClientType(""); // Reset clientType when closing AddClientModal
+        }}
         onSave={handleSaveClient}
       />
-      <SelectClientModal open={selectClientModalOpen} onClose={() => setSelectClientModalOpen(false)} onClientSelect={handleClientSelection} />
+      <SelectClientModal open={selectClientModalOpen} onClose={handleCloseSelectClientModal} onClientSelect={handleClientSelection} />
       
     </>
   );
