@@ -42,12 +42,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
     if (role === 'superadmin') {
       if (project.status === 'Proposal Sent') {
         return (
-          <>
-            <option value="Proposal Sent">Proposal Sent</option>
-            <option value="Proposal Rejected">Proposal Rejected</option>
-            <option value="Project Started">Project Started</option>
-           
-          </>
+          <option value="Proposal Sent">Proposal Sent</option>
         );
       }
       return (

@@ -18,8 +18,7 @@ import ViewProjectModal from "./ViewProjectModal";
 interface Project {
   _id: string;
   projectName: string;
-  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started' | 'Proposal Rejected';
-  adminStatus: 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision';
+  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started';
   subcategory: 'Geoglyphs' | 'Stellar' | 'Perfect';
   projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
@@ -45,8 +44,6 @@ function Main() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [role, setRole] = useState<string>(""); // State to track if the user is admin
-
-  const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -82,21 +79,6 @@ function Main() {
     fetchProjects();
   }, []);
 
-  const handleDeleteClick = async (projectId: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
-    if (confirmDelete) {
-      try {
-        await axios.delete(`http://localhost:3000/api/projects/${projectId}`);
-        // Update the projects state by filtering out the deleted project
-        setProjects(prevProjects => prevProjects.filter(project => project._id !== projectId));
-        alert("Project deleted successfully.");
-      } catch (error) {
-        console.error("Error deleting project:", error);
-        alert("Failed to delete project.");
-      }
-    }
-  };
-  
   // Function to open the edit modal and fetch project details
   const handleEditClick = async (projectId: string) => {
     try {
@@ -109,7 +91,6 @@ function Main() {
     }
   };
 
-<<<<<<< HEAD
   // Function to open the view modal and fetch project details
   const handleViewClick = async (projectId: string) => {
     try {
@@ -121,30 +102,6 @@ function Main() {
       console.error("Error fetching project details:", error);
     }
   };
-=======
-  const handleAdminStatusChange = async (event: ChangeEvent<HTMLSelectElement>, projectId: string) => {
-    const newAdminStatus = event.target.value as 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision'; // Type assertion
-  
-    try {
-      await axios.put(`http://localhost:3000/api/projects/${projectId}/admin-status`, {
-        adminStatus: newAdminStatus,
-      });
-  
-      // Update the project in the state
-      setProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project._id === projectId ? { ...project, adminStatus: newAdminStatus } : project
-        )
-      );
-  
-      alert('Project admin status updated successfully.');
-    } catch (error) {
-      console.error('Error updating admin status:', error);
-      alert('Failed to update admin status.');
-    }
-  };
-  
->>>>>>> 476461e02fa0f4c22d45d0c672b93871d8355d0f
 
   // Function to handle project update
   const handleUpdateProject = async () => {
@@ -215,7 +172,6 @@ function Main() {
           </div>
         </div>
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-<<<<<<< HEAD
         <div className="overflow-x-auto"> {/* Wrapper to allow horizontal scrolling */}
   <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
     <Table.Thead>
@@ -298,83 +254,6 @@ function Main() {
   </Table>
 </div>
 
-=======
-          <Table className="border-spacing-y-[10px] border-separate -mt-2">
-            <Table.Thead>
-            <Table.Tr>
-                <Table.Th className="border-b-0 whitespace-nowrap">
-                  Project Title
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Budget
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Due Date
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status (Cloned)
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Actions
-                </Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {currentProjects.map((project) => (
-                 <Table.Tr key={project._id} className="intro-x">
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <a href="" className="font-medium whitespace-nowrap">
-                     {project.projectName}
-                   </a>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   ${project.budget}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {new Date(project.clientDueDate).toLocaleDateString()}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                 {role === 'admin' && project.status === 'Proposal Sent'
-                      ? 'On Hold'
-                      : project.status}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {/* Cloned status with different styling or formatting */}
-                   <select
-                      value={project.adminStatus}
-                      onChange={(e) => handleAdminStatusChange(e, project._id)}
-                      className="form-select !box"
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <div className="flex items-center justify-center">
-                     <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
-                       <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                       Edit
-                     </a>
-                     <a
-                       className="flex items-center text-danger"
-                       href="#"
-                       onClick={() => handleDeleteClick(project._id)}
-                     >
-                       <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                       Delete
-                     </a>
-                   </div>
-                 </Table.Td>
-               </Table.Tr>              ))}
-            </Table.Tbody>
-          </Table>
->>>>>>> 476461e02fa0f4c22d45d0c672b93871d8355d0f
           <div className="flex flex-col items-center mt-4">
             <Pagination
               currentPage={currentPage}
