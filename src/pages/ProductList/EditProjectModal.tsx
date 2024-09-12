@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import { Project } from "./Main"; // Import the Project type
@@ -12,12 +12,29 @@ interface EditProjectModalProps {
   role: string;
 }
 
-const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, project, onInputChange, onUpdate, role }) => {
+const EditProjectModal: React.FC<EditProjectModalProps> = ({
+  open,
+  onClose,
+  project,
+  onInputChange,
+  onUpdate,
+  role,
+}) => {
   if (!open || !project) return null;
 
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  
   // Handle select change
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onInputChange(e);
+    const value = e.target.value;
+    if (value && !selectedMembers.includes(value)) {
+      setSelectedMembers([...selectedMembers, value]);
+    }
+  };
+
+  // Handle tag removal
+  const handleTagRemove = (memberId: string) => {
+    setSelectedMembers(selectedMembers.filter(id => id !== memberId));
   };
 
   // Render status options based on role
@@ -76,6 +93,14 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
 
   const isFieldDisabled = role === "admin";
   
+  // Dropdown options
+  const memberOptions = [
+    { id: '1', name: 'John Doe' },
+    { id: '2', name: 'Jane Smith' },
+    { id: '3', name: 'Alice Johnson' },
+    { id: '4', name: 'Bob Brown' },
+  ];
+
   return (
     <>
       <div style={overlayStyles} onClick={onClose}></div>
@@ -209,6 +234,46 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
                 disabled={isFieldDisabled}
               />
             </div>
+            {/* Added Select Members Field */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Select Members:</label>
+              <FormSelect
+                name="selectedMember"
+                value=""
+                onChange={handleSelectChange}
+                style={selectStyles}
+              >
+                <option value="">Select a Member</option>
+                {memberOptions.map(member => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            {/* Display selected members as tags */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Selected Members:</label>
+              <div style={tagsContainerStyles}>
+                {selectedMembers.map(memberId => {
+                  const member = memberOptions.find(m => m.id === memberId);
+                  return (
+                    member && (
+                      <div key={member.id} style={tagStyles}>
+                        {member.name}
+                        <button
+                          type="button"
+                          style={removeButtonStyles}
+                          onClick={() => handleTagRemove(member.id)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    )
+                  );
+                })}
+              </div>
+            </div>
           </div>
           <div style={footerStyles}>
             <Button variant="secondary" onClick={onClose} style={buttonStyles}>
@@ -310,6 +375,32 @@ const footerStyles: React.CSSProperties = {
 
 const buttonStyles: React.CSSProperties = {
   padding: '10px 20px',
+};
+
+// New styles for tags
+const tagsContainerStyles: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '5px',
+};
+
+const tagStyles: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  backgroundColor: '#e0e0e0',
+  borderRadius: '15px',
+  padding: '5px 10px',
+  fontSize: '14px',
+  color: '#333',
+};
+
+const removeButtonStyles: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  marginLeft: '5px',
+  cursor: 'pointer',
+  fontSize: '16px',
+  color: '#888',
 };
 
 export default EditProjectModal;
