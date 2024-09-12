@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent } from "react";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import { Project } from "./Main"; // Import the Project type
@@ -10,39 +10,31 @@ interface EditProjectModalProps {
   onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onUpdate: () => void;
   role: string;
+  
 }
 
-const EditProjectModal: React.FC<EditProjectModalProps> = ({
-  open,
-  onClose,
-  project,
-  onInputChange,
-  onUpdate,
-  role,
-}) => {
+const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, project, onInputChange, onUpdate,role }) => {
   if (!open || !project) return null;
 
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  
   // Handle select change
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value && !selectedMembers.includes(value)) {
-      setSelectedMembers([...selectedMembers, value]);
-    }
+    onInputChange(e);
   };
-
-  // Handle tag removal
-  const handleTagRemove = (memberId: string) => {
-    setSelectedMembers(selectedMembers.filter(id => id !== memberId));
-  };
-
-  // Render status options based on role
+  console.log("Client Type Value:", project.status); 
+ 
+   // Render status options based on role
+    // Render status options based on role and current status
   const renderStatusOptions = () => {
+
     if (role === 'superadmin') {
       if (project.status === 'Proposal Sent') {
         return (
-          <option value="Proposal Sent">Proposal Sent</option>
+          <>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Proposal Rejected">Proposal Rejected</option>
+            <option value="Project Started">Project Started</option>
+           
+          </>
         );
       }
       return (
@@ -56,8 +48,10 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
       );
     }
 
+
     if (role === 'admin') {
       if (project.status === 'Proposal Sent') {
+        // Admin cannot change status if it's Proposal Sent
         return (
           <option value={project.status} disabled>{project.status}</option>
         );
@@ -79,8 +73,26 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
           <option value="Rejected">Rejected</option>
         </>
       );
+    } else if (role === 'superadmin') {
+      if (project.status === 'Proposal Sent') {
+        return (
+          <>
+            <option value="Proposal Sent">Proposal Sent</option>
+           
+          </>
+        );
+      }
+        // Determine if the field should be disabled for admin (superadmin can edit all)
+  
+      return (
+        <>
+          <option value="ETA">ETA</option>
+          <option value="Proposal Sent">Proposal Sent</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </>
+      );
     }
-    
     return (
       <>
         <option value="ETA">ETA</option>
@@ -92,15 +104,6 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
   };
 
   const isFieldDisabled = role === "admin";
-  
-  // Dropdown options
-  const memberOptions = [
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Smith' },
-    { id: '3', name: 'Alice Johnson' },
-    { id: '4', name: 'Bob Brown' },
-  ];
-
   return (
     <>
       <div style={overlayStyles} onClick={onClose}></div>
@@ -132,32 +135,10 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
               </FormSelect>
             </div>
             <div style={formGroupStyles}>
-              <label style={labelStyles}>Initial Amount:</label>
+              <label style={labelStyles}>Budget:</label>
               <FormInput
-                name="initialAmount"
-                value={project.initialAmount}
-                onChange={onInputChange}
-                type="number"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Total Amount:</label>
-              <FormInput
-                name="totalAmount"
-                value={project.totalAmount}
-                onChange={onInputChange}
-                type="number"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Remaining Amount:</label>
-              <FormInput
-                name="remainingAmount"
-                value={project.remainingAmount}
+                name="budget"
+                value={project.budget}
                 onChange={onInputChange}
                 type="number"
                 style={inputStyles}
@@ -197,7 +178,17 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 disabled={isFieldDisabled}
               />
             </div>
-           
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>RFI Addendum:</label>
+              <FormInput
+                name="rfiAddendum"
+                value={project.rfiAddendum}
+                onChange={onInputChange}
+                type="text"
+                style={inputStyles}
+                disabled={isFieldDisabled} 
+              />
+            </div>
             <div style={formGroupStyles}>
               <label style={labelStyles}>Client Type:</label>
               <FormSelect
@@ -210,69 +201,6 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 <option value="New">New</option>
                 <option value="Old">Old</option>
               </FormSelect>
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Estimator Link:</label>
-              <FormInput
-                name="estimatorLink"
-                value={project.estimatorLink || ''} // Provide default empty string if undefined
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            {/* Added Template Field */}
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Template:</label>
-              <FormInput
-                name="template"
-                value={project.template || ''} // Provide default empty string if undefined
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            {/* Added Select Members Field */}
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Select Members:</label>
-              <FormSelect
-                name="selectedMember"
-                value=""
-                onChange={handleSelectChange}
-                style={selectStyles}
-              >
-                <option value="">Select a Member</option>
-                {memberOptions.map(member => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
-            {/* Display selected members as tags */}
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Selected Members:</label>
-              <div style={tagsContainerStyles}>
-                {selectedMembers.map(memberId => {
-                  const member = memberOptions.find(m => m.id === memberId);
-                  return (
-                    member && (
-                      <div key={member.id} style={tagStyles}>
-                        {member.name}
-                        <button
-                          type="button"
-                          style={removeButtonStyles}
-                          onClick={() => handleTagRemove(member.id)}
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    )
-                  );
-                })}
-              </div>
             </div>
           </div>
           <div style={footerStyles}>
@@ -288,6 +216,11 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
     </>
   );
 };
+
+// Styles remain the same as in your original code
+
+
+
 
 // Styles for overlay, modal container, and modal
 const overlayStyles: React.CSSProperties = {
@@ -320,8 +253,7 @@ const modalStyles: React.CSSProperties = {
   boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
   width: '500px',
   maxWidth: '90%',
-  maxHeight: '80vh', // Limit height and enable scrolling
-  overflowY: 'auto', // Enable vertical scrolling
+  overflowY: 'auto',
 };
 
 const headingStyles: React.CSSProperties = {
@@ -359,13 +291,6 @@ const selectStyles: React.CSSProperties = {
   marginBottom: '15px',
 };
 
-const textareaStyles: React.CSSProperties = {
-  flex: '1', // Takes remaining space
-  marginBottom: '15px',
-  minHeight: '100px', // Minimum height for textarea
-  resize: 'vertical', // Allow vertical resizing
-};
-
 const footerStyles: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'flex-end',
@@ -375,32 +300,6 @@ const footerStyles: React.CSSProperties = {
 
 const buttonStyles: React.CSSProperties = {
   padding: '10px 20px',
-};
-
-// New styles for tags
-const tagsContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '5px',
-};
-
-const tagStyles: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  backgroundColor: '#e0e0e0',
-  borderRadius: '15px',
-  padding: '5px 10px',
-  fontSize: '14px',
-  color: '#333',
-};
-
-const removeButtonStyles: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  marginLeft: '5px',
-  cursor: 'pointer',
-  fontSize: '16px',
-  color: '#888',
 };
 
 export default EditProjectModal;

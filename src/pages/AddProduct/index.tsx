@@ -61,6 +61,12 @@ console.log("new pressed")
     }
    
   };
+
+  const handleCloseSelectClientModal = () => {
+    setSelectClientModalOpen(false);
+    setClientType(""); // Reset clientType when closing SelectClientModal
+  };
+
   const handleClientSelection = (client) => {
     setSelectedClient(client);  // Save selected old client
     setSelectClientModalOpen(false);
@@ -467,10 +473,13 @@ console.log("new pressed")
       </div>
       <AddClientModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setClientType(""); // Reset clientType when closing AddClientModal
+        }}
         onSave={handleSaveClient}
       />
-      <SelectClientModal open={selectClientModalOpen} onClose={() => setSelectClientModalOpen(false)} onClientSelect={handleClientSelection} />
+      <SelectClientModal open={selectClientModalOpen} onClose={handleCloseSelectClientModal} onClientSelect={handleClientSelection} />
       
     </>
   );
