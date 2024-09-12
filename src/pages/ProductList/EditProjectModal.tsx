@@ -31,6 +31,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, proj
         return (
           <>
             <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Proposal Rejected">Proposal Rejected</option>
             <option value="Project Started">Project Started</option>
            
           </>

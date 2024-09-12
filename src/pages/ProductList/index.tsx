@@ -13,7 +13,7 @@ import EditProjectModal from "./EditProjectModal"; // Import the new modal compo
 interface Project {
   _id: string;
   projectName: string;
-  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started';
+  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started' | 'Proposal Rejected';
   subcategory: 'Geoglyphs' | 'Stellar' | 'Perfect';
   projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
