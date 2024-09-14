@@ -15,6 +15,8 @@ import Tippy from "@/components/Base/Tippy";
 import EditProjectModal from "./EditProjectModal";
 import ViewProjectModal from "./ViewProjectModal";
 
+
+
 interface Project {
   _id: string;
   projectName: string;
@@ -26,8 +28,15 @@ interface Project {
   opsDueDate: Date;
   budget: number;
   clientPermanentNotes: string;
+  projectLink:string;
+  estimatorLink:string;
+  template:string;
   clientType: 'New' | 'Old';
   createdAt: Date;
+  client: {
+    _id: string;
+    name: string;
+  };
   creator: string;
 }
 
@@ -45,6 +54,7 @@ function Main() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [role, setRole] = useState<string>(""); // State to track if the user is admin
+  const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
 
   const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
 
@@ -96,6 +106,25 @@ function Main() {
       }
     }
   };
+
+  const handleStatusFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(event.target.value);
+    console.log('Selected Status Filter:', event.target.value); // Debugging output
+  };
+  
+
+  // Filter projects based on the selected status
+  const filteredProjects = statusFilter
+    ? projects.filter((project) => project.adminStatus === statusFilter)
+    : projects;
+
+  console.log("Filtered Projects:", filteredProjects); 
+
+  useEffect(() => {
+    console.log('Projects:', projects); // Debugging output
+  }, [projects]);
+  
+
 
   const handleAdminStatusChange = async (event: ChangeEvent<HTMLSelectElement>, projectId: string) => {
     const newAdminStatus = event.target.value as 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision'; // Type assertion
@@ -177,10 +206,10 @@ function Main() {
   };
 
   // Pagination logic
-  const totalPages = Math.ceil(projects.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProjects = projects.slice(startIndex, startIndex + itemsPerPage);
-  const endIndex = Math.min(startIndex + itemsPerPage, projects.length);
+  const currentProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProjects.length);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -194,6 +223,23 @@ function Main() {
           <Button variant="primary" className="mr-2 shadow-md" onClick={() => navigate('/add-product')}>
             Add New Project
           </Button>
+           {/* Status Filter Dropdown */}
+           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
+            <div className="relative w-56 text-slate-500">
+              <FormSelect
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="!box w-56"
+              >
+                <option value="">All Statuses</option>
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+          </div>
           <div className="hidden mx-auto md:block text-slate-500">
             Showing {startIndex + 1} to {endIndex} of {projects.length} entries
           </div>
@@ -217,15 +263,24 @@ function Main() {
     <Table.Thead>
       <Table.Tr>
         <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Client Name</Table.Th>
+
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
+        {(role === "admin" || role === "employee") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
+      )}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Days Remaining</Table.Th>
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Admin Link</Table.Th>
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
+        {(role === "admin" || role === "employee" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
+      )}
+      {/* Conditionally render Template column */}
+      {(role === "admin" || role === "employee" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
+      )}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
       </Table.Tr>
     </Table.Thead>
@@ -233,22 +288,25 @@ function Main() {
       {currentProjects.map((project) => (
         <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
           <Table.Td className="text-center">{project.projectName}</Table.Td>
+          <Table.Td className="text-center">{project.client.name}</Table.Td> {/* Added column */}
           <Table.Td className="text-center">${project.budget}</Table.Td>
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>
           <Table.Td className="text-center">{project.status}</Table.Td>
+          {(role === "admin" || role === "employee" ) && (
           <Table.Td className="text-center">
-          <select
-                      value={project.adminStatus}
-                      onChange={(e) => handleAdminStatusChange(e, project._id)}
-                      className="form-select !box"
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
+            <select
+              value={project.adminStatus}
+              onChange={(e) => handleAdminStatusChange(e, project._id)}
+              className="form-select !box"
+            >
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
           </Table.Td>
+        )}
           <Table.Td className="text-center">{calculateDaysRemaining(project.clientDueDate)}</Table.Td>
           <Table.Td className="text-center max-w-[60px]">
             <div className="relative flex">
@@ -270,12 +328,27 @@ function Main() {
             </div>
           </Table.Td>
           <Table.Td className="text-center">
-            <a href="#">Admin Link</a>
-          </Table.Td>
+  <a 
+    href={project.projectLink} 
+    className="underline text-blue-500 hover:text-blue-700" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    Admin Link
+  </a>
+</Table.Td>
+{(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">
-            <a href="#">Estimator Link</a>
+            <a href={project.estimatorLink} className="underline text-blue-500 hover:text-blue-700" target="_blank" rel="noopener noreferrer">
+              Estimator Link
+            </a>
           </Table.Td>
+        )}
+        {/* Conditionally render Template field */}
+        {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">{project.template}</Table.Td>
+        )}
+        
           <Table.Td className="text-center">
             <div className="flex items-center justify-center">
               <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
@@ -284,7 +357,7 @@ function Main() {
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
               </a>
-              <a className="flex items-center text-danger" href="#">
+              <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
               </a>
             </div>

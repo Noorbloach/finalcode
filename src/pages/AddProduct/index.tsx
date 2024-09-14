@@ -33,10 +33,14 @@ function Main() {
   const [projectPlans, setProjectPlans] = useState("");
   const [projectType, setProjectType] = useState("");
   const [projectName, setProjectName] = useState("");  // Added for Project Name
+  const [projectLink, setProjectLink] = useState("");  // Added for Project Link
+  const [estimatorLink, setEstimatorLink] = useState("");  // Added for Project Link
+  const [template, setTemplate] = useState("");  // Added for Project Link
   const [modalOpen, setModalOpen] = useState(false);
   const [selectClientModalOpen, setSelectClientModalOpen] = useState(false); 
   const [selectedClient, setSelectedClient] = useState(null); 
   const [loading, setLoading] = useState(false);  // Loading state
+  
 
   const token = localStorage.getItem("token");
   const decodedToken = jwtDecode(token);
@@ -49,18 +53,20 @@ function Main() {
     setRemainingAmount(totalAmountNum - initialAmountNum);
   };
 
+  
+
   const handleClientTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedType = e.target.value;
     setClientType(selectedType);
-console.log("new pressed")
+  
     if (selectedType === "new") {
-      console.log("new pressed")
+      setSelectedClient(null); // Reset selected client
       setModalOpen(true); // Open modal when "New" is selected
     } else if (selectedType === "old") {
       setSelectClientModalOpen(true); // Open SelectClientModal for existing clients
     }
-   
   };
+  
 
   const handleCloseSelectClientModal = () => {
     setSelectClientModalOpen(false);
@@ -68,24 +74,37 @@ console.log("new pressed")
   };
 
   const handleClientSelection = (client) => {
-    setSelectedClient(client);  // Save selected old client
+    setSelectedClient(client); // Save selected old client
+    setClientType("old"); // Set client type to "old" when selecting an existing client
     setSelectClientModalOpen(false);
   };
+  
   const handleSaveClient = async (clientData) => {
     try {
       const response = await axios.post("http://localhost:3000/api/clients/create", clientData);
       const newClient = response.data;
-
-      setSelectedClient(newClient);
-      setModalOpen(false); 
+  
+      
+      setClientType(""); // Reset clientType to "Select Client Type"
+      setModalOpen(false); // Close the modal
+      setSelectClientModalOpen(false); // Ensure the select client modal is closed
     } catch (error) {
       console.error("Error saving client:", error);
       Swal.fire("Error", "Error saving client.", "error");
     }
   };
+  
+  
+  
+  const handleRemoveSelectedClient = () => {
+    setSelectedClient(null); // Remove the selected client
+    setClientType(""); // Allow user to select client again
+  };
 
-  const handleSave = async () => {
-    setLoading(true);  // Set loading to true when save is initiated
+  // Inside your Main component
+
+const handleSave = async () => {
+    setLoading(true);
 
     const userId = decodedToken.userId;
     if (!userId) {
@@ -111,10 +130,12 @@ console.log("new pressed")
         rfiAddendum,
         projectPlans,
         clientType,
-        clientDetails: clientType === "new" ? selectedClient : undefined,  
-        selectedClientId: clientType === "old" ? selectedClient._id : undefined,  
+        estimatorLink,
+        projectLink,
+        template,
+        clientDetails: clientType === "new" ? selectedClient : undefined,
+        selectedClientId: clientType === "old" ? selectedClient?._id : undefined,
       });
-
 
       Swal.fire({
         title: "Success",
@@ -123,35 +144,42 @@ console.log("new pressed")
         confirmButtonText: "OK"
       });
 
-       // Clear form fields
-       setProjectName("");
-       setStatus("");
-       setSubcategory("");
-       setProjectType("");
-       setClientDueDate("");
-       setOpsDueDate("");
-       setEditorData("");
-       setInitialAmount("");
-       setTotalAmount("");
-       setRemainingAmount("");
-       setClientPermanentNotes("");
-       setRfiAddendum("");
-       setProjectPlans("");
-       setClientType("");
-       setSelectedClient(null);  // Clear selected client
+      // Clear form fields
+      setProjectName("");
+      setStatus("");
+      setProjectLink("");
+      setSubcategory("");
+      setProjectType("");
+      setClientDueDate("");
+      setOpsDueDate("");
+      setEditorData("");
+      setInitialAmount("");
+      setTotalAmount("");
+      setRemainingAmount("");
+      setClientPermanentNotes("");
+      setRfiAddendum("");
+      setProjectPlans("");
+      setClientType("");
+      setSelectedClient(null);
 
     } catch (error) {
-      if (error.response) {
-        Swal.fire("Error", error.response.data.message || "Unknown error occurred", "error");
-      } else if (error.request) {
-        Swal.fire("Error", "No response received from the server", "error");
-      } else {
-        Swal.fire("Error", error.message, "error");
-      }
+      Swal.fire("Error", error.response?.data?.message || "Unknown error occurred", "error");
     }
 
-    setLoading(false);  // Stop loading when save is completed
-  };
+    setLoading(false);
+};
+
+// Ensure the `clientType` select field is correctly set up
+<FormSelect
+  id="client-type"
+  value={clientType}
+  onChange={handleClientTypeChange}
+>
+  <option value="" disabled>Select Client Type</option>
+  <option value="new">New</option>
+  <option value="old">Existing</option>
+</FormSelect>
+
 
   return (
     <>
@@ -413,16 +441,28 @@ console.log("new pressed")
                   </FormLabel>
                   <div className="flex-1 w-full mt-3 xl:mt-0">
                     <FormSelect
-                      id="client-type"
-                      value={clientType}
-                      onChange={handleClientTypeChange}
-                    >
-                      <option value="" disabled>Select Client Type</option>
-                      <option value="new">New</option>
-                      <option value="old">Old</option>
-                    </FormSelect>
+  id="client-type"
+  value={clientType}
+  onChange={handleClientTypeChange}
+>
+  <option value="" disabled>Select Client Type</option>
+  <option value="new">New</option>
+  <option value="old">Existing</option>
+</FormSelect>
                   </div>
                 </FormInline>
+                 {/* Display selected client name with cross option */}
+      {selectedClient && (
+        <div className="mt-5 flex items-center">
+          <span className="text-lg font-medium mr-4">{selectedClient.name}</span>
+          <button 
+            className="text-red-500 hover:text-red-700" 
+            onClick={handleRemoveSelectedClient}
+          >
+            ✖
+          </button>
+        </div>
+      )}
                 
                 <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
                   <FormLabel className="xl:w-64 xl:!mr-10">
@@ -437,6 +477,8 @@ console.log("new pressed")
                       id="project-link"
                       type="text"
                       placeholder="Enter Project Link"
+                      value={projectLink}
+                      onChange={(e) => setProjectLink(e.target.value)}
                     />
                   </div>
                 </FormInline>
@@ -471,16 +513,22 @@ console.log("new pressed")
           </div>
         </div>
       </div>
-      <AddClientModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setClientType(""); // Reset clientType when closing AddClientModal
-        }}
-        onSave={handleSaveClient}
-      />
-      <SelectClientModal open={selectClientModalOpen} onClose={handleCloseSelectClientModal} onClientSelect={handleClientSelection} />
-      
+      {/* Client modals */}
+      {modalOpen && (
+        <AddClientModal 
+          open={modalOpen} 
+          onClose={() => setModalOpen(false)} 
+          onSave={handleSaveClient} 
+        />
+      )}
+
+      {selectClientModalOpen && (
+        <SelectClientModal 
+          open={selectClientModalOpen} 
+          onClose={handleCloseSelectClientModal} 
+          onClientSelect={handleClientSelection} 
+        />
+      )}
     </>
   );
 }
