@@ -138,7 +138,8 @@ function Main() {
                   <img
                     alt="Client Avatar"
                     className="rounded-full"
-                    src={`https://api.adorable.io/avatars/285/${client.email}.png`} 
+                    src={`https://api.adorable.io/avatars/285/${client.email}.png`} // Use a placeholder image
+                    onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/150?text=No+Image')} // Fallback to a default image if the placeholder fails
                   />
                 </div>
                 <div className="mt-4 text-center">

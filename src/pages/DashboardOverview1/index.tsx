@@ -17,8 +17,175 @@ import SimpleLineChart1 from "@/components/SimpleLineChart1";
 import LeafletMap from "@/components/LeafletMap";
 import { Menu } from "@/components/Base/Headless";
 import Table from "@/components/Base/Table";
+import { useEffect} from "react";
+import axios from "axios";
 
 function Main() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [takeoffInProgressCount, setTakeoffInProgressCount] = useState(0);
+  const [totalProjectsCount, setTotalProjectsCount] = useState(0);
+  const [clientsCount, setClientsCount] = useState(0);
+  const [employeesCount, setEmployeesCount] = useState(0);
+
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/clients/clients"); // Adjust the endpoint as needed
+        setClients(response.data.clients);
+      } catch (error) {
+        console.error("Error fetching client data:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
+
+  
+
+useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const projectsResponse = await axios.get('http://localhost:3000/api/projects');
+        const projectsData = projectsResponse.data.data;
+
+        if (Array.isArray(projectsData)) {
+          setProjects(projectsData);
+
+          // Calculate the count of projects with adminStatus as "Takeoff In Progress"
+          const takeoffInProgressCount = projectsData.filter(project => project.adminStatus === 'Takeoff In Progress').length;
+          setTakeoffInProgressCount(takeoffInProgressCount);
+
+          // Calculate the total number of projects
+          const totalProjectsCount = projectsData.length;
+          setTotalProjectsCount(totalProjectsCount);
+        } else {
+          console.error('Unexpected projects response format:', projectsResponse.data);
+          setError('Unexpected projects response format');
+        }
+      } catch (err) {
+        console.error('Projects API call error:', err);
+        setError('Failed to fetch projects');
+      }
+    };
+
+    const fetchClientsCount = async () => {
+      try {
+        const clientsResponse = await axios.get('http://localhost:3000/api/clients/clients');
+        const clientsData = clientsResponse.data.clients;
+        console.log(clientsResponse.data)
+
+        if (Array.isArray(clientsData)) {
+          setClientsCount(clientsData.length);
+        } else {
+          console.error('Unexpected clients response format:', clientsResponse.data);
+          setError('Unexpected clients response format');
+        }
+      } catch (err) {
+        console.error('Clients API call error:', err);
+        setError('Failed to fetch clients');
+      }
+    };
+
+    const fetchEmployeesCount = async () => {
+      try {
+        const usersResponse = await axios.get('http://localhost:3000/api/auth/users');
+        const usersData = usersResponse.data;
+
+        if (Array.isArray(usersData)) {
+          const employeesCount = usersData.filter(user => user.role === 'employee').length;
+          setEmployeesCount(employeesCount);
+        } else {
+          console.error('Unexpected users response format:', usersResponse.data);
+          setError('Unexpected users response format');
+        }
+      } catch (err) {
+        console.error('Users API call error:', err);
+        setError('Failed to fetch users');
+      }
+    };
+
+    const fetchAllData = async () => {
+      await Promise.all([
+        fetchProjects(),
+        fetchClientsCount(),
+        fetchEmployeesCount()
+      ]);
+      setLoading(false);
+    };
+
+    fetchAllData();
+  }, []);
+
+  const [projectStatusCounts, setProjectStatusCounts] = useState({
+    completed: 0,
+    takeoffInProgress: 0,
+    pending: 0,
+    revision: 0,
+    onHold: 0,
+    pendingInProgress: 0,
+  });
+  const [totalProjects, setTotalProjects] = useState(0);
+
+  useEffect(() => {
+    const fetchProjectStatuses = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/projects');
+        const projects = response.data.data;
+
+        // Calculate the count for each status
+        const statusCounts = {
+          completed: 0,
+          takeoffInProgress: 0,
+          pending: 0,
+          revision: 0,
+          onHold: 0,
+          pendingInProgress: 0,
+        };
+
+        projects.forEach(project => {
+          switch (project.adminStatus) {
+            case 'Completed':
+              statusCounts.completed += 1;
+              break;
+            case 'Takeoff In Progress':
+              statusCounts.takeoffInProgress += 1;
+              break;
+            case 'Pending':
+              statusCounts.pending += 1;
+              break;
+            case 'Pending In Progress':
+              statusCounts.pendingInProgress += 1;
+              break;
+            case 'On Hold':
+              statusCounts.onHold += 1;
+              break;
+            case 'Revision':
+              statusCounts.revision += 1;
+              break;
+            default:
+              break;
+          }
+        });
+
+        setProjectStatusCounts(statusCounts);
+        setTotalProjects(projects.length);
+      } catch (error) {
+        console.error('Error fetching project statuses:', error);
+      }
+    };
+
+    fetchProjectStatuses();
+  }, []);
+
+  // Helper function to calculate percentage
+  const getPercentage = (count) => {
+    return totalProjects === 0 ? 0 : ((count / totalProjects) * 100).toFixed(2);
+  };
   const [salesReportFilter, setSalesReportFilter] = useState<string>();
   const importantNotesRef = useRef<TinySliderElement>();
   const prevImportantNotes = () => {
@@ -27,6 +194,48 @@ function Main() {
   const nextImportantNotes = () => {
     importantNotesRef.current?.tns.goTo("next");
   };
+
+
+  const [currentMonthBudget, setCurrentMonthBudget] = useState(0);
+  const [lastMonthBudget, setLastMonthBudget] = useState(0);
+  const [totalBudgetByMonth, setTotalBudgetByMonth] = useState([]);
+
+  // Helper function to get month/year from date
+  const getMonthYear = (date) => {
+    const d = new Date(date);
+    return `${d.getMonth() + 1}-${d.getFullYear()}`;
+  };
+   useEffect(() => {
+    const fetchProjectBudgets = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/projects'); // Replace with actual endpoint
+        const projects = response.data.data;
+
+        const budgetByMonth = {};
+
+        projects.forEach(project => {
+          const monthYear = getMonthYear(project.createdAt); // Assuming `createdAt` field exists
+          if (!budgetByMonth[monthYear]) {
+            budgetByMonth[monthYear] = 0;
+          }
+          budgetByMonth[monthYear] += project.budget; // Assuming each project has a `budget` field
+        });
+
+        // Store budget data grouped by month
+        setTotalBudgetByMonth(budgetByMonth);
+
+        const currentMonth = getMonthYear(new Date());
+        const lastMonth = getMonthYear(new Date(new Date().setMonth(new Date().getMonth() - 1)));
+
+        setCurrentMonthBudget(budgetByMonth[currentMonth] || 0);
+        setLastMonthBudget(budgetByMonth[lastMonth] || 0);
+      } catch (error) {
+        console.error('Error fetching project budgets:', error);
+      }
+    };
+
+    fetchProjectBudgets();
+  }, []);
 
   return (
     <div className="grid grid-cols-12 gap-6">
@@ -69,7 +278,7 @@ function Main() {
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
-                      4
+                    {takeoffInProgressCount}
                     </div>
                     <div className="mt-1 text-base text-slate-500">
                       Running Projects
@@ -105,10 +314,10 @@ function Main() {
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
-                      3
+                      {clientsCount}
                     </div>
                     <div className="mt-1 text-base text-slate-500">
-                      New Projects
+                      No of Clients
                     </div>
                   </div>
                 </div>
@@ -138,7 +347,7 @@ function Main() {
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
-                      7
+                      {totalProjectsCount}
                     </div>
                     <div className="mt-1 text-base text-slate-500">
                       Total Projects
@@ -171,7 +380,7 @@ function Main() {
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
-                      152
+                      {employeesCount}
                     </div>
                     <div className="mt-1 text-base text-slate-500">
                       Employees
@@ -183,114 +392,49 @@ function Main() {
           </div>
           {/* END: General Report */}
           {/* BEGIN: Sales Report */}
-          <div className="col-span-12 mt-8 lg:col-span-6">
-            <div className="items-center block h-10 intro-y sm:flex">
-              <h2 className="mr-5 text-lg font-medium truncate">
-                Sales Report
-              </h2>
-              <div className="relative mt-3 sm:ml-auto sm:mt-0 text-slate-500">
-                <Lucide
-                  icon="Calendar"
-                  className="absolute inset-y-0 left-0 z-10 w-4 h-4 my-auto ml-3"
-                />
-                <Litepicker
-                  value={salesReportFilter}
-                  onChange={(e) => {
-                    setSalesReportFilter(e.target.value);
-                  }}
-                  options={{
-                    autoApply: false,
-                    singleMode: false,
-                    numberOfColumns: 2,
-                    numberOfMonths: 2,
-                    showWeekNumbers: true,
-                    dropdowns: {
-                      minYear: 1990,
-                      maxYear: null,
-                      months: true,
-                      years: true,
-                    },
-                  }}
-                  className="pl-10 sm:w-56 !box"
-                />
-              </div>
-            </div>
-            <div className="p-5 mt-12 intro-y box sm:mt-5">
-              <div className="flex flex-col md:flex-row md:items-center">
-                <div className="flex">
-                  <div>
-                    <div className="text-lg font-medium text-primary dark:text-slate-300 xl:text-xl">
-                      $15,000
-                    </div>
-                    <div className="mt-0.5 text-slate-500">This Month</div>
-                  </div>
-                  <div className="w-px h-12 mx-4 border border-r border-dashed border-slate-200 dark:border-darkmode-300 xl:mx-5"></div>
-                  <div>
-                    <div className="text-lg font-medium text-slate-500 xl:text-xl">
-                      $10,000
-                    </div>
-                    <div className="mt-0.5 text-slate-500">Last Month</div>
-                  </div>
-                </div>
-                <Menu className="mt-5 md:ml-auto md:mt-0">
-                  <Menu.Button
-                    as={Button}
-                    variant="outline-secondary"
-                    className="font-normal"
-                  >
-                    Filter by Category
-                    <Lucide icon="ChevronDown" className="w-4 h-4 ml-2" />
-                  </Menu.Button>
-                  <Menu.Items className="w-40 h-32 overflow-y-auto">
-                    <Menu.Item>ETA</Menu.Item>
-                    <Menu.Item>Approved</Menu.Item>
-                    <Menu.Item>Proposal Sent</Menu.Item>
-                    <Menu.Item>Rejected</Menu.Item>
-                  </Menu.Items>
-                </Menu>
-              </div>
-              <div
-                className={clsx([
-                  "relative",
-                  "before:content-[''] before:block before:absolute before:w-16 before:left-0 before:top-0 before:bottom-0 before:ml-10 before:mb-7 before:bg-gradient-to-r before:from-white before:via-white/80 before:to-transparent before:dark:from-darkmode-600",
-                  "after:content-[''] after:block after:absolute after:w-16 after:right-0 after:top-0 after:bottom-0 after:mb-7 after:bg-gradient-to-l after:from-white after:via-white/80 after:to-transparent after:dark:from-darkmode-600",
-                ])}
-              >
-                <ReportLineChart height={275} className="mt-6 -mb-6" />
-              </div>
-            </div>
-          </div>
+          
           {/* END: Sales Report */}
           {/* BEGIN: Weekly Top Seller */}
-<div className="col-span-12 mt-8 sm:col-span-6 lg:col-span-6">
-  <div className="flex items-center h-10 intro-y">
-    <h2 className="mr-5 text-lg font-medium truncate">
-      Projects Status
-    </h2>
-  </div>
-  <div className="p-5 mt-5 intro-y box">
-    <div className="mt-3">
-      <ReportPieChart height={213} />
+          <div className="col-span-12 mt-8 sm:col-span-6 lg:col-span-12">
+      <div className="flex items-center h-10 intro-y">
+        <h2 className="mr-5 text-lg font-medium truncate">
+          Projects Status
+        </h2>
+      </div>
+      <div className="p-5 mt-5 intro-y box">
+        <div className="mt-3">
+          <ReportPieChart height={213} /> {/* Assuming you already have a pie chart component */}
+        </div>
+        <div className="mx-auto mt-8 w-52 sm:w-auto">
+          <div className="flex items-center">
+            <div className="w-2 h-2 mr-3 rounded-full bg-primary"></div>
+            <span className="truncate">Completed</span>
+            <span className="ml-auto font-medium">{getPercentage(projectStatusCounts.completed)}%</span>
+          </div>
+          <div className="flex items-center mt-4">
+            <div className="w-2 h-2 mr-3 rounded-full bg-pending"></div>
+            <span className="truncate">Takeoff In Progress</span>
+            <span className="ml-auto font-medium">{getPercentage(projectStatusCounts.takeoffInProgress)}%</span>
+          </div>
+          <div className="flex items-center mt-4">
+            <div className="w-2 h-2 mr-3 rounded-full bg-warning"></div>
+            <span className="truncate">Pending</span>
+            <span className="ml-auto font-medium">{getPercentage(projectStatusCounts.pending)}%</span>
+          </div>
+          <div className="flex items-center mt-4">
+            <div className="w-2 h-2 mr-3 rounded-full bg-warning"></div>
+            <span className="truncate">Pending In Progress</span>
+            <span className="ml-auto font-medium">{getPercentage(projectStatusCounts.pendingInProgress)}%</span>
+          </div>
+          <div className="flex items-center mt-4">
+            <div className="w-2 h-2 mr-3 rounded-full bg-danger"></div>
+            <span className="truncate">On Hold</span>
+            <span className="ml-auto font-medium">{getPercentage(projectStatusCounts.onHold)}%</span>
+          </div>
+          
+        </div>
+      </div>
     </div>
-    <div className="mx-auto mt-8 w-52 sm:w-auto">
-      <div className="flex items-center">
-        <div className="w-2 h-2 mr-3 rounded-full bg-primary"></div>
-        <span className="truncate">Completed</span>
-        <span className="ml-auto font-medium">62%</span>
-      </div>
-      <div className="flex items-center mt-4">
-        <div className="w-2 h-2 mr-3 rounded-full bg-pending"></div>
-        <span className="truncate">In Progress</span>
-        <span className="ml-auto font-medium">33%</span>
-      </div>
-      <div className="flex items-center mt-4">
-        <div className="w-2 h-2 mr-3 rounded-full bg-warning"></div>
-        <span className="truncate">Not Started Yet</span>
-        <span className="ml-auto font-medium">10%</span>
-      </div>
-    </div>
-  </div>
-</div>
 {/* END: Weekly Top Seller */}
 {/* BEGIN: Our Clients */}
 <div className="col-span-12 mt-6 xl:col-span-12">
@@ -469,46 +613,42 @@ function Main() {
           <div className="grid grid-cols-12 2xl:pl-6 gap-x-6 2xl:gap-x-0 gap-y-6">
             {/* BEGIN: Transactions */}
             <div className="col-span-12 mt-3 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-8">
-              <div className="flex items-center h-10 intro-x">
-                <h2 className="mr-5 text-lg font-medium truncate">
-                  Clients
-                </h2>
+      <div className="flex items-center h-10 intro-x">
+        <h2 className="mr-5 text-lg font-medium truncate">Clients</h2>
+      </div>
+      <div className="mt-5">
+        {clients.slice(0, 5).map((client, index) => (
+          <div key={index} className="intro-x">
+            <div className="flex items-center px-5 py-3 mb-3 box zoom-in">
+              <div className="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
+                <img
+                  alt="Client Avatar"
+                  src={client.avatar || "default-avatar.png"}  // Add a default image if needed
+                />
               </div>
-              <div className="mt-5">
-                {_.take(fakerData, 5).map((faker, fakerKey) => (
-                  <div key={fakerKey} className="intro-x">
-                    <div className="flex items-center px-5 py-3 mb-3 box zoom-in">
-                      <div className="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
-                        <img
-                          alt="Midone Tailwind HTML Admin Template"
-                          src={faker.photos[0]}
-                        />
-                      </div>
-                      <div className="ml-4 mr-auto">
-                        <div className="font-medium">{faker.users[0].name}</div>
-                        <div className="text-slate-500 text-xs mt-0.5">
-                          {faker.dates[0]}
-                        </div>
-                      </div>
-                      <div
-                        className={clsx({
-                          "text-success": faker.trueFalse[0],
-                          "text-danger": !faker.trueFalse[0],
-                        })}
-                      >
-                        {faker.trueFalse[0] ? "+" : "-"}${faker.totals[0]}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <a
-                  href=""
-                  className="block w-full py-3 text-center border border-dotted rounded-md intro-x border-slate-400 dark:border-darkmode-300 text-slate-500"
-                >
-                  View More
-                </a>
+              <div className="ml-4 mr-auto">
+                <div className="font-medium">{client.name}</div>  {/* Display client name */}
+                <div className="text-slate-500 text-xs mt-0.5">
+                  {new Date(client.createdAt).toLocaleDateString()}  {/* Display creation date */}
+                </div>
+              </div>
+              <div className={clsx({
+                  "text-success": client.isActive,
+                  "text-danger": !client.isActive,
+              })}>
+               
               </div>
             </div>
+          </div>
+        ))}
+        <a
+          href="#"
+          className="block w-full py-3 text-center border border-dotted rounded-md intro-x border-slate-400 dark:border-darkmode-300 text-slate-500"
+        >
+          View More
+        </a>
+      </div>
+    </div>
             {/* END: Transactions */}
             {/* BEGIN: Recent Activities */}
             <div className="col-span-12 mt-3 md:col-span-6 xl:col-span-4 2xl:col-span-12">
