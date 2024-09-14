@@ -26,7 +26,9 @@ interface Project {
   projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
   opsDueDate: Date;
-  budget: number;
+  initialAmount: number;
+  totalAmount:number;
+  remainingAmount:number;
   clientPermanentNotes: string;
   projectLink:string;
   estimatorLink:string;
@@ -62,6 +64,17 @@ function Main() {
 
   const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
   const projectTypes = ['Residential', 'Commercial', 'Industrial'];
+
+  // Utility function to ensure URL has a protocol
+const ensureProtocol = (url: string) => {
+  // If the URL starts with "http://" or "https://", return it as is
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  // Otherwise, prepend "http://" to the URL
+  return `http://${url}`;
+};
+
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -295,16 +308,22 @@ function Main() {
     <Table.Thead>
       <Table.Tr>
         <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Client Name</Table.Th>
-
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">ClientName</Table.Th>
+      )}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>)}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
         {(role === "admin" || role === "employee") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
       )}
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Days Remaining</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>
+      
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
         {(role === "admin" || role === "employee" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
@@ -320,10 +339,15 @@ function Main() {
       {currentProjects.map((project) => (
         <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
           <Table.Td className="text-center">{project.projectName}</Table.Td>
-          <Table.Td className="text-center">{project.client.name}</Table.Td> {/* Added column */}
-          <Table.Td className="text-center">${project.budget}</Table.Td>
-          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>
-          <Table.Td className="text-center">{project.status}</Table.Td>
+          {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
+          {(role === "superadmin") && (<Table.Td className="text-center">${project.budget}</Table.Td>)}
+          {(role === "superadmin") && (
+          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
+          {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
+          <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
+                      ? 'On Hold'
+                      : project.status}</Table.Td>
           {(role === "admin" || role === "employee" ) && (
           <Table.Td className="text-center">
             <select
@@ -339,7 +363,8 @@ function Main() {
             </select>
           </Table.Td>
         )}
-          <Table.Td className="text-center">{project.clientDueDate}</Table.Td>
+          
+          {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center max-w-[60px]">
             <div className="relative flex">
               {_.take(fakerData, 3).map((faker, fakerKey) => (
@@ -358,10 +383,10 @@ function Main() {
                 </div>
               ))}
             </div>
-          </Table.Td>
+          </Table.Td>)}
           <Table.Td className="text-center">
   <a 
-    href={project.projectLink} 
+    href={ensureProtocol(project.projectLink)} 
     className="underline text-blue-500 hover:text-blue-700" 
     target="_blank" 
     rel="noopener noreferrer"
@@ -370,12 +395,18 @@ function Main() {
   </a>
 </Table.Td>
 {(role === "admin" || role === "employee") && (
-          <Table.Td className="text-center">
-            <a href={project.estimatorLink} className="underline text-blue-500 hover:text-blue-700" target="_blank" rel="noopener noreferrer">
-              Estimator Link
-            </a>
-          </Table.Td>
-        )}
+  <Table.Td className="text-center">
+    <a 
+      href={ensureProtocol(project.estimatorLink)} 
+      className="underline text-blue-500 hover:text-blue-700" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      Estimator Link
+    </a>
+  </Table.Td>
+)}
+
         {/* Conditionally render Template field */}
         {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">{project.template}</Table.Td>

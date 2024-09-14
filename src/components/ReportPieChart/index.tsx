@@ -20,15 +20,25 @@ function Main({ width = "auto", height = "auto", className = "" }: MainProps) {
   const colorScheme = useAppSelector(selectColorScheme);
   const darkMode = useAppSelector(selectDarkMode);
 
-  const chartData = [15, 10, 65];
+  const chartData = [15, 10, 65, 25, 30, 20]; // Adjusted data counts
   const chartColors = () => [
-    getColor("pending", 0.9),
-    getColor("warning", 0.9),
-    getColor("primary", 0.9),
+    getColor("primary", 0.9),      // Completed
+    getColor("pending", 0.9),      // Takeoff In Progress
+    getColor("warning", 0.9),      // Pending
+    getColor("warning", 0.9),      // Pending In Progress
+    getColor("danger", 0.9),       // On Hold
+    
   ];
   const data: ChartData = useMemo(() => {
     return {
-      labels: ["Yellow", "Dark"],
+      labels: [
+        "Completed",
+        "Takeoff In Progress",
+        "Pending",
+        "Pending In Progress",
+        "On Hold",
+        
+      ],
       datasets: [
         {
           data: chartData,
