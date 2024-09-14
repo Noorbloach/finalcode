@@ -29,6 +29,8 @@ interface Project {
   clientType: 'New' | 'Old';
   createdAt: Date;
   creator: string;
+  
+  enterpriseName: string;
 }
 
 interface DecodedToken {
@@ -45,8 +47,11 @@ function Main() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [role, setRole] = useState<string>(""); // State to track if the user is admin
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filterType, setFilterType] = useState<string | null>(null); // State to track the filter type
 
   const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
+  const projectTypes = ['Residential', 'Commercial', 'Industrial'];
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -169,18 +174,37 @@ function Main() {
     }
   };
 
-  // Calculate days remaining until the client due date
-  const calculateDaysRemaining = (dueDate: Date) => {
-    const today = new Date();
-    const timeDiff = new Date(dueDate).getTime() - today.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  // Handle search input change
+  const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Handle project type filter change
+  const handleFilterTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedType = e.target.value;
+    setFilterType(selectedType !== "All" ? selectedType : null);
   };
 
   // Pagination logic
-  const totalPages = Math.ceil(projects.length / itemsPerPage);
+  const filteredProjects = projects.filter(project => {
+    if (filterType && filterType !== "All") {
+      return project.projectType === filterType;
+    }
+    return true;
+  });
+
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProjects = projects.slice(startIndex, startIndex + itemsPerPage);
-  const endIndex = Math.min(startIndex + itemsPerPage, projects.length);
+  let currentProjects = filteredProjects;
+  
+  if (searchTerm.trim() !== "") {
+    currentProjects = currentProjects.filter(project =>
+      project.projectName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  currentProjects = currentProjects.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProjects.length);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -195,7 +219,7 @@ function Main() {
             Add New Project
           </Button>
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing {startIndex + 1} to {endIndex} of {projects.length} entries
+            Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
@@ -203,6 +227,8 @@ function Main() {
                 type="text"
                 className="w-56 pr-10 !box"
                 placeholder="Search..."
+                value={searchTerm}
+                onChange={handleSearchInputChange}
               />
               <Lucide
                 icon="Search"
@@ -210,97 +236,121 @@ function Main() {
               />
             </div>
           </div>
+          <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-2 md:ml-2">
+            <FormSelect
+              value={filterType || "All"}
+              onChange={handleFilterTypeChange}
+              className="w-36 !box"
+            >
+              <option value="All">All Types</option>
+              {projectTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </FormSelect>
+          </div>
         </div>
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-        <div className="overflow-x-auto"> {/* Wrapper to allow horizontal scrolling */}
-  <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
-    <Table.Thead>
-      <Table.Tr>
-        <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Days Remaining</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Admin Link</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
-      </Table.Tr>
-    </Table.Thead>
-    <Table.Tbody>
-      {currentProjects.map((project) => (
-        <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
-          <Table.Td className="text-center">{project.projectName}</Table.Td>
-          <Table.Td className="text-center">${project.budget}</Table.Td>
-          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>
-          <Table.Td className="text-center">{project.status}</Table.Td>
-          <Table.Td className="text-center">
-          <select
-                      value={project.adminStatus}
-                      onChange={(e) => handleAdminStatusChange(e, project._id)}
-                      className="form-select !box"
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-          </Table.Td>
-          <Table.Td className="text-center">{calculateDaysRemaining(project.clientDueDate)}</Table.Td>
-          <Table.Td className="text-center max-w-[60px]">
-            <div className="relative flex">
-              {_.take(fakerData, 3).map((faker, fakerKey) => (
-                <div
-                  key={fakerKey}
-                  className="w-8 h-8 image-fit zoom-in"
-                  style={{ position: 'relative', zIndex: 5 - fakerKey, marginLeft: fakerKey === 0 ? '0' : '-8px' }}
-                >
-                  <Tippy
-                    as="img"
-                    alt="Midone Tailwind HTML Admin Template"
-                    className="rounded-full"
-                    src={faker.images[0]}
-                    content={`Uploaded at ${faker.dates[0]}`}
-                  />
-                </div>
-              ))}
-            </div>
-          </Table.Td>
-          <Table.Td className="text-center">
-            <a href="#">Admin Link</a>
-          </Table.Td>
-          <Table.Td className="text-center">
-            <a href="#">Estimator Link</a>
-          </Table.Td>
-          <Table.Td className="text-center">{project.template}</Table.Td>
-          <Table.Td className="text-center">
-            <div className="flex items-center justify-center">
-              <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
-                <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
-              </a>
-              <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
-                <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
-              </a>
-              <a className="flex items-center text-danger" href="#">
-                <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
-              </a>
-            </div>
-          </Table.Td>
-        </Table.Tr>
-      ))}
-    </Table.Tbody>
-  </Table>
-</div>
+          <div className="overflow-x-auto"> {/* Wrapper to allow horizontal scrolling */}
+            <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Admin Status</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Enterprise Name</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Admin Link</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
+                  <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {currentProjects.map((project) => (
+                  <Table.Tr key={project._id} className="intro-x bg-white mb-2">
+                    <Table.Td className="text-center">{project.projectName}</Table.Td>
+                    <Table.Td className="text-center">${project.budget}</Table.Td>
+                    <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>
+                    <Table.Td className="text-center">{project.status}</Table.Td>
+                    <Table.Td className="text-center">
+                      <select
+                        value={project.adminStatus}
+                        onChange={(e) => handleAdminStatusChange(e, project._id)}
+                        className="form-select !box"
+                      >
+                        {statuses.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </Table.Td>
+                    <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>
+                    <Table.Td className="text-center">{project.enterpriseName}</Table.Td>
+                    <Table.Td className="text-center max-w-[60px]">
+                      <div className="relative flex">
+                        {_.take(fakerData, 3).map((faker, fakerKey) => (
+                          <div
+                            key={fakerKey}
+                            className="w-8 h-8 image-fit zoom-in"
+                            style={{ position: 'relative', zIndex: 5 - fakerKey, marginLeft: fakerKey === 0 ? '0' : '-8px' }}
+                          >
+                            <Tippy
+                              as="img"
+                              alt="Midone Tailwind HTML Admin Template"
+                              className="rounded-full"
+                              src={faker.images[0]}
+                              content={`Uploaded at ${faker.dates[0]}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Table.Td>
+                    <Table.Td className="text-center">
+                      <a href="#">Admin Link</a>
+                    </Table.Td>
+                    <Table.Td className="text-center">
+                      <a href="#">Estimator Link</a>
+                    </Table.Td>
+                    <Table.Td className="text-center">{project.template}</Table.Td>
+                    <Table.Td className="text-center">
+                      <div className="flex items-center justify-center">
+                        <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
+                          <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
+                        </a>
+                        <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                          <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
+                        </a>
+                        <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
+                          <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
+                        </a>
+                      </div>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </div>
 
-          <div className="flex flex-col items-center mt-4">
+          <div className="flex items-center justify-between mt-4">
             <Pagination
+              className="w-full sm:w-auto sm:mr-auto"
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
+            <FormSelect
+              className="w-20 mt-3 !box sm:mt-0"
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </FormSelect>
           </div>
         </div>
       </div>

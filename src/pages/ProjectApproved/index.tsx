@@ -3,7 +3,7 @@ import axios from "axios";
 import clsx from "clsx";
 import Button from "@/components/Base/Button";
 import Pagination from "@/components/Base/Pagination";
-import { FormInput,FormSelect } from "@/components/Base/Form";
+import { FormInput, FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom";
@@ -28,9 +28,11 @@ interface Project {
 function Main() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -44,6 +46,7 @@ function Main() {
           // Filter projects with status 'Project Started'
           const filteredProjects = projectData.filter((project: Project) => project.status === 'Project Started');
           setProjects(filteredProjects);
+          setFilteredProjects(filteredProjects); // Set the filteredProjects initially
         } else {
           console.error("Unexpected data format:", projectData);
         }
@@ -57,12 +60,20 @@ function Main() {
     fetchProjects();
   }, []);
 
+  // Filter projects based on search query
+  useEffect(() => {
+    const results = projects.filter(project =>
+      project.projectName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredProjects(results);
+    setCurrentPage(1); // Reset to first page on search
+  }, [searchQuery, projects]);
+
   // Function to open the edit modal and fetch project details
   const handleEditClick = async (projectId: string) => {
     try {
       const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
       const projectData = response.data.data;
-      console.log(projectData)
       setSelectedProject(projectData);
       setEditModalOpen(true);
     } catch (error) {
@@ -76,8 +87,8 @@ function Main() {
       try {
         await axios.put(`http://localhost:3000/api/projects/${selectedProject._id}`, selectedProject);
         // Update the project in the state
-       
         setProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
+        setFilteredProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
         setEditModalOpen(false);
       } catch (error) {
         console.error("Error updating project:", error);
@@ -96,10 +107,10 @@ function Main() {
   };
 
   // Pagination logic
-  const totalPages = Math.ceil(projects.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProjects = projects.slice(startIndex, startIndex + itemsPerPage);
-  const endIndex = Math.min(startIndex + itemsPerPage, projects.length);
+  const currentProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProjects.length);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -114,14 +125,16 @@ function Main() {
             Add New Project
           </Button>
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing {startIndex + 1} to {endIndex} of {projects.length} entries
+            Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
               <FormInput
                 type="text"
                 className="w-56 pr-10 !box"
-                placeholder="Search..."
+                placeholder="Search by project title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Lucide
                 icon="Search"
@@ -133,7 +146,7 @@ function Main() {
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
           <Table className="border-spacing-y-[10px] border-separate -mt-2">
             <Table.Thead>
-            <Table.Tr>
+              <Table.Tr>
                 <Table.Th className="border-b-0 whitespace-nowrap">
                   Project Title
                 </Table.Th>
@@ -156,52 +169,52 @@ function Main() {
             </Table.Thead>
             <Table.Tbody>
               {currentProjects.map((project) => (
-                 <Table.Tr key={project._id} className="intro-x">
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <a href="" className="font-medium whitespace-nowrap">
-                     {project.projectName}
-                   </a>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   ${project.budget}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {new Date(project.clientDueDate).toLocaleDateString()}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {project.status}
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   {/* Cloned status with different styling or formatting */}
-                   <div className={clsx({
-                     'text-success': project.status === 'Approved',
-                     'text-warning': project.status === 'Proposal Sent',
-                     'text-danger': project.status === 'Rejected',
-                     'text-muted': project.status === 'ETA',
-                   })}>
-                     {project.status === 'Approved' ? '✓ Approved' :
-                      project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                      project.status === 'Rejected' ? '✘ Rejected' :
-                      '⏳ ETA'}
-                   </div>
-                 </Table.Td>
-                 <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                   <div className="flex items-center justify-center">
-                     <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
-                       <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                       Edit
-                     </a>
-                     <a
-                       className="flex items-center text-danger"
-                       href="#"
-                       
-                     >
-                       <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                       Delete
-                     </a>
-                   </div>
-                 </Table.Td>
-               </Table.Tr>              ))}
+                <Table.Tr key={project._id} className="intro-x">
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    <a href="" className="font-medium whitespace-nowrap">
+                      {project.projectName}
+                    </a>
+                  </Table.Td>
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    ${project.budget}
+                  </Table.Td>
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    {new Date(project.clientDueDate).toLocaleDateString()}
+                  </Table.Td>
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    {project.status}
+                  </Table.Td>
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    {/* Cloned status with different styling or formatting */}
+                    <div className={clsx({
+                      'text-success': project.status === 'Approved',
+                      'text-warning': project.status === 'Proposal Sent',
+                      'text-danger': project.status === 'Rejected',
+                      'text-muted': project.status === 'ETA',
+                    })}>
+                      {project.status === 'Approved' ? '✓ Approved' :
+                        project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
+                        project.status === 'Rejected' ? '✘ Rejected' :
+                        '⏳ ETA'}
+                    </div>
+                  </Table.Td>
+                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
+                    <div className="flex items-center justify-center">
+                      <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                        <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
+                        Edit
+                      </a>
+                      <a
+                        className="flex items-center text-danger"
+                        href="#"
+                      >
+                        <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
+                        Delete
+                      </a>
+                    </div>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
             </Table.Tbody>
           </Table>
           <div className="flex flex-col items-center mt-4">

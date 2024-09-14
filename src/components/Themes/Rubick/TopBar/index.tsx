@@ -1,14 +1,12 @@
-import { useState, Fragment,useEffect } from "react";
+import { useState, Fragment, useEffect } from "react";
 import axios from "axios";
 import Lucide from "@/components/Base/Lucide";
 import Breadcrumb from "@/components/Base/Breadcrumb";
 import { FormInput } from "@/components/Base/Form";
 import { Menu, Popover } from "@/components/Base/Headless";
 import fakerData from "@/utils/faker";
-import _ from "lodash";
-import clsx from "clsx";
 import { Transition } from "@headlessui/react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 interface Notification {
@@ -21,50 +19,48 @@ function Main() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notificationsLimit, setNotificationsLimit] = useState(5); // Control the number of notifications shown initially
 
   const navigate = useNavigate();
 
   const showSearchDropdown = () => setSearchDropdown(true);
   const hideSearchDropdown = () => setSearchDropdown(false);
 
-  const token = localStorage.getItem("token"); // Or get it from context or other storage
+  const token = localStorage.getItem("token");
   const [userId, setUserId] = useState<string | null>(null);
   const [userData, setUserData] = useState({
     name: "",
     role: "",
-
   });
+
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove the token from localStorage
-    navigate("/"); // Navigate to the home page
+    localStorage.removeItem("token");
+    navigate("/");
   };
 
-  
   const getUserIdFromToken = () => {
-    const token = localStorage.getItem("token"); // Fetch the token from localStorage (or sessionStorage)
+    const token = localStorage.getItem("token");
     if (token) {
-      const decodedToken = jwtDecode(token); // Decode the token
-      setUserId(decodedToken.userId)
-      return decodedToken.userId; // Extract and return userId
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.userId);
+      return decodedToken.userId;
     }
     return null;
   };
-console.log(userId)
-  // Fetch user data from the backend
+
   useEffect(() => {
     const fetchUserData = async () => {
-      const userId = getUserIdFromToken(); // Get the userId from the token
+      const userId = getUserIdFromToken();
       if (!userId) {
         console.error("User is not authenticated");
         return;
       }
 
       try {
-        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
+        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`);
         setUserData({
           name: response.data.user.name,
           role: response.data.user.role,
-
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -74,17 +70,13 @@ console.log(userId)
     fetchUserData();
   }, []);
 
-  
-
   useEffect(() => {
     if (userId) {
-      // Fetch notifications for the logged-in user
       const fetchNotifications = async () => {
         try {
           const response = await axios.get<{ data: Notification[] }>(`http://localhost:3000/notifications/user/${userId}`);
-        setNotifications(response.data.data); // Access the 'data' key from the response
-        console.log(response.data.data); // Check if the data is logged correctly
-        setLoadingNotifications(false);
+          setNotifications(response.data.data);
+          setLoadingNotifications(false);
         } catch (err) {
           setError('Failed to load notifications');
           setLoadingNotifications(false);
@@ -95,6 +87,9 @@ console.log(userId)
     }
   }, [userId]);
 
+  const loadMoreNotifications = () => {
+    setNotificationsLimit((prevLimit) => prevLimit + 5); // Increase the limit by 5
+  };
 
   return (
     <>
@@ -138,70 +133,12 @@ console.log(userId)
           >
             <div className="absolute right-0 z-10 mt-[3px]">
               <div className="w-[450px] p-5 box">
-                <div className="mb-2 font-medium">Pages</div>
-                <div className="mb-5">
-                  <a href="" className="flex items-center">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-success/20 dark:bg-success/10 text-success">
-                      <Lucide icon="Inbox" className="w-4 h-4" />
-                    </div>
-                    <div className="ml-3">Mail Settings</div>
-                  </a>
-                  <a href="" className="flex items-center mt-2">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-pending/10 text-pending">
-                      <Lucide icon="Users" className="w-4 h-4" />
-                    </div>
-                    <div className="ml-3">Users & Permissions</div>
-                  </a>
-                  <a href="" className="flex items-center mt-2">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 dark:bg-primary/20 text-primary/80">
-                      <Lucide icon="CreditCard" className="w-4 h-4" />
-                    </div>
-                    <div className="ml-3">Transactions Report</div>
-                  </a>
-                </div>
-                <div className="mb-2 font-medium">Users</div>
-                <div className="mb-5">
-                  {_.take(fakerData, 4).map((faker, fakerKey) => (
-                    <a
-                      key={fakerKey}
-                      href=""
-                      className="flex items-center mt-2"
-                    >
-                      <div className="w-8 h-8 image-fit">
-                        <img
-                          alt="Midone Tailwind HTML Admin Template"
-                          className="rounded-full"
-                          src={faker.photos[0]}
-                        />
-                      </div>
-                      <div className="ml-3">{faker.users[0].name}</div>
-                      <div className="w-48 ml-auto text-xs text-right truncate text-slate-500">
-                        {faker.users[0].email}
-                      </div>
-                    </a>
-                  ))}
-                </div>
-                <div className="mb-2 font-medium">Products</div>
-                {_.take(fakerData, 4).map((faker, fakerKey) => (
-                  <a key={fakerKey} href="" className="flex items-center mt-2">
-                    <div className="w-8 h-8 image-fit">
-                      <img
-                        alt="Midone Tailwind HTML Admin Template"
-                        className="rounded-full"
-                        src={faker.images[0]}
-                      />
-                    </div>
-                    <div className="ml-3">{faker.products[0].name}</div>
-                    <div className="w-48 ml-auto text-xs text-right truncate text-slate-500">
-                      {faker.products[0].category}
-                    </div>
-                  </a>
-                ))}
+                {/* Content here */}
               </div>
             </div>
           </Transition>
         </div>
-        {/* END: Search  */}
+        {/* END: Search */}
         {/* BEGIN: Notifications */}
         <Popover className="mr-auto intro-x sm:mr-6">
           <Popover.Button
@@ -212,16 +149,19 @@ console.log(userId)
           >
             <Lucide icon="Bell" className="w-5 h-5 dark:text-slate-500" />
           </Popover.Button>
-          <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2">
+          <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2 bg-white shadow-lg rounded-lg border border-slate-200 overflow-hidden">
             <div className="mb-5 font-medium">Notifications</div>
-            {loadingNotifications ? (
-              <div>Loading...</div>
-            ) : error ? (
-              <div className="text-red-500">{error}</div>
-            ) : (
-              notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <div key={notification._id} className="flex items-center mt-2">
+            <div className="max-h-[300px] overflow-y-auto">
+              {loadingNotifications ? (
+                <div>Loading...</div>
+              ) : error ? (
+                <div className="text-red-500">{error}</div>
+              ) : notifications.length > 0 ? (
+                notifications.slice(0, notificationsLimit).map((notification) => (
+                  <div
+                    key={notification._id}
+                    className="flex items-center mt-2 p-2 rounded-lg hover:bg-blue-100 transition-all"
+                  >
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">
                       <Lucide icon="Bell" className="w-4 h-4" />
                     </div>
@@ -230,11 +170,21 @@ console.log(userId)
                 ))
               ) : (
                 <div>No notifications</div>
-              )
+              )}
+            </div>
+            {notifications.length > notificationsLimit && (
+              <div className="mt-2 text-center text-blue-600 cursor-pointer">
+                <button
+                  onClick={loadMoreNotifications}
+                  className="text-blue-600 hover:underline"
+                >
+                  Load More
+                </button>
+              </div>
             )}
           </Popover.Panel>
         </Popover>
-        {/* END: Notifications  */}
+        {/* END: Notifications */}
         {/* BEGIN: Account Menu */}
         <Menu>
           <Menu.Button className="block w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
@@ -265,9 +215,9 @@ console.log(userId)
             </Menu.Item>
             <Menu.Divider className="bg-white/[0.08]" />
             <Menu.Item className="hover:bg-white/5">
-            <button
+              <button
                 onClick={handleLogout}
-                className=" px-3 py-2 rounded-md hover:bg-slate-100 w-full text-left flex"
+                className="px-3 py-2 rounded-md hover:bg-slate-100 w-full text-left flex"
               >
                 <Lucide icon="LogOut" className="w-4 h-4 mr-2" />
                 Logout
