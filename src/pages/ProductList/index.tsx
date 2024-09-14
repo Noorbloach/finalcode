@@ -341,7 +341,7 @@ const ensureProtocol = (url: string) => {
         <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
           <Table.Td className="text-center">{project.projectName}</Table.Td>
           {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
-          {(role === "superadmin") && (<Table.Td className="text-center">${project.budget}</Table.Td>)}
+          {(role === "superadmin") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
           {(role === "superadmin") && (
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
           {(role === "admin" || role === "employee") && (

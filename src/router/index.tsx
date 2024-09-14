@@ -1,6 +1,5 @@
 import { useRoutes } from "react-router-dom";
 import DashboardOverview1 from "../pages/DashboardOverview1";
-import Categories from "../pages/Categories";
 import AddProduct from "../pages/AddProduct";
 import ProductList from "../pages/ProductList";
 import ProductDetails from "../pages/ProjectDetails";
@@ -61,10 +60,7 @@ function Router() {
           path: "/",
           element: <DashboardOverview1 />,
         },
-        {
-          path: "categories",
-          element: <Categories />,
-        },
+        
         {
           path: "add-product",
           element: <AddProduct />,
