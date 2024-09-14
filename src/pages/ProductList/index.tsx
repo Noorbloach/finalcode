@@ -214,13 +214,7 @@ function Main() {
     setFilterType(selectedType !== "All" ? selectedType : null);
   };
 
-  // Pagination logic
-  const filteredProjects = projects.filter(project => {
-    if (filterType && filterType !== "All") {
-      return project.projectType === filterType;
-    }
-    return true;
-  });
+
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -345,7 +339,7 @@ function Main() {
             </select>
           </Table.Td>
         )}
-          <Table.Td className="text-center">{calculateDaysRemaining(project.clientDueDate)}</Table.Td>
+          <Table.Td className="text-center">{project.clientDueDate}</Table.Td>
           <Table.Td className="text-center max-w-[60px]">
             <div className="relative flex">
               {_.take(fakerData, 3).map((faker, fakerKey) => (
