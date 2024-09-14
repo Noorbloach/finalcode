@@ -31,6 +31,7 @@ function Main() {
   const [clientPermanentNotes, setClientPermanentNotes] = useState("");
   const [rfiAddendum, setRfiAddendum] = useState("");
   const [projectPlans, setProjectPlans] = useState("");
+  const [description, setDescription] = useState("");
   const [projectType, setProjectType] = useState("");
   const [projectName, setProjectName] = useState("");  // Added for Project Name
   const [projectLink, setProjectLink] = useState("");  // Added for Project Link
@@ -122,7 +123,7 @@ const handleSave = async () => {
         projectType,
         clientDueDate,
         opsDueDate,
-        editorData,
+        description,
         initialAmount,
         totalAmount,
         remainingAmount,
@@ -149,10 +150,11 @@ const handleSave = async () => {
       setStatus("");
       setProjectLink("");
       setSubcategory("");
+      setDescription("");
       setProjectType("");
       setClientDueDate("");
       setOpsDueDate("");
-      setEditorData("");
+      
       setInitialAmount("");
       setTotalAmount("");
       setRemainingAmount("");
@@ -331,8 +333,8 @@ const handleSave = async () => {
                   </FormLabel>
                   <div className="flex-1 w-full mt-3 xl:mt-0">
                     <ClassicEditor
-                      value={editorData}
-                      onChange={setEditorData}
+                      value={description}
+                      onChange={setDescription}
                     />
                   </div>
                 </FormInline>

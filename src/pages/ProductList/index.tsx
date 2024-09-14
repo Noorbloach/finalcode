@@ -33,6 +33,7 @@ interface Project {
   projectLink:string;
   estimatorLink:string;
   template:string;
+  description:string;
   clientType: 'New' | 'Old';
   createdAt: Date;
   client: {
@@ -464,6 +465,7 @@ const ensureProtocol = (url: string) => {
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         project={selectedProject}
+        role={role}
       />
     </>
   );
