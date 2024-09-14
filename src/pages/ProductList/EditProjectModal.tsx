@@ -119,112 +119,115 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
         <div style={modalStyles}>
           <h2 style={headingStyles}>Edit Project</h2>
           <div style={formContainerStyles}>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Project Name:</label>
-              <FormInput
-                name="projectName"
-                value={project.projectName}
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Status:</label>
-              <FormSelect
-                name="status"
-                value={project.status}
-                onChange={handleSelectChangeOne}
-                style={selectStyles}
-                disabled={false}
-              >
-                {renderStatusOptions()}
-              </FormSelect>
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Initial Amount:</label>
-              <FormInput
-                name="initialAmount"
-                value={project.initialAmount}
-                onChange={onInputChange}
-                type="number"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Total Amount:</label>
-              <FormInput
-                name="totalAmount"
-                value={project.totalAmount}
-                onChange={onInputChange}
-                type="number"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Remaining Amount:</label>
-              <FormInput
-                name="remainingAmount"
-                value={project.remainingAmount}
-                onChange={onInputChange}
-                type="number"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Due Date:</label>
-              <FormInput
-                name="clientDueDate"
-                value={new Date(project.clientDueDate).toISOString().substring(0, 10)}
-                onChange={onInputChange}
-                type="date"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Ops Due Date:</label>
-              <FormInput
-                name="opsDueDate"
-                value={new Date(project.opsDueDate).toISOString().substring(0, 10)}
-                onChange={onInputChange}
-                type="date"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Permanent Notes:</label>
-              <FormInput
-                name="clientPermanentNotes"
-                value={project.clientPermanentNotes}
-                onChange={onInputChange}
-                type="text"
-                style={inputStyles}
-                disabled={isFieldDisabled}
-              />
-            </div>
-           
-            {/* <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Type:</label>
-              <FormSelect
-                name="clientType"
-                value={project.clientType}
-                onChange={handleSelectChange}
-                style={selectStyles}
-                disabled={isFieldDisabled}
-              >
-                <option value="New">New</option>
-                <option value="Old">Old</option>
-              </FormSelect>
-            </div> */}
-            {/* Conditionally render Estimator Link and Template for ADMIN and EMPLOYEE roles */}
+            {/* Conditionally render fields based on the role */}
+            {role === 'superadmin' && (
+              <>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Project Name:</label>
+                  <FormInput
+                    name="projectName"
+                    value={project.projectName}
+                    onChange={onInputChange}
+                    type="text"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Status:</label>
+                  <FormSelect
+                    name="status"
+                    value={project.status}
+                    onChange={handleSelectChangeOne}
+                    style={selectStyles}
+                    disabled={false}
+                  >
+                    {renderStatusOptions()}
+                  </FormSelect>
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Initial Amount:</label>
+                  <FormInput
+                    name="initialAmount"
+                    value={project.initialAmount}
+                    onChange={onInputChange}
+                    type="number"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Total Amount:</label>
+                  <FormInput
+                    name="totalAmount"
+                    value={project.totalAmount}
+                    onChange={onInputChange}
+                    type="number"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Remaining Amount:</label>
+                  <FormInput
+                    name="remainingAmount"
+                    value={project.remainingAmount}
+                    onChange={onInputChange}
+                    type="number"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Client Due Date:</label>
+                  <FormInput
+                    name="clientDueDate"
+                    value={new Date(project.clientDueDate).toISOString().substring(0, 10)}
+                    onChange={onInputChange}
+                    type="date"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Ops Due Date:</label>
+                  <FormInput
+                    name="opsDueDate"
+                    value={new Date(project.opsDueDate).toISOString().substring(0, 10)}
+                    onChange={onInputChange}
+                    type="date"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Client Permanent Notes:</label>
+                  <FormInput
+                    name="clientPermanentNotes"
+                    value={project.clientPermanentNotes}
+                    onChange={onInputChange}
+                    type="text"
+                    style={inputStyles}
+                    disabled={isFieldDisabled}
+                  />
+                </div>
+              </>
+            )}
+
             {(role === 'admin' || role === 'employee') && (
               <>
+              <div style={formGroupStyles}>
+                  <label style={labelStyles}>Status:</label>
+                  <FormSelect
+                    name="status"
+                    value={project.status}
+                    onChange={handleSelectChangeOne}
+                    style={selectStyles}
+                    disabled={false}
+                  >
+                    {renderStatusOptions()}
+                  </FormSelect>
+                </div>
                 <div style={formGroupStyles}>
                   <label style={labelStyles}>Estimator Link:</label>
                   <FormInput
@@ -233,7 +236,6 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                     onChange={onInputChange}
                     type="text"
                     style={inputStyles}
-                    
                   />
                 </div>
                 <div style={formGroupStyles}>
@@ -244,12 +246,11 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                     onChange={onInputChange}
                     type="text"
                     style={inputStyles}
-                    
                   />
                 </div>
               </>
             )}
-            {/* Added Select Members Field */}
+
             <div style={formGroupStyles}>
               <label style={labelStyles}>Select Members:</label>
               <FormSelect
@@ -266,7 +267,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 ))}
               </FormSelect>
             </div>
-            {/* Display selected members as tags */}
+
             <div style={formGroupStyles}>
               <label style={labelStyles}>Selected Members:</label>
               <div style={tagsContainerStyles}>
@@ -290,7 +291,6 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
               </div>
             </div>
 
-   
           </div>
           <div style={footerStyles}>
             <Button variant="secondary" onClick={onClose} style={buttonStyles}>

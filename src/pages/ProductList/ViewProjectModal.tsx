@@ -57,6 +57,15 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
                   />
                 </div>
                 <div style={formGroupStyles}>
+                  <label style={labelStyles}>Client Notes:</label>
+                  <textarea
+                    name="clientPermanentNotes"
+                    value={project.clientPermanentNotes}
+                    style={textareaStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
                   <label style={labelStyles}>Project Description:</label>
                   <textarea
                     name="description"
