@@ -7,10 +7,15 @@ interface ViewProjectModalProps {
   open: boolean;
   onClose: () => void;
   project: Project | null;
+  role: string;
 }
 
-const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, project }) => {
+const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, project,role }) => {
   if (!open || !project) return null;
+
+  const stripHtmlTags = (html: string) => {
+    return html.replace(/<\/?[^>]+(>|$)/g, ""); // Removes all HTML tags
+  };
 
   // Render status options based on the project status
   const renderStatusOptions = () => {
@@ -37,118 +42,123 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
         <div style={modalStyles}>
           <h2 style={headingStyles}>View Project</h2>
           <div style={formContainerStyles}>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Project Name:</label>
-              <FormInput
-                name="projectName"
-                value={project.projectName}
-                type="text"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Status:</label>
-              <FormSelect
-                name="status"
-                value={project.status}
-                style={selectStyles}
-                disabled
-              >
-                {renderStatusOptions()}
-              </FormSelect>
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Initial Amount:</label>
-              <FormInput
-                name="initialAmount"
-                value={project.initialAmount}
-                type="number"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Total Amount:</label>
-              <FormInput
-                name="totalAmount"
-                value={project.totalAmount}
-                type="number"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Remaining Amount:</label>
-              <FormInput
-                name="remainingAmount"
-                value={project.remainingAmount}
-                type="number"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Project Description:</label>
-              <textarea
-                name="description"
-                value={project.description}
-                style={textareaStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Due Date:</label>
-              <FormInput
-                name="clientDueDate"
-                value={new Date(project.clientDueDate).toISOString().substring(0, 10)}
-                type="date"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Ops Due Date:</label>
-              <FormInput
-                name="opsDueDate"
-                value={new Date(project.opsDueDate).toISOString().substring(0, 10)}
-                type="date"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Permanent Notes:</label>
-              <FormInput
-                name="clientPermanentNotes"
-                value={project.clientPermanentNotes}
-                type="text"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>RFI Addendum:</label>
-              <FormInput
-                name="rfiAddendum"
-                value={project.rfiAddendum}
-                type="text"
-                style={inputStyles}
-                disabled
-              />
-            </div>
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Client Type:</label>
-              <FormSelect
-                name="clientType"
-                value={project.clientType}
-                style={selectStyles}
-                disabled
-              >
-                <option value="New" selected={project.clientType === 'New'} disabled>New</option>
-                <option value="Old" selected={project.clientType === 'Old'} disabled>Old</option>
-              </FormSelect>
-            </div>
+            {/* Conditionally render content based on the role */}
+            {role === "admin" || role === "employee" ? (
+              <>
+                {/* Show only project name and description */}
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Project Name:</label>
+                  <FormInput
+                    name="projectName"
+                    value={project.projectName}
+                    type="text"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Client Notes:</label>
+                  <textarea
+                    name="clientPermanentNotes"
+                    value={project.clientPermanentNotes}
+                    style={textareaStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Project Description:</label>
+                  <textarea
+                    name="description"
+                    value={stripHtmlTags(project.description)}
+                    style={textareaStyles}
+                    disabled
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Render the entire project details for other roles */}
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Project Name:</label>
+                  <FormInput
+                    name="projectName"
+                    value={project.projectName}
+                    type="text"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Status:</label>
+                  <FormInput
+                    name="status"
+                    value={project.status}
+                    type="text"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Initial Amount:</label>
+                  <FormInput
+                    name="initialAmount"
+                    value={project.initialAmount}
+                    type="number"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Total Amount:</label>
+                  <FormInput
+                    name="totalAmount"
+                    value={project.totalAmount}
+                    type="number"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Remaining Amount:</label>
+                  <FormInput
+                    name="remainingAmount"
+                    value={project.remainingAmount}
+                    type="number"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Project Description:</label>
+                  <textarea
+                    name="description"
+                    value={stripHtmlTags(project.description)}
+                    style={textareaStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Client Due Date:</label>
+                  <FormInput
+                    name="clientDueDate"
+                    value={new Date(project.clientDueDate).toISOString().substring(0, 10)}
+                    type="date"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Ops Due Date:</label>
+                  <FormInput
+                    name="opsDueDate"
+                    value={new Date(project.opsDueDate).toISOString().substring(0, 10)}
+                    type="date"
+                    style={inputStyles}
+                    disabled
+                  />
+                </div>
+              </>
+            )}
           </div>
           <div style={footerStyles}>
             <Button variant="primary" onClick={onClose} style={buttonStyles}>
