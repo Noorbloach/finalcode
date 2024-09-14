@@ -119,21 +119,20 @@ function Main() {
                 />
                 <div className="mt-10 text-4xl font-medium leading-tight text-white -intro-x">
                   A few more clicks to <br />
-                  sign up to your account.
+                  Register a user account.
                 </div>
                 <div className="mt-5 text-lg text-white -intro-x text-opacity-70 dark:text-slate-400">
-                  Manage all your e-commerce accounts in one place
+                  Manage all your accounts in one place
                 </div>
               </div>
             </div>
             <div className="flex h-screen py-5 my-10 xl:h-auto xl:py-0 xl:my-0">
               <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
-                  Sign Up
+                  Add User
                 </h2>
                 <div className="mt-2 text-center intro-x text-slate-400 dark:text-slate-400 xl:hidden">
-                  A few more clicks to sign up to your account. Manage all your
-                  e-commerce accounts in one place
+                  A few more clicks to add user.
                 </div>
                 <form onSubmit={formik.handleSubmit}>
                   <div className="mt-8 intro-x">
@@ -223,14 +222,7 @@ function Main() {
                         'Register'
                       )}
                     </Button>
-                    <Button
-                      variant="outline-secondary"
-                      className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
-                      onClick={() => navigate('/login')}
-                      disabled={loading}
-                    >
-                      Back to Login
-                    </Button>
+                    
                   </div>
                 </form>
               </div>

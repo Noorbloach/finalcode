@@ -118,16 +118,11 @@ function Main() {
                 <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Personal
                 Information
               </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Box" className="w-4 h-4 mr-2" /> Account Settings
-              </a>
-              <a className="flex items-center mt-5" href="">
+             
+              <a className="flex items-center mt-5" href="/change-password">
                 <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Change Password
               </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Settings" className="w-4 h-4 mr-2" /> User
-                Settings
-              </a>
+              
             </div>
             
             

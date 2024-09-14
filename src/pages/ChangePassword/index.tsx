@@ -29,100 +29,20 @@ function Main() {
                 </div>
                 <div className="text-slate-500">{fakerData[0].jobs[0]}</div>
               </div>
-              <Menu>
-                <Menu.Button as="a" className="block w-5 h-5">
-                  <Lucide
-                    icon="MoreHorizontal"
-                    className="w-5 h-5 text-slate-500"
-                  />
-                </Menu.Button>
-                <Menu.Items className="w-56">
-                  <Menu.Header> Export Options</Menu.Header>
-                  <Menu.Divider />
-                  <Menu.Item>
-                    <Lucide icon="Activity" className="w-4 h-4 mr-2" />
-                    English
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="Box" className="w-4 h-4 mr-2" />
-                    Indonesia
-                    <div className="px-1 ml-auto text-xs text-white rounded-full bg-danger">
-                      10
-                    </div>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="PanelsTopLeft" className="w-4 h-4 mr-2" />
-                    English
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="PanelLeft" className="w-4 h-4 mr-2" />
-                    Indonesia
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Footer>
-                    <Button
-                      variant="primary"
-                      type="button"
-                      className="px-2 py-1"
-                    >
-                      Settings
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      className="px-2 py-1 ml-auto"
-                    >
-                      View Profile
-                    </Button>
-                  </Menu.Footer>
-                </Menu.Items>
-              </Menu>
+              
             </div>
             <div className="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-              <a className="flex items-center font-medium text-primary" href="">
+              <a className="flex items-center mt-5" href="/update-profile">
                 <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Personal
                 Information
               </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Box" className="w-4 h-4 mr-2" /> Account Settings
-              </a>
-              <a className="flex items-center mt-5" href="">
+              
+              <a className="flex items-center mt-1 font-medium text-primary" href="">
                 <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Change Password
               </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Settings" className="w-4 h-4 mr-2" /> User
-                Settings
-              </a>
+              
             </div>
-            <div className="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-              <a className="flex items-center" href="">
-                <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Email
-                Settings
-              </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Box" className="w-4 h-4 mr-2" /> Saved Credit
-                Cards
-              </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Social Networks
-              </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Settings" className="w-4 h-4 mr-2" /> Tax
-                Information
-              </a>
-            </div>
-            <div className="flex p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-              <Button variant="primary" type="button" className="px-2 py-1">
-                New Group
-              </Button>
-              <Button
-                variant="outline-secondary"
-                type="button"
-                className="px-2 py-1 ml-auto"
-              >
-                New Quick Link
-              </Button>
-            </div>
+           
           </div>
         </div>
         {/* END: Profile Menu */}

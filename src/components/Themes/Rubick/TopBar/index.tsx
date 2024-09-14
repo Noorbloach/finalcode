@@ -91,6 +91,21 @@ function Main() {
     setNotificationsLimit((prevLimit) => prevLimit + 5); // Increase the limit by 5
   };
 
+  // Handler for Reset Password menu item
+  const handleResetPasswordClick = () => {
+    navigate('/change-password');
+  };
+
+  // Handler for Add Account menu item
+  const handleAddAccountClick = () => {
+    navigate('/register');
+  };
+
+  // Handler for Profile menu item
+  const handleProfileClick = () => {
+    navigate('/update-profile');
+  };
+
   return (
     <>
       {/* BEGIN: Top Bar */}
@@ -201,17 +216,23 @@ function Main() {
               </div>
             </Menu.Header>
             <Menu.Divider className="bg-white/[0.08]" />
-            <Menu.Item className="hover:bg-white/5">
+            <Menu.Item
+              className="hover:bg-white/5"
+              onClick={handleProfileClick}
+            >
               <Lucide icon="User" className="w-4 h-4 mr-2" /> Profile
             </Menu.Item>
-            <Menu.Item className="hover:bg-white/5">
+            <Menu.Item
+              className="hover:bg-white/5"
+              onClick={handleAddAccountClick}
+            >
               <Lucide icon="FilePenLine" className="w-4 h-4 mr-2" /> Add Account
             </Menu.Item>
-            <Menu.Item className="hover:bg-white/5">
+            <Menu.Item
+              className="hover:bg-white/5"
+              onClick={handleResetPasswordClick}
+            >
               <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Reset Password
-            </Menu.Item>
-            <Menu.Item className="hover:bg-white/5">
-              <Lucide icon="HelpCircle" className="w-4 h-4 mr-2" /> Help
             </Menu.Item>
             <Menu.Divider className="bg-white/[0.08]" />
             <Menu.Item className="hover:bg-white/5">
