@@ -283,6 +283,69 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 })}
               </div>
             </div>
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Estimator Link:</label>
+              <FormInput
+                name="estimatorLink"
+                value={project.estimatorLink || ''} // Provide default empty string if undefined
+                onChange={onInputChange}
+                type="text"
+                style={inputStyles}
+                disabled={isFieldDisabled}
+              />
+            </div>
+            {/* Added Template Field */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Template:</label>
+              <FormInput
+                name="template"
+                value={project.template || ''} // Provide default empty string if undefined
+                onChange={onInputChange}
+                type="text"
+                style={inputStyles}
+                disabled={isFieldDisabled}
+              />
+            </div>
+            {/* Added Select Members Field */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Select Members:</label>
+              <FormSelect
+                name="selectedMember"
+                value=""
+                onChange={handleSelectChange}
+                style={selectStyles}
+              >
+                <option value="">Select a Member</option>
+                {memberOptions.map(member => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            {/* Display selected members as tags */}
+            <div style={formGroupStyles}>
+              <label style={labelStyles}>Selected Members:</label>
+              <div style={tagsContainerStyles}>
+                {selectedMembers.map(memberId => {
+                  const member = memberOptions.find(m => m.id === memberId);
+                  return (
+                    member && (
+                      <div key={member.id} style={tagStyles}>
+                        {member.name}
+                        <button
+                          type="button"
+                          style={removeButtonStyles}
+                          onClick={() => handleTagRemove(member.id)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    )
+                  );
+                })}
+              </div>
+            </div>
           </div>
           <div style={footerStyles}>
             <Button variant="secondary" onClick={onClose} style={buttonStyles}>
