@@ -248,10 +248,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                     style={inputStyles}
                   />
                 </div>
-              </>
-            )}
-
-            <div style={formGroupStyles}>
+                <div style={formGroupStyles}>
               <label style={labelStyles}>Select Members:</label>
               <FormSelect
                 name="selectedMember"
@@ -290,6 +287,10 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 })}
               </div>
             </div>
+              </>
+            )}
+
+           
 
           </div>
           <div style={footerStyles}>
