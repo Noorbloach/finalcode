@@ -12,43 +12,41 @@ import Swal from 'sweetalert2';
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
 
-function Main() {
+function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
-    email: Yup.string()
-      .email('Invalid email address')
-      .required('Email is required'),
-    password: Yup.string()
+    newPassword: Yup.string()
       .min(6, 'Password must be at least 6 characters')
-      .required('Password is required'),
+      .required('New password is required'),
+    repeatPassword: Yup.string()
+      .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
+      .required('Repeat password is required'),
   });
 
-  const handleLogin = async (values) => {
+  const handleChangePassword = async (values) => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', values);
-      const { token } = response.data;
-      localStorage.setItem('token', token); // Save the JWT token
+      const response = await axios.post('http://localhost:3000/api/auth/change-password', values);
       setLoading(false);
 
       // Success popup using SweetAlert2
       Swal.fire({
         icon: 'success',
-        title: 'Login Successful',
+        title: 'Password Changed Successfully',
         showConfirmButton: false,
         timer: 1500,
       });
 
-      navigate('/'); // Redirect to the home page or dashboard
+      navigate('/login'); // Redirect to the login page
     } catch (error) {
       setLoading(false);
-      console.error('Login failed:', error);
+      console.error('Password change failed:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Login Failed',
-        text: 'Please check your email and password.',
+        title: 'Password Change Failed',
+        text: 'Please try again later.',
       });
     }
   };
@@ -78,7 +76,7 @@ function Main() {
                 />
                 <div className="mt-10 text-4xl font-medium leading-tight text-white -intro-x">
                   A few more clicks to <br />
-                  sign in to your account.
+                  change your password.
                 </div>
                 <div className="mt-5 text-lg text-white -intro-x text-opacity-70 dark:text-slate-400">
                   Manage all your projects in one place
@@ -88,57 +86,38 @@ function Main() {
             <div className="flex h-screen py-5 my-10 xl:h-auto xl:py-0 xl:my-0">
               <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
-                  Sign In
+                  Change Password
                 </h2>
-                <div className="mt-2 text-center intro-x text-slate-400 xl:hidden">
-                  A few more clicks to sign in to your account.
-                </div>
                 <Formik
-                  initialValues={{ email: '', password: '' }}
+                  initialValues={{ newPassword: '', repeatPassword: '' }}
                   validationSchema={validationSchema}
-                  onSubmit={handleLogin}
+                  onSubmit={handleChangePassword}
                 >
                   {({ errors, touched }) => (
                     <Form className="mt-8 intro-x">
                       <div>
                         <Field
-                          name="email"
-                          type="text"
+                          name="newPassword"
+                          type="password"
                           className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", {
-                            'border-red-500': errors.email && touched.email,
-                            'border-slate-300 dark:border-darkmode-400': !errors.email || !touched.email
+                            'border-red-500': errors.newPassword && touched.newPassword,
+                            'border-slate-300 dark:border-darkmode-400': !errors.newPassword || !touched.newPassword
                           })}
-                          placeholder="Email"
+                          placeholder="Enter new password"
                         />
-                        <ErrorMessage name="email" component="div" className="mt-2 text-red-500 text-xs" />
+                        <ErrorMessage name="newPassword" component="div" className="mt-2 text-red-500 text-xs" />
                       </div>
                       <div className="mt-4">
                         <Field
-                          name="password"
+                          name="repeatPassword"
                           type="password"
                           className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", {
-                            'border-red-500': errors.password && touched.password,
-                            'border-slate-300 dark:border-darkmode-400': !errors.password || !touched.password
+                            'border-red-500': errors.repeatPassword && touched.repeatPassword,
+                            'border-slate-300 dark:border-darkmode-400': !errors.repeatPassword || !touched.repeatPassword
                           })}
-                          placeholder="Password"
+                          placeholder="Repeat password"
                         />
-                        <ErrorMessage name="password" component="div" className="mt-2 text-red-500 text-xs" />
-                      </div>
-                      <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
-                        <div className="flex items-center mr-auto">
-                          <input
-                            id="remember-me"
-                            type="checkbox"
-                            className="mr-2 border"
-                          />
-                          <label
-                            className="cursor-pointer select-none"
-                            htmlFor="remember-me"
-                          >
-                            Remember me
-                          </label>
-                        </div>
-                        <a href="/forgot-password">Forgot Password?</a>
+                        <ErrorMessage name="repeatPassword" component="div" className="mt-2 text-red-500 text-xs" />
                       </div>
                       <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
                         <Button
@@ -150,15 +129,8 @@ function Main() {
                           {loading ? (
                             <FontAwesomeIcon icon={faSpinner} spin />
                           ) : (
-                            'Login'
+                            'Save Password'
                           )}
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
-                          disabled={loading}
-                        >
-                          Register
                         </Button>
                       </div>
                     </Form>
@@ -173,4 +145,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default ChangePassword;

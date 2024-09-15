@@ -5,7 +5,6 @@ import Button from '@/components/Base/Button';
 import Pagination from '@/components/Base/Pagination';
 import { FormInput, FormSelect } from '@/components/Base/Form';
 import Lucide from '@/components/Base/Lucide';
-import { Menu } from '@/components/Base/Headless';
 import _ from 'lodash';
 
 interface User {
@@ -127,22 +126,7 @@ function Main() {
           >
             Add New User
           </Button>
-          <Menu>
-            <Menu.Button as={Button} className="px-2 !box">
-              <span className="flex items-center justify-center w-5 h-5">
-                <Lucide icon="Plus" className="w-4 h-4" />
-              </span>
-            </Menu.Button>
-            <Menu.Items className="w-40">
-              <Menu.Item>
-                <Lucide icon="Users" className="w-4 h-4 mr-2" /> Add Group
-              </Menu.Item>
-              <Menu.Item>
-                <Lucide icon="MessageCircle" className="w-4 h-4 mr-2" /> Send
-                Message
-              </Menu.Item>
-            </Menu.Items>
-          </Menu>
+          
           <div className="hidden mx-auto md:block text-slate-500">
             Showing{' '}
             {itemsPerPage * (currentPage - 1) + 1} to{' '}
@@ -173,7 +157,7 @@ function Main() {
                   <img
                     alt="User Avatar"
                     className="rounded-full"
-                    src={`https://api.adorable.io/avatars/285/${user.email}.png`}
+                    src={`src/pages/Clients/612.jpg`} // Updated image path
                   />
                 </div>
                 <div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:text-left lg:mt-0">
@@ -185,14 +169,7 @@ function Main() {
                   </div>
                 </div>
                 <div className="flex mt-4 lg:mt-0">
-                  <Button variant="primary" className="px-2 py-1 mr-2">
-                    Message
-                  </Button>
-                  <Button
-                    variant="outline-secondary"
-                    className="px-2 py-1"
-                    onClick={() => handleProfileClick(user._id)} // Adjust if necessary
-                  >
+                  <Button variant="outline-secondary" className="px-2 py-1">
                     Profile
                   </Button>
                 </div>

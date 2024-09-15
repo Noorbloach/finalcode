@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 interface User {
   _id: string;
@@ -28,6 +28,7 @@ const Main = () => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chats' | 'friends'>('chats');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fetch all users from the API
   useEffect(() => {
@@ -111,7 +112,6 @@ const Main = () => {
       };
     }
   }, [currentUserId, selectedUser]);
-  
 
   // Fetch chat history when a user is selected
   useEffect(() => {
@@ -175,22 +175,27 @@ const Main = () => {
           (msg.sender === userId && msg.receiver === currentUserId)
       )
       .slice(-1)[0];
-    return lastMessage ? `${lastMessage.sender === currentUserId ? 'You: ' : ''}${lastMessage.message}` : '';
+    return lastMessage ? `${lastMessage.sender === currentUserId ? 'You: ' : ''}${lastMessage.message}` : 'No messages yet';
   };
 
+  // Filter friends based on search query
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100">
       {/* Sidebar with Tabs */}
-      <div className="w-1/3 border-r border-gray-300 p-4 bg-gray-100 overflow-y-auto">
+      <div className="w-1/3 max-w-sm border-r border-blue-500 p-4 bg-white shadow-lg overflow-y-auto">
         <div className="flex justify-between mb-4">
           <button
-            className={`w-1/2 p-2 text-center border border-gray-300 rounded-md ${activeTab === 'chats' ? 'bg-green-500 text-white font-bold' : ''}`}
+            className={`w-1/2 p-2 text-center border border-blue-500 rounded-md ${activeTab === 'chats' ? 'bg-blue-500 text-white font-bold' : 'bg-white text-blue-500'}`}
             onClick={() => setActiveTab('chats')}
           >
             Chats
           </button>
           <button
-            className={`w-1/2 p-2 text-center border border-gray-300 rounded-md ${activeTab === 'friends' ? 'bg-green-500 text-white font-bold' : ''}`}
+            className={`w-1/2 p-2 text-center border border-blue-500 rounded-md ${activeTab === 'friends' ? 'bg-blue-500 text-white font-bold' : 'bg-white text-blue-500'}`}
             onClick={() => setActiveTab('friends')}
           >
             Friends
@@ -204,11 +209,20 @@ const Main = () => {
               {chatUsers.map((user) => (
                 <li
                   key={user._id}
-                  className={`p-3 border-b border-gray-300 cursor-pointer ${selectedUser?._id === user._id ? 'bg-green-500 text-white' : ''}`}
+                  className={`p-3 border-b border-blue-300 cursor-pointer flex items-center hover:bg-blue-100 rounded-md transition-colors ${selectedUser?._id === user._id ? 'bg-blue-500 text-white' : ''}`}
                   onClick={() => setSelectedUser(user)}
                 >
-                  <div className="font-semibold text-lg">{user.name}</div>
-                  <div className="text-gray-500 text-sm">{getLastMessage(user._id)}</div>
+                  <div className={`w-10 h-10 rounded-full bg-blue-400 text-white flex items-center justify-center mr-3 text-lg`}>
+                    {user.name[0]}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`font-semibold text-lg ${selectedUser?._id === user._id ? 'text-white' : 'text-black'}`}>
+                      {user.name}
+                    </div>
+                    <div className="text-black-400 text-sm">
+                      {getLastMessage(user._id)}
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -218,13 +232,23 @@ const Main = () => {
         {activeTab === 'friends' && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Friends</h2>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 border border-blue-300 rounded-md mb-4"
+              placeholder="Search friends by name"
+            />
             <ul className="list-none p-0">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <li
                   key={user._id}
-                  className={`p-2 cursor-pointer ${selectedUser?._id === user._id ? 'bg-green-500 text-white' : ''} border-b border-gray-300`}
+                  className={`p-3 cursor-pointer flex items-center hover:bg-blue-100 rounded-md transition-colors ${selectedUser?._id === user._id ? 'bg-blue-500 text-white' : ''} border-b border-blue-300`}
                   onClick={() => setSelectedUser(user)}
                 >
+                  <div className={`w-10 h-10 rounded-full bg-blue-400 text-white flex items-center justify-center mr-3 text-lg`}>
+                    {user.name[0]}
+                  </div>
                   <div className="font-semibold">{user.name}</div>
                 </li>
               ))}
@@ -235,40 +259,43 @@ const Main = () => {
 
       {/* Chat Section */}
       {selectedUser && (
-        <div className="w-2/3 p-4 flex flex-col bg-white">
-          <div className="flex items-center justify-between border-b border-gray-300 p-4 bg-gray-50">
+        <div className="w-2/3 p-4 flex flex-col bg-white shadow-lg">
+          <div className="flex items-center justify-between border-b border-blue-500 p-4 bg-gray-50">
             <h2 className="text-xl font-semibold">{selectedUser.name}</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
             {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex ${msg.sender === currentUserId ? 'justify-end' : 'justify-start'} mb-3`}
               >
                 <div
-                  className={`p-3 rounded-lg max-w-xs ${msg.sender === currentUserId ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}
+                  className={`p-3 rounded-lg max-w-xs ${msg.sender === currentUserId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
                 >
                   <p className="text-sm">{msg.message}</p>
-                  <p className="text-xs text-gray-500">{new Date(msg.timestamp).toLocaleTimeString()}</p>
+                  <p className="text-xs text-white-500">{new Date(msg.timestamp).toLocaleTimeString()}</p>
                 </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div className="border-t border-gray-300 p-4 bg-gray-50 flex">
+          <div className="border-t border-blue-500 p-4 flex items-center bg-gray-50">
             <input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="flex-1 border border-gray-300 p-2 rounded-l-md"
+              className="flex-1 border border-blue-300 p-2 rounded-l-md"
               placeholder="Type a message"
             />
             <button
               onClick={handleSendMessage}
-              className="bg-blue-500 text-white p-2 rounded-r-md ml-2"
+              className="bg-blue-500 text-white p-2 rounded-r-md ml-2 hover:bg-blue-600 transition-colors"
             >
               Send
             </button>
+          </div>
+          <div className="text-center text-xs text-gray-500 mt-2 italic">
+            All chats are end-to-end encrypted
           </div>
         </div>
       )}

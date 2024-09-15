@@ -1,8 +1,6 @@
 import { useRoutes } from "react-router-dom";
 import DashboardOverview1 from "../pages/DashboardOverview1";
-import Categories from "../pages/Categories";
 import AddProduct from "../pages/AddProduct";
-import ProductList from "../pages/ProductList";
 import ProductDetails from "../pages/ProjectDetails";
 import ProjectApproved from "../pages/ProjectApproved"
 import Chat from "../pages/Chat";
@@ -37,14 +35,22 @@ import TomSelect from "../pages/TomSelect";
 import WysiwygEditor from "../pages/WysiwygEditor";
 import Validation from "../pages/Validation";
 import Chart from "../pages/Chart";
+import ForgotPassword from "../pages/ForgotPassword";
 import {  Navigate } from "react-router-dom";
+import OTP from "../pages/OTP";
+import NewPassword from "../pages/NewPassword";
 
 
 import Layout from "../themes";
+import Clients from "../pages/Clients";
+import ProjectList from "../pages/ProductList";
+import ProductList from "../pages/ProductList";
+
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const isAuthenticated = !!localStorage.getItem("token");
   return isAuthenticated ? children : <Navigate to="/login" />;
+  
 };
 
 function Router() {
@@ -61,10 +67,7 @@ function Router() {
           path: "/",
           element: <DashboardOverview1 />,
         },
-        {
-          path: "categories",
-          element: <Categories />,
-        },
+        
         {
           path: "add-product",
           element: <AddProduct />,
@@ -74,7 +77,7 @@ function Router() {
           element: <ProjectApproved />,
         },
         {
-          path: "product-list",
+          path: "project-list",
           element: <ProductList />,
         },
         {
@@ -88,9 +91,10 @@ function Router() {
         },
        
         {
-          path: "calendar",
-          element: <Calendar />,
+          path: "clients",
+          element: <Clients />,
         },
+        
         {
           path: "crud-data-list",
           element: <CrudDataList />,
@@ -214,6 +218,18 @@ function Router() {
     {
       path: "/register",
       element: <Register />,
+    },
+    {
+      path: "/forgot-password",
+      element: <ForgotPassword />,  // Public route for Forgot Password
+    },
+    {
+      path: "/otp",
+      element: <OTP />,  // Public route for Forgot Password
+    },
+    {
+      path: "/new-password",
+      element: <NewPassword />,  // Public route for Forgot Password
     },
     {
       path: "/error-page",

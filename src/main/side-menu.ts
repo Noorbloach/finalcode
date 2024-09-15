@@ -16,11 +16,7 @@ const menu: Array<Menu | "divider"> = [
     icon: "ShoppingBag",
     title: "Projects",
     subMenu: [
-      {
-        icon: "Activity",
-        pathname: "/categories",
-        title: "Categories",
-      },
+     
       {
         icon: "Activity",
         pathname: "/add-product",
@@ -61,7 +57,7 @@ const menu: Array<Menu | "divider"> = [
   
   {
     icon: "Users",
-    pathname: "/calendar",
+    pathname: "/clients",
     title: "Clients",
   },
   "divider",
