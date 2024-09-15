@@ -57,7 +57,7 @@ const menu: Array<Menu | "divider"> = [
   
   {
     icon: "Users",
-    pathname: "/calendar",
+    pathname: "/clients",
     title: "Clients",
   },
   "divider",

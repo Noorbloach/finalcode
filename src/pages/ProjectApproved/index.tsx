@@ -8,23 +8,42 @@ import Lucide from "@/components/Base/Lucide";
 import Table from "@/components/Base/Table";
 import { useNavigate } from "react-router-dom";
 import EditProjectModal from "../ProductList/EditProjectModal"; // Import the new modal component
+import { jwtDecode } from "jwt-decode";
+import fakerData from "@/utils/faker";
+import _ from "lodash";
+import Tippy from "@/components/Base/Tippy";
+import ViewProjectModal from "../ProductList/ViewProjectModal";
 
 interface Project {
   _id: string;
   projectName: string;
-  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected';
+  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started' | 'Project Rejected';
+  adminStatus: 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision';
   subcategory: 'Geoglyphs' | 'Stellar' | 'Perfect';
   projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
   opsDueDate: Date;
-  budget: number;
+  initialAmount: number;
+  totalAmount:number;
+  remainingAmount:number;
   clientPermanentNotes: string;
-  rfiAddendum: string;
+  projectLink:string;
+  estimatorLink:string;
+  template:string;
+  description:string;
   clientType: 'New' | 'Old';
   createdAt: Date;
+  client: {
+    _id: string;
+    name: string;
+  };
   creator: string;
+  
+  enterpriseName: string;
 }
-
+interface DecodedToken {
+  role: string; // Expecting a string role from the JWT token
+}
 function Main() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -35,6 +54,59 @@ function Main() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [role, setRole] = useState<string>(""); // State to track if the user is admin
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+
+  const ensureProtocol = (url: string) => {
+    // If the URL starts with "http://" or "https://", return it as is
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+    // Otherwise, prepend "http://" to the URL
+    return `http://${url}`;
+  };
+
+  const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
+
+  // Decode JWT to check if the user is an admin
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+    if (token) {
+      try {
+        const decoded: DecodedToken = jwtDecode(token);
+        setRole(decoded.role); // Set role directly based on decoded token
+      } catch (error) {
+        console.error("Invalid token", error);
+      }
+    }
+  }, []);
+
+  const handleDeleteClick = async (projectId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
+    if (confirmDelete) {
+      try {
+        await axios.delete(`http://localhost:3000/api/projects/${projectId}`);
+        // Update the projects state by filtering out the deleted project
+        setProjects(prevProjects => prevProjects.filter(project => project._id !== projectId));
+        alert("Project deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("Failed to delete project.");
+      }
+    }
+  };
+
+    // Function to open the view modal and fetch project details
+    const handleViewClick = async (projectId: string) => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
+        const projectData = response.data.data;
+        setSelectedProject(projectData);
+        setViewModalOpen(true);
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+      }
+    };
 
   // Fetch projects from API
   useEffect(() => {
@@ -59,6 +131,29 @@ function Main() {
 
     fetchProjects();
   }, []);
+
+  const handleAdminStatusChange = async (event: ChangeEvent<HTMLSelectElement>, projectId: string) => {
+    const newAdminStatus = event.target.value as 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision'; // Type assertion
+  
+    try {
+      await axios.put(`http://localhost:3000/api/projects/${projectId}/admin-status`, {
+        adminStatus: newAdminStatus,
+      });
+  
+      // Update the project in the state
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project._id === projectId ? { ...project, adminStatus: newAdminStatus } : project
+        )
+      );
+  
+      alert('Project admin status updated successfully.');
+    } catch (error) {
+      console.error('Error updating admin status:', error);
+      alert('Failed to update admin status.');
+    }
+  };
+
 
   // Filter projects based on search query
   useEffect(() => {
@@ -144,79 +239,134 @@ function Main() {
           </div>
         </div>
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-          <Table className="border-spacing-y-[10px] border-separate -mt-2">
+        <div className="overflow-x-auto">
+        <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
             <Table.Thead>
-              <Table.Tr>
-                <Table.Th className="border-b-0 whitespace-nowrap">
-                  Project Title
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Budget
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Due Date
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Status (Cloned)
-                </Table.Th>
-                <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                  Actions
-                </Table.Th>
-              </Table.Tr>
+            <Table.Tr>
+        <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">ClientName</Table.Th>
+      )}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>)}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
+      )}
+      
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
+        {(role === "admin" || role === "employee" ) && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
+      )}
+      {/* Conditionally render Template column */}
+      {(role === "admin" || role === "employee" ) && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
+      )}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
+      </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {currentProjects.map((project) => (
-                <Table.Tr key={project._id} className="intro-x">
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <a href="" className="font-medium whitespace-nowrap">
-                      {project.projectName}
-                    </a>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    ${project.budget}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {new Date(project.clientDueDate).toLocaleDateString()}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {project.status}
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    {/* Cloned status with different styling or formatting */}
-                    <div className={clsx({
-                      'text-success': project.status === 'Approved',
-                      'text-warning': project.status === 'Proposal Sent',
-                      'text-danger': project.status === 'Rejected',
-                      'text-muted': project.status === 'ETA',
-                    })}>
-                      {project.status === 'Approved' ? '✓ Approved' :
-                        project.status === 'Proposal Sent' ? '🕒 Proposal Sent' :
-                        project.status === 'Rejected' ? '✘ Rejected' :
-                        '⏳ ETA'}
-                    </div>
-                  </Table.Td>
-                  <Table.Td className="box rounded-l-none rounded-r-none border-x-0 text-center shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                    <div className="flex items-center justify-center">
-                      <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
-                        <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                        Edit
-                      </a>
-                      <a
-                        className="flex items-center text-danger"
-                        href="#"
-                      >
-                        <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                        Delete
-                      </a>
-                    </div>
-                  </Table.Td>
-                </Table.Tr>
+      {currentProjects.map((project) => (
+        <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
+          <Table.Td className="text-center">{project.projectName}</Table.Td>
+          {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
+          {(role === "superadmin") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
+          {(role === "superadmin") && (
+          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
+          {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
+          <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
+                      ? 'On Hold'
+                      : project.status}</Table.Td>
+          {(role === "admin" || role === "employee" ) && (
+          <Table.Td className="text-center">
+            <select
+              value={project.adminStatus}
+              onChange={(e) => handleAdminStatusChange(e, project._id)}
+              className="form-select !box"
+            >
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
               ))}
-            </Table.Tbody>
+            </select>
+          </Table.Td>
+        )}
+          
+          {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center max-w-[60px]">
+            <div className="relative flex">
+              {_.take(fakerData, 3).map((faker, fakerKey) => (
+                <div
+                  key={fakerKey}
+                  className="w-8 h-8 image-fit zoom-in"
+                  style={{ position: 'relative', zIndex: 5 - fakerKey, marginLeft: fakerKey === 0 ? '0' : '-8px' }}
+                >
+                  <Tippy
+                    as="img"
+                    alt="Midone Tailwind HTML Admin Template"
+                    className="rounded-full"
+                    src={faker.images[0]}
+                    content={`Uploaded at ${faker.dates[0]}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </Table.Td>)}
+          <Table.Td className="text-center">
+  <a 
+    href={ensureProtocol(project.projectLink)} 
+    className="underline text-blue-500 hover:text-blue-700" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    Admin Link
+  </a>
+</Table.Td>
+{(role === "admin" || role === "employee") && (
+  <Table.Td className="text-center">
+    <a 
+      href={ensureProtocol(project.estimatorLink)} 
+      className="underline text-blue-500 hover:text-blue-700" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      Estimator Link
+    </a>
+  </Table.Td>
+)}
+
+        {/* Conditionally render Template field */}
+        {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center">{project.template}</Table.Td>
+        )}
+        
+          <Table.Td className="text-center">
+            <div className="flex items-center justify-center">
+              <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
+                <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
+              </a>
+              <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
+              </a>
+              <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
+                <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
+              </a>
+            </div>
+          </Table.Td>
+        </Table.Tr>
+      ))}
+    </Table.Tbody>
           </Table>
+        </div>
+         
           <div className="flex flex-col items-center mt-4">
             <Pagination
               currentPage={currentPage}
@@ -264,12 +414,19 @@ function Main() {
         </div>
         {/* END: Pagination */}
      
-      <EditProjectModal
+        <EditProjectModal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         project={selectedProject}
         onInputChange={handleInputChange}
         onUpdate={handleUpdateProject}
+        role={role}
+      />
+      <ViewProjectModal
+        open={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        project={selectedProject}
+        role={role}
       />
     </>
   );
