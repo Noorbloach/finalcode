@@ -1,52 +1,25 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import logoUrl from "@/assets/images/logo.svg";
 import illustrationUrl from "@/assets/images/illustration.svg";
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import Swal from 'sweetalert2';
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
 
 function Main() {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  const validationSchema = Yup.object({
-    email: Yup.string()
-      .email('Invalid email address')
-      .required('Email is required'),
-  });
-
-  const handleForgotPassword = async (values) => {
+  const handleForgotPassword = () => {
     setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:3000/api/auth/forgot-password', values);
+    setTimeout(() => {
       setLoading(false);
-
-      // Success popup using SweetAlert2
-      Swal.fire({
-        icon: 'success',
-        title: 'Password Reset Link Sent',
-        text: 'Please check your email.',
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
-      // Navigate or stay on the same page after the email is sent
-    } catch (error) {
-      setLoading(false);
-      console.error('Request failed:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed to send reset link',
-        text: 'Please check your email address and try again.',
-      });
-    }
+      // Redirect to /otp
+      navigate('/otp');
+    }, 500); // Simulate a delay
   };
 
   return (
@@ -87,46 +60,36 @@ function Main() {
                   Forgot Password
                 </h2>
                 <div className="mt-2 text-center intro-x text-slate-400 xl:hidden">
-                  Enter your email to reset your password.
+                  Enter your email to proceed to the OTP page.
                 </div>
-                <Formik
-                  initialValues={{ email: '' }}
-                  validationSchema={validationSchema}
-                  onSubmit={handleForgotPassword}
-                >
-                  {({ errors, touched }) => (
-                    <Form className="mt-8 intro-x">
-                      <div>
-                        <Field
-                          name="email"
-                          type="text"
-                          className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", {
-                            'border-red-500': errors.email && touched.email,
-                            'border-slate-300 dark:border-darkmode-400': !errors.email || !touched.email
-                          })}
-                          placeholder="Email"
-                        />
-                        <ErrorMessage name="email" component="div" className="mt-2 text-red-500 text-xs" />
-                      </div>
-                      
-                      <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
-                      <Button
-  variant="primary"
-  className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3 whitespace-nowrap text-center"
-  type="submit"
-  disabled={loading}
->
-  {loading ? (
-    <FontAwesomeIcon icon={faSpinner} spin />
-  ) : (
-    'Forgot Password'
-  )}
-</Button>
 
-                      </div>
-                    </Form>
-                  )}
-                </Formik>
+                {/* Email Field */}
+                <div className="mt-8 intro-x">
+                  <input
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={clsx("block px-4 py-3 intro-x min-w-full xl:min-w-[350px] border rounded-lg", 'border-slate-300 dark:border-darkmode-400')}
+                    placeholder="Email"
+                  />
+                </div>
+
+                <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
+                  <Button
+                    variant="primary"
+                    className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3 whitespace-nowrap text-center"
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                    ) : (
+                      'Forgot Password'
+                    )}
+                  </Button>
+                </div>
+
               </div>
             </div>
           </div>

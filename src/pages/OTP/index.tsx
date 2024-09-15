@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import logoUrl from "@/assets/images/logo.svg";
 import illustrationUrl from "@/assets/images/illustration.svg";
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import Swal from 'sweetalert2';
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
 
@@ -16,37 +13,13 @@ function Main() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validationSchema = Yup.object({
-    otp1: Yup.string().required('Required'),
-    otp2: Yup.string().required('Required'),
-    otp3: Yup.string().required('Required'),
-    otp4: Yup.string().required('Required'),
-  });
-
-  const handleOTPSubmit = async (values) => {
+  const handleOTPSubmit = () => {
     setLoading(true);
-    try {
-      // Your OTP submission logic here
-      const otp = `${values.otp1}${values.otp2}${values.otp3}${values.otp4}`;
-      const response = await axios.post('http://localhost:3000/api/auth/verify-otp', { otp });
+    setTimeout(() => {
       setLoading(false);
-
-      Swal.fire({
-        icon: 'success',
-        title: 'OTP Verified',
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
-      navigate('/'); // Redirect to the home page or dashboard
-    } catch (error) {
-      setLoading(false);
-      Swal.fire({
-        icon: 'error',
-        title: 'OTP Verification Failed',
-        text: 'Please check the OTP and try again.',
-      });
-    }
+      // Redirect to /new-password
+      navigate('/new-password');
+    }, 500); // Simulate a delay
   };
 
   return (
@@ -91,50 +64,36 @@ function Main() {
                 </div>
                 <Formik
                   initialValues={{ otp1: '', otp2: '', otp3: '', otp4: '' }}
-                  validationSchema={validationSchema}
                   onSubmit={handleOTPSubmit}
                 >
-                  {({ errors, touched }) => (
+                  {() => (
                     <Form className="mt-8 intro-x">
                       <div className="flex justify-center space-x-3">
                         <Field
                           name="otp1"
                           type="text"
                           maxLength="1"
-                          className={clsx("block w-12 px-3 py-3 text-center border rounded-lg", {
-                            'border-red-500': errors.otp1 && touched.otp1,
-                            'border-slate-300 dark:border-darkmode-400': !errors.otp1 || !touched.otp1
-                          })}
+                          className="block w-12 px-3 py-3 text-center border rounded-lg border-slate-300 dark:border-darkmode-400"
                         />
                         <Field
                           name="otp2"
                           type="text"
                           maxLength="1"
-                          className={clsx("block w-12 px-3 py-3 text-center border rounded-lg", {
-                            'border-red-500': errors.otp2 && touched.otp2,
-                            'border-slate-300 dark:border-darkmode-400': !errors.otp2 || !touched.otp2
-                          })}
+                          className="block w-12 px-3 py-3 text-center border rounded-lg border-slate-300 dark:border-darkmode-400"
                         />
                         <Field
                           name="otp3"
                           type="text"
                           maxLength="1"
-                          className={clsx("block w-12 px-3 py-3 text-center border rounded-lg", {
-                            'border-red-500': errors.otp3 && touched.otp3,
-                            'border-slate-300 dark:border-darkmode-400': !errors.otp3 || !touched.otp3
-                          })}
+                          className="block w-12 px-3 py-3 text-center border rounded-lg border-slate-300 dark:border-darkmode-400"
                         />
                         <Field
                           name="otp4"
                           type="text"
                           maxLength="1"
-                          className={clsx("block w-12 px-3 py-3 text-center border rounded-lg", {
-                            'border-red-500': errors.otp4 && touched.otp4,
-                            'border-slate-300 dark:border-darkmode-400': !errors.otp4 || !touched.otp4
-                          })}
+                          className="block w-12 px-3 py-3 text-center border rounded-lg border-slate-300 dark:border-darkmode-400"
                         />
                       </div>
-                      <ErrorMessage name="otp1" component="div" className="mt-2 text-red-500 text-xs" />
                       <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
                         <Button
                           variant="primary"

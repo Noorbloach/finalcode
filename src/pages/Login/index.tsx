@@ -138,7 +138,7 @@ function Main() {
                             Remember me
                           </label>
                         </div>
-                        <a href="">Forgot Password?</a>
+                        <a href="/forgot-password">Forgot Password?</a>
                       </div>
                       <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
                         <Button

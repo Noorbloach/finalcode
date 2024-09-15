@@ -39,7 +39,7 @@ function ChangePassword() {
         timer: 1500,
       });
 
-      navigate('/'); // Redirect to the home page or dashboard
+      navigate('/login'); // Redirect to the login page
     } catch (error) {
       setLoading(false);
       console.error('Password change failed:', error);
