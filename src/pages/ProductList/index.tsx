@@ -227,7 +227,7 @@ const ensureProtocol = (url: string) => {
     const selectedType = e.target.value;
     setFilterType(selectedType !== "All" ? selectedType : null);
   };
-
+  const isFieldDisabled = role === "employee";
 
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
@@ -355,6 +355,7 @@ const ensureProtocol = (url: string) => {
               value={project.adminStatus}
               onChange={(e) => handleAdminStatusChange(e, project._id)}
               className="form-select !box"
+              disabled={isFieldDisabled}
             >
               {statuses.map((status) => (
                 <option key={status} value={status}>

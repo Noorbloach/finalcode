@@ -1,25 +1,55 @@
 import React, { useEffect, useState, ChangeEvent } from 'react';
-import _ from 'lodash';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Base/Button';
 import Pagination from '@/components/Base/Pagination';
 import { FormInput, FormSelect } from '@/components/Base/Form';
 import Lucide from '@/components/Base/Lucide';
 import { Menu } from '@/components/Base/Headless';
-import axios from 'axios'; // For making HTTP requests
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import _ from 'lodash';
 
 interface User {
   name: string;
   role: string;
   email: string;
+  address?: string;
+  phoneNo?: string;
 }
+
+const UserModal = ({ user, onClose }: { user: User | null; onClose: () => void }) => {
+  if (!user) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+      <div className="bg-white p-5 rounded shadow-lg max-w-md w-full">
+        <h3 className="text-lg font-semibold">User Details</h3>
+        <div className="mt-4">
+          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Role:</strong> {user.role}</p>
+          <p><strong>Address:</strong> {user.address}</p>
+          <p><strong>Phone No:</strong> {user.phoneNo}</p>
+        </div>
+        <button
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={onClose}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
 
 function Main() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
-  const [searchTerm, setSearchTerm] = useState<string>(''); // State for search term
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,28 +71,23 @@ function Main() {
     return <div>Loading...</div>;
   }
 
-  // Calculate the total number of pages
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
-  // Function to handle page changes
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
 
-  // Function to handle items per page change
-  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleItemsPerPageChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page whenever items per page changes
+    setCurrentPage(1);
   };
 
-  // Function to handle search input change
   const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page whenever search term changes
+    setCurrentPage(1);
   };
 
-  // Filter users based on search term
   let filteredUsers = users;
   if (searchTerm.trim() !== '') {
     filteredUsers = users.filter(user =>
@@ -70,16 +95,24 @@ function Main() {
     );
   }
 
-  // Slice the users array to get users for the current page
   const currentUsers = _.slice(
     filteredUsers,
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Function to navigate to add new user page
   const handleAddNewUser = () => {
     navigate('/register');
+  };
+
+  const handleProfileClick = async (userId: string) => {
+    try {
+      const response = await axios.get<User>(`http://localhost:3000/api/auth/user/${userId}`);
+      setSelectedUser(response.data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
   };
 
   return (
@@ -132,7 +165,6 @@ function Main() {
             </div>
           </div>
         </div>
-        {/* BEGIN: Users Layout */}
         {currentUsers.map((user, index) => (
           <div key={index} className="col-span-12 intro-y md:col-span-6">
             <div className="box">
@@ -156,7 +188,11 @@ function Main() {
                   <Button variant="primary" className="px-2 py-1 mr-2">
                     Message
                   </Button>
-                  <Button variant="outline-secondary" className="px-2 py-1">
+                  <Button
+                    variant="outline-secondary"
+                    className="px-2 py-1"
+                    onClick={() => handleProfileClick(user._id)} // Adjust if necessary
+                  >
                     Profile
                   </Button>
                 </div>
@@ -164,8 +200,6 @@ function Main() {
             </div>
           </div>
         ))}
-
-        {/* BEGIN: Pagination */}
         <div className="flex flex-wrap items-center col-span-12 intro-y sm:flex-row sm:flex-nowrap">
           <Pagination
             className="w-full sm:w-auto sm:mr-auto"
@@ -183,8 +217,14 @@ function Main() {
             <option value={50}>50</option>
           </FormSelect>
         </div>
-        {/* END: Pagination */}
       </div>
+
+      {isModalOpen && (
+        <UserModal
+          user={selectedUser}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </>
   );
 }
