@@ -169,7 +169,7 @@ function Main() {
                   </div>
                 </div>
                 <div className="flex mt-4 lg:mt-0">
-                  <Button variant="outline-secondary" className="px-2 py-1">
+                  <Button variant="outline-secondary" className="px-2 py-1" onClick={() => handleProfileClick(user._id)}>
                     Profile
                   </Button>
                 </div>

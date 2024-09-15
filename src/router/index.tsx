@@ -77,7 +77,7 @@ function Router() {
           element: <ProjectApproved />,
         },
         {
-          path: "project-list",
+          path: "product-list",
           element: <ProductList />,
         },
         {
@@ -228,7 +228,7 @@ function Router() {
       element: <OTP />,  // Public route for Forgot Password
     },
     {
-      path: "/new-password",
+      path: "/resetpassword/:token",
       element: <NewPassword />,  // Public route for Forgot Password
     },
     {
