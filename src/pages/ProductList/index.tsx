@@ -256,6 +256,7 @@ const ensureProtocol = (url: string) => {
             Add New Project
           </Button>
            {/* Status Filter Dropdown */}
+           {(role === "admin") && (
            <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
               <FormSelect
@@ -271,7 +272,7 @@ const ensureProtocol = (url: string) => {
                 ))}
               </FormSelect>
             </div>
-          </div>
+          </div>)}
           <div className="hidden mx-auto md:block text-slate-500">
             Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
           </div>
