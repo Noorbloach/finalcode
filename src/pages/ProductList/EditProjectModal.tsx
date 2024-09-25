@@ -3,14 +3,21 @@ import React, { ChangeEvent, useState } from "react";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import { Project } from "./Main"; // Import the Project type
-
+import axios from "axios";
 interface EditProjectModalProps {
   open: boolean;
   onClose: () => void;
+  onUpdate:()=> void;
   project: Project | null;
   onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onUpdate: () => void;
+
   role: string;
+  employees: Employee[];
+}
+
+interface Employee {
+  _id: string; // Assuming employees have an ID
+  name: string; // Employee name
 }
 
 const EditProjectModal: React.FC<EditProjectModalProps> = ({
@@ -18,14 +25,22 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
   onClose,
   project,
   onInputChange,
-  onUpdate,
   role,
+  employees,
+  onUpdate,
 }) => {
   if (!open || !project) return null;
 
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  
-  // Handle select change
+  const [selectedMembers, setSelectedMembers] = useState<string[]>(project.members || []);
+  const [error, setError] = useState<string | null>(null);
+
+
+
+  const handleSelectChangeOne = (e: ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    onInputChange({ target: { name, value } });
+  };
+
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value && !selectedMembers.includes(value)) {
@@ -33,16 +48,27 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
     }
   };
 
-  const handleSelectChangeOne = (e: ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    onInputChange({ target: { name, value } }); // Call parent handler
-  };
-
-
-  // Handle tag removal
   const handleTagRemove = (memberId: string) => {
     setSelectedMembers(selectedMembers.filter(id => id !== memberId));
   };
+
+  const handleUpdate = async () => {
+    try {
+      const updatedProject = {
+        ...project,
+        members: selectedMembers,
+      };
+
+      const response = await axios.put(`http://localhost:3000/api/projects/${project._id}`, updatedProject);
+      console.log("Project updated successfully:", response.data);
+      onUpdate();
+      onClose(); // Close the modal after update
+    } catch (error) {
+      console.error("Error updating project:", error);
+      setError("Failed to update project. Please try again.");
+    }
+  };
+
 
   // Render status options based on role
   const renderStatusOptions = () => {
@@ -249,42 +275,43 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                   />
                 </div>
                 <div style={formGroupStyles}>
-              <label style={labelStyles}>Select Members:</label>
-              <FormSelect
-                name="selectedMember"
-                value=""
-                onChange={handleSelectChange}
-                style={selectStyles}
-              >
-                <option value="">Select a Member</option>
-                {memberOptions.map(member => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
+                  <label style={labelStyles}>Select Members:</label>
+                  <FormSelect
+                    name="selectedMember"
+                    value=""
+                    onChange={handleSelectChange}
+                    style={selectStyles}
+                  >
+                    <option value="">Select a Member</option>
+                    {employees.map(employee => (
+                      <option key={employee._id} value={employee._id}>
+                        {employee.name}
+                      </option>
+                    ))}
+                  </FormSelect>
+                </div>
 
-            <div style={formGroupStyles}>
-              <label style={labelStyles}>Selected Members:</label>
-              <div style={tagsContainerStyles}>
-                {selectedMembers.map(memberId => {
-                  const member = memberOptions.find(m => m.id === memberId);
-                  return (
-                    member && (
-                      <div key={member.id} style={tagStyles}>
-                        {member.name}
-                        <button
-                          type="button"
-                          style={removeButtonStyles}
-                          onClick={() => handleTagRemove(member.id)}
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    )
-                  );
-                })}
+                <div style={formGroupStyles}>
+                  <label style={labelStyles}>Selected Members:</label>
+                  <div style={tagsContainerStyles}>
+                    {selectedMembers.map(memberId => {
+                      const member = employees.find(m => m._id === memberId);
+                      return (
+                        member && (
+                          <div key={member._id} style={tagStyles}>
+                            {member.name}
+                            <button
+                              type="button"
+                              style={removeButtonStyles}
+                              onClick={() => handleTagRemove(member._id)}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        )
+                      );
+                    })}
+
               </div>
             </div>
               </>
@@ -297,7 +324,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
             <Button variant="secondary" onClick={onClose} style={buttonStyles}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={onUpdate} style={buttonStyles}>
+            <Button variant="primary" onClick={handleUpdate} style={buttonStyles}>
               Save Changes
             </Button>
           </div>
