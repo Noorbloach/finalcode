@@ -378,9 +378,10 @@ const ensureProtocol = (url: string) => {
               <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
                 <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
               </a>
+              {(role === "superadmin" || role === "admin" ) && (
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
-              </a>
+              </a>)}
               {(role === "superadmin" ) && (
               <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
