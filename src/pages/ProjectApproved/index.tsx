@@ -292,17 +292,17 @@ function Main() {
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
-              <FormInput
+              {/* <FormInput
                 type="text"
                 className="w-56 pr-10 !box"
                 placeholder="Search by project title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Lucide
+              /> */}
+              {/* <Lucide
                 icon="Search"
                 className="absolute inset-y-0 right-0 w-4 h-4 my-auto mr-3"
-              />
+              /> */}
             </div>
           </div>
         </div>
@@ -496,3 +496,4 @@ function Main() {
 }
 
 export default Main;
+

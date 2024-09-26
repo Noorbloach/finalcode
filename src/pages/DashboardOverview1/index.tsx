@@ -267,14 +267,7 @@ useEffect(() => {
                         className="w-[28px] h-[28px] text-primary"
                       />
                       <div className="ml-auto">
-                        <Tippy
-                          as="div"
-                          className="cursor-pointer bg-success py-[3px] flex rounded-full text-white text-xs pl-2 pr-1 items-center font-medium"
-                          content="33% Higher than last month"
-                        >
-                          33%
-                          <Lucide icon="ChevronUp" className="w-4 h-4 ml-0.5" />
-                        </Tippy>
+                       
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
@@ -300,17 +293,8 @@ useEffect(() => {
                         className="w-[28px] h-[28px] text-pending"
                       />
                       <div className="ml-auto">
-                        <Tippy
-                          as="div"
-                          className="cursor-pointer bg-danger py-[3px] flex rounded-full text-white text-xs pl-2 pr-1 items-center font-medium"
-                          content="2% Lower than last month"
-                        >
-                          2%
-                          <Lucide
-                            icon="ChevronDown"
-                            className="w-4 h-4 ml-0.5"
-                          />
-                        </Tippy>
+                       
+                        
                       </div>
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
@@ -335,16 +319,7 @@ useEffect(() => {
                         icon="Layers"
                         className="w-[28px] h-[28px] text-warning"
                       />
-                      <div className="ml-auto">
-                        <Tippy
-                          as="div"
-                          className="cursor-pointer bg-success py-[3px] flex rounded-full text-white text-xs pl-2 pr-1 items-center font-medium"
-                          content="12% Higher than last month"
-                        >
-                          12%{" "}
-                          <Lucide icon="ChevronUp" className="w-4 h-4 ml-0.5" />
-                        </Tippy>
-                      </div>
+                      
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
                       {totalProjectsCount}
@@ -368,16 +343,7 @@ useEffect(() => {
                         icon="User"
                         className="w-[28px] h-[28px] text-success"
                       />
-                      <div className="ml-auto">
-                        <Tippy
-                          as="div"
-                          className="cursor-pointer bg-success py-[3px] flex rounded-full text-white text-xs pl-2 pr-1 items-center font-medium"
-                          content="22% Higher than last month"
-                        >
-                          22%{" "}
-                          <Lucide icon="ChevronUp" className="w-4 h-4 ml-0.5" />
-                        </Tippy>
-                      </div>
+                      
                     </div>
                     <div className="mt-6 text-3xl font-medium leading-8">
                       {employeesCount}
@@ -436,176 +402,9 @@ useEffect(() => {
       </div>
     </div>
 {/* END: Weekly Top Seller */}
-{/* BEGIN: Our Clients */}
-<div className="col-span-12 mt-6 xl:col-span-12">
-  <div className="items-center block h-10 intro-y sm:flex">
-    <h2 className="mr-5 text-lg font-medium truncate">
-      Our Clients
-    </h2>
-    <div className="relative mt-3 sm:ml-auto sm:mt-0 text-slate-500">
-      <Lucide
-        icon="MapPin"
-        className="absolute inset-y-0 left-0 z-10 w-4 h-4 my-auto ml-3"
-      />
-      <FormInput
-        type="text"
-        className="pl-10 sm:w-56 !box"
-        placeholder="Filter by city"
-      />
-    </div>
-  </div>
-  <div className="p-5 mt-12 intro-y box sm:mt-5">
-    <div>
-      250 Official stores in 21 countries, click the marker to see
-      location details.
-    </div>
-    <LeafletMap className="h-[310px] mt-5 rounded-md bg-slate-200" />
-  </div>
-</div>
-{/* END: Our Clients */}
 
-          {/* BEGIN: Weekly Top Products */}
-          <div className="col-span-12 mt-6">
-            <div className="items-center block h-10 intro-y sm:flex">
-              <h2 className="mr-5 text-lg font-medium truncate">
-                Weekly Top Projects
-              </h2>
-              <div className="flex items-center mt-3 sm:ml-auto sm:mt-0">
-                
-              </div>
-            </div>
-            <div className="mt-8 overflow-auto intro-y lg:overflow-visible sm:mt-0">
-              <Table className="border-spacing-y-[10px] border-separate sm:mt-2">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th className="border-b-0 whitespace-nowrap">
-                      IMAGES
-                    </Table.Th>
-                    <Table.Th className="border-b-0 whitespace-nowrap">
-                      PRODUCT NAME
-                    </Table.Th>
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      STOCK
-                    </Table.Th>
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      STATUS
-                    </Table.Th>
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      ACTIONS
-                    </Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {_.take(fakerData, 4).map((faker, fakerKey) => (
-                    <Table.Tr key={fakerKey} className="intro-x">
-                      <Table.Td className="box w-40 rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                        <div className="flex">
-                          <div className="w-10 h-10 image-fit zoom-in">
-                            <Tippy
-                              as="img"
-                              alt="Midone Tailwind HTML Admin Template"
-                              className="rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
-                              src={faker.images[0]}
-                              content={`Uploaded at ${faker.dates[0]}`}
-                            />
-                          </div>
-                          <div className="w-10 h-10 -ml-5 image-fit zoom-in">
-                            <Tippy
-                              as="img"
-                              alt="Midone Tailwind HTML Admin Template"
-                              className="rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
-                              src={faker.images[1]}
-                              content={`Uploaded at ${faker.dates[1]}`}
-                            />
-                          </div>
-                          <div className="w-10 h-10 -ml-5 image-fit zoom-in">
-                            <Tippy
-                              as="img"
-                              alt="Midone Tailwind HTML Admin Template"
-                              className="rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
-                              src={faker.images[2]}
-                              content={`Uploaded at ${faker.dates[2]}`}
-                            />
-                          </div>
-                        </div>
-                      </Table.Td>
-                      <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                        <a href="" className="font-medium whitespace-nowrap">
-                          {faker.products[0].name}
-                        </a>
-                        <div className="text-slate-500 text-xs whitespace-nowrap mt-0.5">
-                          {faker.products[0].category}
-                        </div>
-                      </Table.Td>
-                      <Table.Td className="box rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                        {faker.stocks[0]}
-                      </Table.Td>
-                      <Table.Td className="box w-40 rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600">
-                        <div
-                          className={clsx([
-                            "flex items-center justify-center",
-                            { "text-success": faker.trueFalse[0] },
-                            { "text-danger": !faker.trueFalse[0] },
-                          ])}
-                        >
-                          <Lucide icon="CheckSquare" className="w-4 h-4 mr-2" />
-                          {faker.trueFalse[0] ? "Active" : "Inactive"}
-                        </div>
-                      </Table.Td>
-                      <Table.Td
-                        className={clsx([
-                          "box w-56 rounded-l-none rounded-r-none border-x-0 shadow-[5px_3px_5px_#00000005] first:rounded-l-[0.6rem] first:border-l last:rounded-r-[0.6rem] last:border-r dark:bg-darkmode-600",
-                          "before:absolute before:inset-y-0 before:left-0 before:my-auto before:block before:h-8 before:w-px before:bg-slate-200 before:dark:bg-darkmode-400",
-                        ])}
-                      >
-                        <div className="flex items-center justify-center">
-                          <a className="flex items-center mr-3" href="">
-                            <Lucide
-                              icon="CheckSquare"
-                              className="w-4 h-4 mr-1"
-                            />
-                            Edit
-                          </a>
-                          <a className="flex items-center text-danger" href="">
-                            <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                            Delete
-                          </a>
-                        </div>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </div>
-            <div className="flex flex-wrap items-center mt-3 intro-y sm:flex-row sm:flex-nowrap">
-              <Pagination className="w-full sm:w-auto sm:mr-auto">
-                <Pagination.Link>
-                  <Lucide icon="ChevronsLeft" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>...</Pagination.Link>
-                <Pagination.Link>1</Pagination.Link>
-                <Pagination.Link active>2</Pagination.Link>
-                <Pagination.Link>3</Pagination.Link>
-                <Pagination.Link>...</Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronRight" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronsRight" className="w-4 h-4" />
-                </Pagination.Link>
-              </Pagination>
-              <FormSelect className="w-20 mt-3 !box sm:mt-0">
-                <option>10</option>
-                <option>25</option>
-                <option>35</option>
-                <option>50</option>
-              </FormSelect>
-            </div>
-          </div>
-          {/* END: Weekly Top Products */}
+          
+         
         </div>
       </div>
       <div className="col-span-12 2xl:col-span-3">
