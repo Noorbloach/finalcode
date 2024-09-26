@@ -71,45 +71,43 @@ function Main() {
   menu === "divider" ? (
     <li className="my-6 side-nav__divider" key={menuKey}></li>
   ) : (
-    // Check if menu.title is "Clients" or "Dashboard" and hide them
-    (menu.title !== "Clients" && menu.title !== "Dashboard" && menu.title !== "Users") && (
+    // Hide "Users" and "Clients" only for employees
+    (menu.title !== "Users" && menu.title !== "Clients") || (userRole === "admin" || userRole === "superadmin") ? (
       <li key={menuKey}>
-        {menu.title === "Clients" && userRole !== "admin" && userRole !== "superadmin" ? null : (
-          <Tippy
-            as="a"
-            content={menu.title}
-            options={{
-              placement: "right",
-            }}
-            disable={windowWidth > 1260}
-            href={menu.subMenu ? "#" : menu.pathname}
-            onClick={(event: React.MouseEvent) => {
-              event.preventDefault();
-              linkTo(menu, navigate);
-              setFormattedMenu([...formattedMenu]);
-            }}
-            className={clsx([
-              menu.active ? "side-menu side-menu--active" : "side-menu",
-            ])}
-          >
-            <div className="side-menu__icon">
-              <Lucide icon={menu.icon} />
-            </div>
-            <div className="side-menu__title">
-              {menu.title}
-              {menu.subMenu && (
-                <div
-                  className={clsx([
-                    "side-menu__sub-icon",
-                    { "transform rotate-180": menu.activeDropdown },
-                  ])}
-                >
-                  <Lucide icon="ChevronDown" />
-                </div>
-              )}
-            </div>
-          </Tippy>
-        )}
+        <Tippy
+          as="a"
+          content={menu.title}
+          options={{
+            placement: "right",
+          }}
+          disable={windowWidth > 1260}
+          href={menu.subMenu ? "#" : menu.pathname}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            linkTo(menu, navigate);
+            setFormattedMenu([...formattedMenu]);
+          }}
+          className={clsx([
+            menu.active ? "side-menu side-menu--active" : "side-menu",
+          ])}
+        >
+          <div className="side-menu__icon">
+            <Lucide icon={menu.icon} />
+          </div>
+          <div className="side-menu__title">
+            {menu.title}
+            {menu.subMenu && (
+              <div
+                className={clsx([
+                  "side-menu__sub-icon",
+                  { "transform rotate-180": menu.activeDropdown },
+                ])}
+              >
+                <Lucide icon="ChevronDown" />
+              </div>
+            )}
+          </div>
+        </Tippy>
         {/* BEGIN: Second Child */}
         {menu.subMenu && (
           <Transition
@@ -123,7 +121,7 @@ function Main() {
                 "side-menu__sub-open": menu.activeDropdown,
               })}
             >
-             {menu.subMenu.map((subMenu, subMenuKey) => (
+              {menu.subMenu.map((subMenu, subMenuKey) => (
                 (subMenu.title !== "Add Project") || (userRole === "admin" || userRole === "superadmin") ? (
                   <li key={subMenuKey}>
                     <Tippy
@@ -229,9 +227,10 @@ function Main() {
         )}
         {/* END: Second Child */}
       </li>
-    )
+    ) : null
   )
 )}
+
 
             {/* END: First Child */}
           </ul>
