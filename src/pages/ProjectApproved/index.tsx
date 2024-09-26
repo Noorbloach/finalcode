@@ -62,6 +62,20 @@ function Main() {
   const [role, setRole] = useState<string>(""); // State to track if the user is admin
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [filterType, setFilterType] = useState<string | null>(null); // State to track the filter type
+  const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const handleStatusFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(event.target.value);
+    console.log('Selected Status Filter:', event.target.value); // Debugging output
+  };
+  
+
+  // Filter projects based on the selected status
+  const filteredProjectss = statusFilter
+    ? projects.filter((project) => project.adminStatus === statusFilter)
+    : projects;
 
   const ensureProtocol = (url: string) => {
     // If the URL starts with "http://" or "https://", return it as is
@@ -145,9 +159,9 @@ function Main() {
         const projectData = response.data.data;
         if (Array.isArray(projectData)) {
           // Filter projects with status 'Project Started'
-          const filteredProjects = projectData.filter((project: Project) => project.status === 'Project Started');
-          setProjects(filteredProjects);
-          setFilteredProjects(filteredProjects); // Set the filteredProjects initially
+          const filteredProjectss = projectData.filter((project: Project) => project.status === 'Project Started');
+          setProjects(filteredProjectss);
+          setFilteredProjects(filteredProjectss); // Set the filteredProjects initially
         } else {
           console.error("Unexpected data format:", projectData);
         }
@@ -230,11 +244,18 @@ function Main() {
     }
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProjectss.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredProjects.length);
+  let currentProjects = filteredProjectss;
+  
+  if (searchTerm.trim() !== "") {
+    currentProjects = currentProjects.filter(project =>
+      project.projectName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  currentProjects = currentProjects.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProjectss.length);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -250,8 +271,24 @@ function Main() {
           <Button variant="primary" className="mr-2 shadow-md" onClick={() => navigate('/add-product')}>
             Add New Project
           </Button>
+          <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
+            <div className="relative w-56 text-slate-500">
+              <FormSelect
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="!box w-56"
+              >
+                <option value="">All Statuses</option>
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+          </div>
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
+            Showing {startIndex + 1} to {endIndex} of {filteredProjectss.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">

@@ -331,25 +331,7 @@ function Main() {
           >
             Add New Project
           </Button>
-          {/* Status Filter Dropdown */}
-          {role === "admin" && (
-            <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
-              <div className="relative w-56 text-slate-500">
-                <FormSelect
-                  value={statusFilter}
-                  onChange={handleStatusFilterChange}
-                  className="!box w-56"
-                >
-                  <option value="">All Statuses</option>
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </FormSelect>
-              </div>
-            </div>
-          )}
+          
           <div className="hidden mx-auto md:block text-slate-500">
             Showing {startIndex + 1} to {endIndex} of {filteredProjects.length}{" "}
             entries
@@ -402,14 +384,10 @@ function Main() {
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
        
       
-        {(role === "admin" || role === "employee") && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
+        
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
        
-      {/* Conditionally render Template column */}
-      {(role === "admin" || role === "employee" ) && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
-      )}
+     
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
       </Table.Tr>
     </Table.Thead>
@@ -428,18 +406,7 @@ function Main() {
                       : project.status}</Table.Td>
         
           
-          {(role === "admin" || role === "employee") && (
-          <Table.Td className="text-center max-w-[60px]">
-            <div className="relative flex">
-            <FormSelect className="!box w-56" >
-                    {getMemberNames(project.members).map((name, index) => (
-                      <option key={index} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </FormSelect>
-            </div>
-          </Table.Td>)}
+          
           <Table.Td className="text-center">
   <a 
     href={ensureProtocol(project.projectLink)} 
@@ -452,10 +419,6 @@ function Main() {
 </Table.Td>
 
 
-        {/* Conditionally render Template field */}
-        {(role === "admin" || role === "employee") && (
-          <Table.Td className="text-center">{project.template}</Table.Td>
-        )}
         
           <Table.Td className="text-center">
             <div className="flex items-center justify-center">
