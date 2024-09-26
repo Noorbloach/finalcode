@@ -66,7 +66,7 @@ interface AddClientModalProps {
     name: string;
     email: string;
     phone: string;
-    zip: string;
+    zipCode: string;
     location: string;
   }) => void;
 }
@@ -79,7 +79,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [zip, setZip] = useState(""); // New state for zip code
+  const [zipCode, setZip] = useState(""); // New state for zip code
   const [location, setLocation] = useState(null); // Handle the selected state
 
   if (!open) return null;
@@ -104,7 +104,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
         name,
         email,
         phone: `+1${phone}`,
-        zip,
+        zipCode,
         location: location?.label || "",
       });
       onClose();
@@ -165,7 +165,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             <FormInline style={formInlineStyles}>
               <FormLabel style={labelStyles}>Zip Code:</FormLabel>
               <FormInput
-                value={zip}
+                value={zipCode}
                 onChange={handleZipChange}
                 placeholder="Enter zip code"
                 style={inputStyles}
