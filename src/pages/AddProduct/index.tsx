@@ -164,7 +164,7 @@ const handleSave = async () => {
       setClientType("");
       setSelectedClient(null);
 
-    } catch (error) {
+    } catch (error:any) {
       Swal.fire("Error", error.response?.data?.message || "Unknown error occurred", "error");
     }
 
@@ -182,6 +182,10 @@ const handleSave = async () => {
   <option value="old">Existing</option>
 </FormSelect>
 
+
+  function setRfiInput(value: string): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <>
@@ -417,6 +421,27 @@ const handleSave = async () => {
                     />
                   </div>
                 </FormInline>
+                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+  <FormLabel className="xl:w-64 xl:!mr-10">
+    <div className="text-left">
+      <div className="flex items-center">
+        <div className="font-medium">Project Specific RFI</div>
+      </div>
+    </div>
+  </FormLabel>
+  <div className="flex-1 w-full mt-3 xl:mt-0">
+    <FormInput
+      id="rfiAddendum"
+      as="textarea"
+      placeholder="Enter your RFI here"
+      rows={6}  // Increased the number of rows for a larger input box
+      value={rfiAddendum}
+      onChange={(e) => setRfiAddendum(e.target.value)}
+    />
+  </div>
+</FormInline>
+
+                
               </div>
             </div>
           </div>
@@ -430,29 +455,41 @@ const handleSave = async () => {
                 Detail
               </div>
               <div className="mt-5">
-                <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
-                  <FormLabel className="xl:w-64 xl:!mr-10">
-                    <div className="text-left">
-                      <div className="flex items-center">
-                        <div className="font-medium">Client Type</div>
-                        <div className="ml-2 px-2 py-0.5 bg-slate-200 text-slate-600 dark:bg-darkmode-300 dark:text-slate-400 text-xs rounded-md">
-                          Required
-                        </div>
-                      </div>
-                    </div>
-                  </FormLabel>
-                  <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <FormSelect
-  id="client-type"
-  value={clientType}
-  onChange={handleClientTypeChange}
->
-  <option value="" disabled>Select Client Type</option>
-  <option value="new">New</option>
-  <option value="old">Existing</option>
-</FormSelect>
-                  </div>
-                </FormInline>
+              <FormInline className="flex-col items-start pt-5 mt-5 xl:flex-row first:mt-0 first:pt-0">
+  <FormLabel className="xl:w-64 xl:!mr-10">
+    <div className="text-left">
+      <div className="flex items-center">
+        <div className="font-medium">Client Type</div>
+        <div className="ml-2 px-2 py-0.5 bg-slate-200 text-slate-600 dark:bg-darkmode-300 dark:text-slate-400 text-xs rounded-md">
+          Required
+        </div>
+      </div>
+    </div>
+  </FormLabel>
+  <div className="flex-1 w-full mt-3 xl:mt-0">
+    <div className="flex space-x-4">
+      <button
+        onClick={() => {
+          setSelectedClient(null); // Reset selected client
+          setModalOpen(true); // Open modal for New Client
+        }}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+      >
+        New Client
+      </button>
+      <button
+        onClick={() => {
+          setSelectedClient(null); // Reset selected client
+          setSelectClientModalOpen(true); // Open SelectClientModal for Existing Client
+        }}
+        className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+      >
+        Existing Client
+      </button>
+    </div>
+  </div>
+</FormInline>
+
                  {/* Display selected client name with cross option */}
       {selectedClient && (
         <div className="mt-5 flex items-center">
@@ -536,3 +573,4 @@ const handleSave = async () => {
 }
 
 export default Main;
+

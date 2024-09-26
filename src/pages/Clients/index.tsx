@@ -4,7 +4,6 @@ import Button from '@/components/Base/Button';
 import Pagination from '@/components/Base/Pagination';
 import { FormInput, FormSelect } from '@/components/Base/Form';
 import Lucide from '@/components/Base/Lucide';
-import { Menu } from '@/components/Base/Headless';
 import axios from 'axios'; // For making HTTP requests
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -13,23 +12,25 @@ interface Client {
   email: string;
   phone: string;
   location: string;
+  zipCode: string; // Add zip property
 }
 
 function Main() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]); // State for filtered clients
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const [itemsPerPage, setItemsPerPage] = useState(10); // State for items per page
-  const [searchTerm, setSearchTerm] = useState<string>(''); // State for search term
-  const navigate = useNavigate(); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const response = await axios.get<Client[]>('http://localhost:3000/api/clients/clients');
         setClients(response.data.clients);
-        setFilteredClients(response.data.clients); // Initialize filtered clients with all clients
+        setFilteredClients(response.data.clients);
       } catch (error) {
         console.error('Error fetching clients:', error);
       } finally {
@@ -42,26 +43,26 @@ function Main() {
 
   // Function to handle search input change
   const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page whenever search term changes
+    const value = e.target.value;
+    setSearchTerm(value);
+    setCurrentPage(1);
 
-    // Filter clients based on search term
-    if (e.target.value.trim() === '') {
-      setFilteredClients(clients); // Reset filtered clients to all clients when search term is empty
+    // Filter clients based on name
+    if (value.trim() === '') {
+      setFilteredClients(clients); // Reset to all clients if search term is empty
     } else {
       const filtered = clients.filter(client =>
-        client.name.toLowerCase().includes(e.target.value.toLowerCase())
+        client.name.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredClients(filtered);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
-
   const currentClients = _.slice(
     filteredClients,
     (currentPage - 1) * itemsPerPage,
@@ -75,27 +76,23 @@ function Main() {
 
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page whenever items per page changes
+    setCurrentPage(1);
   };
-
-  
 
   return (
     <>
       <h2 className="mt-10 text-lg font-medium intro-y">Clients Data</h2>
       <div className="grid grid-cols-12 gap-6 mt-5">
-        <div className="flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap">
-          
-         
-          <div className="hidden mx-auto md:block text-slate-500">
+      <div className="flex justify-between items-center col-span-12 mt-2 intro-y">
+        <div className="text-slate-500 text-center flex-1">
             Showing {itemsPerPage * (currentPage - 1) + 1} to {Math.min(currentPage * itemsPerPage, filteredClients.length)} of {filteredClients.length} entries
           </div>
-          <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
+          <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-3">
             <div className="relative w-56 text-slate-500">
               <FormInput
                 type="text"
                 className="w-56 pr-10 !box"
-                placeholder="Search..."
+                placeholder="Search by name..."
                 value={searchTerm}
                 onChange={handleSearchInputChange}
               />
@@ -132,6 +129,9 @@ function Main() {
                     </div>
                     <div className="text-slate-500 text-sm">
                       Location: {client.location}
+                    </div>
+                    <div className="text-slate-500 text-sm">
+                      Zip: {client.zipCode} {/* Display zip code */}
                     </div>
                   </div>
                 </div>
