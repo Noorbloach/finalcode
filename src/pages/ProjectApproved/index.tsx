@@ -391,18 +391,23 @@ function Main() {
     Admin Link
   </a>
 </Table.Td>
-{(role === "admin" || role === "employee") && (
-  <Table.Td className="text-center">
-    <a 
-      href={ensureProtocol(project.estimatorLink)} 
-      className="underline text-blue-500 hover:text-blue-700" 
-      target="_blank" 
-      rel="noopener noreferrer"
-    >
-      Estimator Link
-    </a>
-  </Table.Td>
-)}
+<Table.Td className="text-center">
+  {project.estimatorLink ? (
+    (role === "admin" || role === "employee") && (
+      <a 
+        href={ensureProtocol(project.estimatorLink)} 
+        className="underline text-blue-500 hover:text-blue-700" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        Estimator Link
+      </a>
+    )
+  ) : (
+    " - "
+  )}
+</Table.Td>
+
 
         {/* Conditionally render Template field */}
         {(role === "admin" || role === "employee") && (
