@@ -320,7 +320,11 @@ function Main() {
         {(role === "superadmin") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
         {(role === "admin" || role === "employee") && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>)}
+  <Table.Th className="text-center border-b-0 whitespace-nowrap">
+    {role === "admin" ? "Ops Due Date" : "Due Date"}
+  </Table.Th>
+)}
+
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
         {(role === "admin" || role === "employee") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
