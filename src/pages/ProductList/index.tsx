@@ -287,23 +287,7 @@ const ensureProtocol = (url: string) => {
           <Button variant="primary" className="mr-2 shadow-md" onClick={() => navigate('/add-product')}>
             Add New Project
           </Button>
-           {/* Status Filter Dropdown */}
-           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
-            <div className="relative w-56 text-slate-500">
-              <FormSelect
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                className="!box w-56"
-              >
-                <option value="">All Statuses</option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
-          </div>
+          
           <div className="hidden mx-auto md:block text-slate-500">
             Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
           </div>
