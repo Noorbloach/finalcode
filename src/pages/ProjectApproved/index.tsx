@@ -30,6 +30,7 @@ interface Project {
   projectLink:string;
   estimatorLink:string;
   template:string;
+  
   description:string;
   clientType: 'New' | 'Old';
   createdAt: Date;
@@ -211,6 +212,8 @@ function Main() {
     return <div>Loading...</div>;
   }
 
+  const isFieldDisabled = role === "employee";
+
   return (
     <>
       <h2 className="mt-10 text-lg font-medium intro-y">Project List</h2>
@@ -290,6 +293,7 @@ function Main() {
               value={project.adminStatus}
               onChange={(e) => handleAdminStatusChange(e, project._id)}
               className="form-select !box"
+              disabled={isFieldDisabled}
             >
               {statuses.map((status) => (
                 <option key={status} value={status}>
@@ -356,9 +360,10 @@ function Main() {
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
               </a>
+              {(role === "superadmin") && (
               <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
-              </a>
+              </a>)}
             </div>
           </Table.Td>
         </Table.Tr>

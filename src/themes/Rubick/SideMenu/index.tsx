@@ -11,10 +11,23 @@ import logoUrl from "@/assets/images/logo.svg";
 import clsx from "clsx";
 import TopBar from "@/components/Themes/Rubick/TopBar";
 import MobileMenu from "@/components/MobileMenu";
+import {jwtDecode} from "jwt-decode";
 
 function Main() {
   const navigate = useNavigate();
   const location = useLocation();
+
+   // Decode the JWT to get user role
+   const [userRole, setUserRole] = useState<string | null>(null);
+  
+   useEffect(() => {
+     // Assume you have the JWT token stored in localStorage
+     const token = localStorage.getItem("token");
+     if (token) {
+       const decoded: any = jwtDecode(token);
+       setUserRole(decoded.role); // Assuming the role is stored in the 'role' field of the token
+     }
+   }, []);
   const [formattedMenu, setFormattedMenu] = useState<
     Array<FormattedMenu | "divider">
   >([]);
@@ -59,6 +72,7 @@ function Main() {
                 <li className="my-6 side-nav__divider" key={menuKey}></li>
               ) : (
                 <li key={menuKey}>
+                  {menu.title === "Clients" && userRole !== "admin"  && userRole !== "superadmin" ? null : (
                   <Tippy
                     as="a"
                     content={menu.title}
@@ -92,7 +106,7 @@ function Main() {
                         </div>
                       )}
                     </div>
-                  </Tippy>
+                  </Tippy> )}
                   {/* BEGIN: Second Child */}
                   {menu.subMenu && (
                     <Transition

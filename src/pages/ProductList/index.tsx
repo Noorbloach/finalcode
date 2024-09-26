@@ -40,23 +40,29 @@ interface Project {
   totalAmount: number;
   remainingAmount: number;
   clientPermanentNotes: string;
-  projectLink: string;
-  estimatorLink: string;
-  template: string;
-  description: string;
-  clientType: "New" | "Old";
+  projectLink:string;
+  estimatorLink:string;
+  template:string;
+  rfiAddendum:string;
+  description:string;
+  clientType: 'New' | 'Old';
   createdAt: Date;
   client: {
     _id: string;
     name: string;
   };
   creator: string;
-
+  members: string[];
   enterpriseName: string;
 }
 
 interface DecodedToken {
   role: string; // Expecting a string role from the JWT token
+}
+
+interface Employee {
+  _id: string; // Assuming employees have an ID
+  name: string; // Employee name
 }
 
 function Main() {
@@ -72,6 +78,7 @@ function Main() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterType, setFilterType] = useState<string | null>(null); // State to track the filter type
   const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   const statuses = [
     "Pending",
@@ -105,6 +112,29 @@ function Main() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/auth/users/role/employee"); // Adjust endpoint as necessary
+        console.log(response.data)
+        setEmployees(response.data); // Assuming the response contains the employee data
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+   // Function to get member names based on member IDs
+   const getMemberNames = (memberIds: string[]) => {
+    return memberIds.map(memberId => {
+      const employee = employees.find(emp => emp._id === memberId);
+      return employee ? employee.name : memberId; // Return name or ID if not found
+    });
+  };
+
 
   // Fetch projects from API
   useEffect(() => {
@@ -228,24 +258,21 @@ function Main() {
   };
 
   // Function to handle project update
-  const handleUpdateProject = async () => {
-    if (selectedProject) {
+ const handleUpdate = async () => {
+    // This function is called after the project is updated
+    const fetchUpdatedProject = async () => {
       try {
-        await axios.put(
-          `http://localhost:3000/api/projects/${selectedProject._id}`,
-          selectedProject
-        );
-        // Update the project in the state
-        setProjects((prevProjects) =>
-          prevProjects.map((p) =>
-            p._id === selectedProject._id ? selectedProject : p
-          )
+        const response = await axios.get(`http://localhost:3000/api/projects/${selectedProject._id}`);
+        setProjects(prevProjects =>
+          prevProjects.map(p => (p._id === selectedProject._id ? selectedProject : p))
         );
         setEditModalOpen(false);
       } catch (error) {
-        console.error("Error updating project:", error);
+        console.error("Error fetching updated project:", error);
       }
-    }
+    };
+
+    fetchUpdatedProject();
   };
 
   // Handle input change for the form
@@ -358,209 +385,110 @@ function Main() {
           </div>
         </div>
         <div className="col-span-12 overflow-auto intro-y lg:overflow-visible">
-          <div className="overflow-x-auto">
-            {" "}
-            {/* Wrapper to allow horizontal scrolling */}
-            <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th className="border-b-0 whitespace-nowrap">
-                    Project Title
-                  </Table.Th>
-                  {role === "superadmin" && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      ClientName
-                    </Table.Th>
-                  )}
-                  {role === "superadmin" && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Budget
-                    </Table.Th>
-                  )}
-                  {role === "superadmin" && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Due Date
-                    </Table.Th>
-                  )}
-                  {(role === "admin" || role === "employee") && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Ops Due Date
-                    </Table.Th>
-                  )}
-                  <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                    Status
-                  </Table.Th>
-                  {(role === "admin" || role === "employee") && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Status (Cloned)
-                    </Table.Th>
-                  )}
+        <div className="overflow-x-auto"> {/* Wrapper to allow horizontal scrolling */}
+  <Table className="border-spacing-y-[10px] border-separate -mt-2 w-full">
+    <Table.Thead>
+      <Table.Tr>
+        <Table.Th className=" text-center border-b-0 whitespace-nowrap">Project Title</Table.Th>
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">ClientName</Table.Th>
+      )}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
+        {(role === "superadmin") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>)}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
+       
+      
+        {(role === "admin" || role === "employee") && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
+        {(role === "admin" || role === "employee" ) && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
+      )}
+      {/* Conditionally render Template column */}
+      {(role === "admin" || role === "employee" ) && (
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
+      )}
+        <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
+      </Table.Tr>
+    </Table.Thead>
+    <Table.Tbody>
+      {currentProjects.map((project) => (
+        <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
+          <Table.Td className="text-center">{project.projectName}</Table.Td>
+          {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
+          {(role === "superadmin") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
+          {(role === "superadmin") && (
+          <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
+          {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
+          <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
+                      ? 'On Hold'
+                      : project.status}</Table.Td>
+        
+          
+          {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center max-w-[60px]">
+            <div className="relative flex">
+            <FormSelect className="!box w-56" >
+                    {getMemberNames(project.members).map((name, index) => (
+                      <option key={index} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </FormSelect>
+            </div>
+          </Table.Td>)}
+          <Table.Td className="text-center">
+  <a 
+    href={ensureProtocol(project.projectLink)} 
+    className="underline text-blue-500 hover:text-blue-700" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    Admin Link
+  </a>
+</Table.Td>
+{(role === "admin" || role === "employee") && (
+  <Table.Td className="text-center">
+    <a 
+      href={ensureProtocol(project.estimatorLink)} 
+      className="underline text-blue-500 hover:text-blue-700" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      Estimator Link
+    </a>
+  </Table.Td>
+)}
 
-                  {(role === "admin" || role === "employee") && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Joined Members
-                    </Table.Th>
-                  )}
-                  <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                    Project (admin) Link
-                  </Table.Th>
-                  {(role === "admin" || role === "employee") && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Estimator Link
-                    </Table.Th>
-                  )}
-                  {/* Conditionally render Template column */}
-                  {(role === "admin" || role === "employee") && (
-                    <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                      Template
-                    </Table.Th>
-                  )}
-                  <Table.Th className="text-center border-b-0 whitespace-nowrap">
-                    Actions
-                  </Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {currentProjects.map((project) => (
-                  <Table.Tr key={project._id} className="intro-x bg-white mb-2">
-                    {" "}
-                    {/* Removed box and shadow classes */}
-                    <Table.Td className="text-center">
-                      {/* {project.projectName} */}
-                      {project.projectName.length > 10
-                        ? `${project.projectName.substring(0, 10)}...`
-                        : project.projectName}
-                    </Table.Td>
-                    {role === "superadmin" && (
-                      <Table.Td className="text-center">
-                        {project.client.name}
-                      </Table.Td>
-                    )}{" "}
-                    {/* Added column */}
-                    {role === "superadmin" && (
-                      <Table.Td className="text-center">
-                        ${project.totalAmount}
-                      </Table.Td>
-                    )}
-                    {role === "superadmin" && (
-                      <Table.Td className="text-center">
-                        {new Date(project.clientDueDate).toLocaleDateString()}
-                      </Table.Td>
-                    )}
-                    {(role === "admin" || role === "employee") && (
-                      <Table.Td className="text-center">
-                        {new Date(project.opsDueDate).toLocaleDateString()}
-                      </Table.Td>
-                    )}
-                    <Table.Td className="text-center">
-                      {" "}
-                      {role === "admin" && project.status === "Proposal Sent"
-                        ? "On Hold"
-                        : project.status}
-                    </Table.Td>
-                    {(role === "admin" || role === "employee") && (
-                      <Table.Td className="text-center">
-                        <select
-                          value={project.adminStatus}
-                          onChange={(e) =>
-                            handleAdminStatusChange(e, project._id)
-                          }
-                          className="form-select !box"
-                          disabled={isFieldDisabled}
-                        >
-                          {statuses.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </Table.Td>
-                    )}
-                    {(role === "admin" || role === "employee") && (
-                      <Table.Td className="text-center max-w-[60px]">
-                        <div className="relative flex">
-                          {_.take(fakerData, 3).map((faker, fakerKey) => (
-                            <div
-                              key={fakerKey}
-                              className="w-8 h-8 image-fit zoom-in"
-                              style={{
-                                position: "relative",
-                                zIndex: 5 - fakerKey,
-                                marginLeft: fakerKey === 0 ? "0" : "-8px",
-                              }}
-                            >
-                              <Tippy
-                                as="img"
-                                alt="Midone Tailwind HTML Admin Template"
-                                className="rounded-full"
-                                src={faker.images[0]}
-                                content={`Uploaded at ${faker.dates[0]}`}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </Table.Td>
-                    )}
-                    <Table.Td className="text-center">
-                      <a
-                        href={ensureProtocol(project.projectLink)}
-                        className="underline text-blue-500 hover:text-blue-700"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Admin Link
-                      </a>
-                    </Table.Td>
-                    {(role === "admin" || role === "employee") && (
-                      <Table.Td className="text-center">
-                        <a
-                          href={ensureProtocol(project.estimatorLink)}
-                          className="underline text-blue-500 hover:text-blue-700"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Estimator Link
-                        </a>
-                      </Table.Td>
-                    )}
-                    {/* Conditionally render Template field */}
-                    {(role === "admin" || role === "employee") && (
-                      <Table.Td className="text-center">
-                        {project.template}
-                      </Table.Td>
-                    )}
-                    <Table.Td className="text-center">
-                      <div className="flex items-center justify-center">
-                        <a
-                          className="flex items-center mr-3"
-                          href="#"
-                          onClick={() => handleViewClick(project._id)}
-                        >
-                          <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
-                        </a>
-                        <a
-                          className="flex items-center mr-3"
-                          href="#"
-                          onClick={() => handleEditClick(project._id)}
-                        >
-                          <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" />{" "}
-                          Edit
-                        </a>
-                        <a
-                          className="flex items-center text-danger"
-                          href="#"
-                          onClick={() => handleDeleteClick(project._id)}
-                        >
-                          <Lucide icon="Trash2" className="w-4 h-4 mr-1" />{" "}
-                          Delete
-                        </a>
-                      </div>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          </div>
+        {/* Conditionally render Template field */}
+        {(role === "admin" || role === "employee") && (
+          <Table.Td className="text-center">{project.template}</Table.Td>
+        )}
+        
+          <Table.Td className="text-center">
+            <div className="flex items-center justify-center">
+              <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
+                <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
+              </a>
+              <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
+                <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
+              </a>
+              {(role === "superadmin" ) && (
+              <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
+                <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
+              </a>)}
+            </div>
+          </Table.Td>
+        </Table.Tr>
+      ))}
+    </Table.Tbody>
+  </Table>
+</div>
 
           <div className="flex items-center justify-between mt-4">
             <Pagination
@@ -587,8 +515,9 @@ function Main() {
         onClose={() => setEditModalOpen(false)}
         project={selectedProject}
         onInputChange={handleInputChange}
-        onUpdate={handleUpdateProject}
         role={role}
+        employees={employees} 
+        onUpdate={handleUpdate}
       />
 
       <ViewProjectModal
