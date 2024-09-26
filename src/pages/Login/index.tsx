@@ -153,13 +153,7 @@ function Main() {
                             'Login'
                           )}
                         </Button>
-                        <Button
-                          variant="outline-secondary"
-                          className="w-full px-4 py-3 mt-3 align-top xl:w-32 xl:mt-0"
-                          disabled={loading}
-                        >
-                          Register
-                        </Button>
+                       
                       </div>
                     </Form>
                   )}
