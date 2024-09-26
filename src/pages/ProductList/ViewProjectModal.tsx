@@ -169,6 +169,15 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
                   />
                 </div>
                 <div style={formGroupStyles}>
+                  <label style={labelStyles}>RFI Notes:</label>
+                  <textarea
+                    name="description"
+                    value={stripHtmlTags(project.rfiAddendum)}
+                    style={textareaStyles}
+                    disabled
+                  />
+                </div>
+                <div style={formGroupStyles}>
                   <label style={labelStyles}>Client Due Date:</label>
                   <FormInput
                     name="clientDueDate"
