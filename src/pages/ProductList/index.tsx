@@ -380,7 +380,10 @@ function Main() {
         {(role === "superadmin") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
         {(role === "admin" || role === "employee") && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Ops Due Date</Table.Th>)}
+  <Table.Th className="text-center border-b-0 whitespace-nowrap">
+    {role === "admin" ? "Ops Due Date" : "Due Date"}
+  </Table.Th>
+)}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
        
       
@@ -425,9 +428,10 @@ function Main() {
               <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
                 <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
               </a>
+              {(role === "superadmin" || role === "admin" ) && (
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
-              </a>
+              </a>)}
               {(role === "superadmin" ) && (
               <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
