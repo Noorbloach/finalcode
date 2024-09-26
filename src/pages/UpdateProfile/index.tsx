@@ -107,7 +107,7 @@ function Main() {
               </div>
               <div className="ml-4 mr-auto">
                 <div className="text-base font-medium">
-                  s
+                  {userData.name}
                 </div>
                 <div className="text-slate-500">{}</div>
               </div>

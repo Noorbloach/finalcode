@@ -39,13 +39,16 @@ import ForgotPassword from "../pages/ForgotPassword";
 import {  Navigate } from "react-router-dom";
 import OTP from "../pages/OTP";
 import NewPassword from "../pages/NewPassword";
-
-
+import { jwtDecode } from "jwt-decode";
+import { useEffect,useState } from "react";
 import Layout from "../themes";
 import Clients from "../pages/Clients";
 import ProjectList from "../pages/ProductList";
 import ProductList from "../pages/ProductList";
 
+interface DecodedToken {
+  role: string; // Expecting a string role from the JWT token
+}
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -54,6 +57,22 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 function Router() {
+
+  const [role, setRole] = useState<string>("");
+
+   // Decode JWT to check if the user is an admin
+   useEffect(() => {
+    const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+    if (token) {
+      try {
+        const decoded: DecodedToken = jwtDecode(token);
+        setRole(decoded.role); // Set role directly based on decoded token
+      } catch (error) {
+        console.error("Invalid token", error);
+      }
+    }
+  }, []);
+
   const routes = [
     {
       path: "/",

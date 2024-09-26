@@ -101,6 +101,15 @@ function Main() {
     navigate('/register');
   };
 
+  const handleNotificationClick = (notification) => {
+    // You can check the notification type or any specific condition to navigate
+    // For this case, we're simply navigating to '/product-list' when a notification is clicked.
+    navigate('/product-list');
+    
+    // Optionally, you can mark the notification as 'read' after clicking it
+    // updateNotificationReadStatus(notification._id);
+  };
+
   // Handler for Profile menu item
   const handleProfileClick = () => {
     navigate('/update-profile');
@@ -175,6 +184,7 @@ function Main() {
                 notifications.slice(0, notificationsLimit).map((notification) => (
                   <div
                     key={notification._id}
+                    onClick={() => handleNotificationClick(notification)}
                     className="flex items-center mt-2 p-2 rounded-lg hover:bg-blue-100 transition-all"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">

@@ -114,13 +114,16 @@ const handleSave = async () => {
       return;
     }
 
+    const formattedSubcategory = subcategory || null;
+    const formattedProjectType = projectType || null;
+
     try {
       const response = await axios.post("http://localhost:3000/api/create", {
         creator: userId,
         projectName,
         status,
-        subcategory,
-        projectType,
+        subcategory: formattedSubcategory,
+        projectType:formattedProjectType,
         clientDueDate,
         opsDueDate,
         description,
