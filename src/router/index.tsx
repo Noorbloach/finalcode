@@ -10,7 +10,6 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ErrorPage from "../pages/ErrorPage";
 import UpdateProfile from "../pages/UpdateProfile";
-import ChangePassword from "../pages/ChangePassword";
 import Notification from "../pages/Notification";
 import Accordion from "../pages/Accordion";
 import ProgressBar from "../pages/ProgressBar";
@@ -111,10 +110,7 @@ function Router() {
           element: <UpdateProfile />,
         },
         
-        {
-          path: "change-password",
-          element: <ChangePassword />,
-        },
+      
        
         {
           path: "notification",

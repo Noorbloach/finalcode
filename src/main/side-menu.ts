@@ -95,11 +95,7 @@ const menu: Array<Menu | "divider"> = [
         pathname: "/update-profile",
         title: "Update profile",
       },
-      {
-        icon: "Activity",
-        pathname: "/change-password",
-        title: "Change Password",
-      },
+      
     ],
   },
  
