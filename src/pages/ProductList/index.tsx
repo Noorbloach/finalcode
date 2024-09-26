@@ -353,14 +353,10 @@ const ensureProtocol = (url: string) => {
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status</Table.Th>
        
       
-        {(role === "admin" || role === "employee") && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
+        
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
        
-      {/* Conditionally render Template column */}
-      {(role === "admin" || role === "employee" ) && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
-      )}
+     
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
       </Table.Tr>
     </Table.Thead>
@@ -379,18 +375,7 @@ const ensureProtocol = (url: string) => {
                       : project.status}</Table.Td>
         
           
-          {(role === "admin" || role === "employee") && (
-          <Table.Td className="text-center max-w-[60px]">
-            <div className="relative flex">
-            <FormSelect className="!box w-56" >
-                    {getMemberNames(project.members).map((name, index) => (
-                      <option key={index} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </FormSelect>
-            </div>
-          </Table.Td>)}
+          
           <Table.Td className="text-center">
   <a 
     href={ensureProtocol(project.projectLink)} 
@@ -403,10 +388,6 @@ const ensureProtocol = (url: string) => {
 </Table.Td>
 
 
-        {/* Conditionally render Template field */}
-        {(role === "admin" || role === "employee") && (
-          <Table.Td className="text-center">{project.template}</Table.Td>
-        )}
         
           <Table.Td className="text-center">
             <div className="flex items-center justify-center">
