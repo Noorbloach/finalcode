@@ -109,7 +109,7 @@ function Main() {
                   className="w-6"
                   src={logoUrl}
                 />
-                <span className="ml-3 text-lg text-white"> Rubick </span>
+                <span className="ml-3 text-lg text-white"> Sufnoor </span>
               </a>
               <div className="my-auto">
                 <img

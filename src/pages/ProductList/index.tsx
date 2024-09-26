@@ -405,9 +405,7 @@ function Main() {
         {(role === "admin" || role === "employee") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
-        {(role === "admin" || role === "employee" ) && (
-        <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
-      )}
+       
       {/* Conditionally render Template column */}
       {(role === "admin" || role === "employee" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
@@ -452,18 +450,7 @@ function Main() {
     Admin Link
   </a>
 </Table.Td>
-{(role === "admin" || role === "employee") && (
-  <Table.Td className="text-center">
-    <a 
-      href={ensureProtocol(project.estimatorLink)} 
-      className="underline text-blue-500 hover:text-blue-700" 
-      target="_blank" 
-      rel="noopener noreferrer"
-    >
-      Estimator Link
-    </a>
-  </Table.Td>
-)}
+
 
         {/* Conditionally render Template field */}
         {(role === "admin" || role === "employee") && (

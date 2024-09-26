@@ -14,6 +14,10 @@ import _ from "lodash";
 import Tippy from "@/components/Base/Tippy";
 import ViewProjectModal from "../ProductList/ViewProjectModal";
 
+interface Employee {
+  _id: string; // Assuming employees have an ID
+  name: string; // Employee name
+}
 interface Project {
   _id: string;
   projectName: string;
@@ -30,7 +34,7 @@ interface Project {
   projectLink:string;
   estimatorLink:string;
   template:string;
-  
+  members: string[];
   description:string;
   clientType: 'New' | 'Old';
   createdAt: Date;
@@ -57,6 +61,7 @@ function Main() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [role, setRole] = useState<string>(""); // State to track if the user is admin
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   const ensureProtocol = (url: string) => {
     // If the URL starts with "http://" or "https://", return it as is
@@ -81,6 +86,29 @@ function Main() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/auth/users/role/employee"); // Adjust endpoint as necessary
+        console.log(response.data)
+        setEmployees(response.data); // Assuming the response contains the employee data
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  // Function to get member names based on member IDs
+  const getMemberNames = (memberIds: string[]) => {
+    return memberIds.map(memberId => {
+      const employee = employees.find(emp => emp._id === memberId);
+      return employee ? employee.name : memberId; // Return name or ID if not found
+    });
+  };
+
 
   const handleDeleteClick = async (projectId: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this project?");
@@ -307,21 +335,13 @@ function Main() {
           {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center max-w-[60px]">
             <div className="relative flex">
-              {_.take(fakerData, 3).map((faker, fakerKey) => (
-                <div
-                  key={fakerKey}
-                  className="w-8 h-8 image-fit zoom-in"
-                  style={{ position: 'relative', zIndex: 5 - fakerKey, marginLeft: fakerKey === 0 ? '0' : '-8px' }}
-                >
-                  <Tippy
-                    as="img"
-                    alt="Midone Tailwind HTML Admin Template"
-                    className="rounded-full"
-                    src={faker.images[0]}
-                    content={`Uploaded at ${faker.dates[0]}`}
-                  />
-                </div>
-              ))}
+            <FormSelect className="!box w-56" >
+                    {getMemberNames(project.members).map((name, index) => (
+                      <option key={index} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </FormSelect>
             </div>
           </Table.Td>)}
           <Table.Td className="text-center">
@@ -426,6 +446,7 @@ function Main() {
         onInputChange={handleInputChange}
         onUpdate={handleUpdateProject}
         role={role}
+        employees={employees} 
       />
       <ViewProjectModal
         open={viewModalOpen}
