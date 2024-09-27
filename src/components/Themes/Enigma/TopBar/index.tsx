@@ -78,7 +78,7 @@ function Main(props: { layout?: "side-menu" | "simple-menu" | "top-menu" }) {
               <FormInput
                 type="text"
                 className="border-transparent w-56 shadow-none rounded-full bg-slate-200 pr-8 transition-[width] duration-300 ease-in-out focus:border-transparent focus:w-72 dark:bg-darkmode-400"
-                placeholder="Search..."
+                placeholder="Searchh..."
                 onFocus={showSearchDropdown}
                 onBlur={hideSearchDropdown}
               />
