@@ -1,10 +1,10 @@
-import { useRoutes } from "react-router-dom";
+import { useRoutes, Navigate, useNavigate } from "react-router-dom";
 import DashboardOverview1 from "../pages/DashboardOverview1";
 import AddProduct from "../pages/AddProduct";
-import ProductDetails from "../pages/ProjectDetails";
-import ProjectApproved from "../pages/ProjectApproved"
+import ProjectDetails from "../pages/ProjectDetails";
+import ProjectApproved from "../pages/ProjectApproved";
 import Chat from "../pages/Chat";
-import Calendar from "../pages/Clients";
+import Clients from "../pages/Clients";
 import CrudDataList from "../pages/CrudDataList";
 import CrudForm from "../pages/CrudForm";
 import UsersLayout2 from "../pages/UsersLayout2";
@@ -36,14 +36,11 @@ import WysiwygEditor from "../pages/WysiwygEditor";
 import Validation from "../pages/Validation";
 import Chart from "../pages/Chart";
 import ForgotPassword from "../pages/ForgotPassword";
-import {  Navigate } from "react-router-dom";
 import OTP from "../pages/OTP";
 import NewPassword from "../pages/NewPassword";
-import { jwtDecode } from "jwt-decode";
-import { useEffect,useState } from "react";
+import {jwtDecode} from "jwt-decode"; // Make sure you have this installed
+import { useEffect, useState } from "react";
 import Layout from "../themes";
-import Clients from "../pages/Clients";
-import ProjectList from "../pages/ProductList";
 import ProductList from "../pages/ProductList";
 
 interface DecodedToken {
@@ -51,28 +48,41 @@ interface DecodedToken {
 }
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const navigate = useNavigate();
+  const [role, setRole] = useState<string | null>(null);
   const isAuthenticated = !!localStorage.getItem("token");
-  return isAuthenticated ? children : <Navigate to="/login" />;
-  
-};
 
-function Router() {
-
-  const [role, setRole] = useState<string>("");
-
-   // Decode JWT to check if the user is an admin
-   useEffect(() => {
-    const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded: DecodedToken = jwtDecode(token);
-        setRole(decoded.role); // Set role directly based on decoded token
+        setRole(decoded.role);
+
+        // Redirect based on the user role
+        if (decoded.role === "employee") {
+          navigate("/project-approved"); // Redirect employee to project-approved
+        }
+        else if (decoded.role === "admin") {
+          navigate("/product-list"); // Redirect employee to project-approved
+        }
+        else if (decoded.role === "superadmin") {
+          navigate("/add-product"); // Redirect employee to project-approved
+        }
       } catch (error) {
         console.error("Invalid token", error);
       }
     }
-  }, []);
+  }, [navigate]);
 
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
+};
+
+function Router() {
   const routes = [
     {
       path: "/",
@@ -86,7 +96,6 @@ function Router() {
           path: "/",
           element: <DashboardOverview1 />,
         },
-        
         {
           path: "add-product",
           element: <AddProduct />,
@@ -101,19 +110,16 @@ function Router() {
         },
         {
           path: "project-details",
-          element: <ProductDetails />,
-        },    
-              
+          element: <ProjectDetails />,
+        },
         {
           path: "chat",
           element: <Chat />,
         },
-       
         {
           path: "clients",
           element: <Clients />,
         },
-        
         {
           path: "crud-data-list",
           element: <CrudDataList />,
@@ -122,13 +128,10 @@ function Router() {
           path: "crud-form",
           element: <CrudForm />,
         },
-       
         {
           path: "users-layout-2",
           element: <UsersLayout2 />,
         },
-       
-       
         {
           path: "profile-overview-3",
           element: <ProfileOverview3 />,
@@ -137,7 +140,6 @@ function Router() {
           path: "update-profile",
           element: <UpdateProfile />,
         },
-        
         {
           path: "change-password",
           element: <ChangePassword />,
@@ -214,7 +216,6 @@ function Router() {
           path: "tom-select",
           element: <TomSelect />,
         },
-        
         {
           path: "wysiwyg-editor",
           element: <WysiwygEditor />,
@@ -227,7 +228,6 @@ function Router() {
           path: "chart",
           element: <Chart />,
         },
-       
       ],
     },
     {
@@ -240,15 +240,15 @@ function Router() {
     },
     {
       path: "/forgot-password",
-      element: <ForgotPassword />,  // Public route for Forgot Password
+      element: <ForgotPassword />, // Public route for Forgot Password
     },
     {
       path: "/otp",
-      element: <OTP />,  // Public route for Forgot Password
+      element: <OTP />, // Public route for OTP
     },
     {
       path: "/resetpassword/:token",
-      element: <NewPassword />,  // Public route for Forgot Password
+      element: <NewPassword />, // Public route for resetting password
     },
     {
       path: "/error-page",

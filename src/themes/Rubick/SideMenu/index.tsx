@@ -72,7 +72,7 @@ function Main() {
     <li className="my-6 side-nav__divider" key={menuKey}></li>
   ) : (
     // Hide "Users" and "Clients" only for employees
-    (menu.title !== "Users" && menu.title !== "Clients") || (userRole === "admin" || userRole === "superadmin") ? (
+    (menu.title !== "Users" && menu.title !== "Clients" && menu.title !== "Dashboard") || (userRole === "admin" || userRole === "superadmin") ? (
       <li key={menuKey}>
         <Tippy
           as="a"
