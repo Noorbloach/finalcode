@@ -4,6 +4,7 @@ import AddProduct from "../pages/AddProduct";
 import ProjectApproved from "../pages/ProjectApproved"
 import Chat from "../pages/Chat";
 import Calendar from "../pages/Clients";
+
 import UsersLayout2 from "../pages/UsersLayout2";
 import ProfileOverview3 from "../pages/ProfileOverview3";
 import Login from "../pages/Login";
@@ -81,7 +82,7 @@ function Router() {
           path: "product-list",
           element: <ProductList />,
         },
-         
+           
               
         {
           path: "chat",
@@ -92,9 +93,7 @@ function Router() {
           path: "clients",
           element: <Clients />,
         },
-        
-        
-       
+     
         {
           path: "users-layout-2",
           element: <UsersLayout2 />,
@@ -110,8 +109,6 @@ function Router() {
           element: <UpdateProfile />,
         },
         
-      
-       
         {
           path: "notification",
           element: <Notification />,
