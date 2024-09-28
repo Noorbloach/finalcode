@@ -530,19 +530,8 @@ const handleSave = async () => {
           {/* END: Product Detail */}
           
           <div className="flex flex-col justify-end gap-2 mt-5 md:flex-row">
-            <Button
-              type="button"
-              className="w-full py-3 border-slate-300 dark:border-darkmode-400 text-slate-500 md:w-52"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              className="w-full py-3 border-slate-300 dark:border-darkmode-400 text-slate-500 md:w-52"
-              onClick={handleSave}
-            >
-              Save & Add New Project
-            </Button>
+            
+           
             <Button
               variant="primary"
               type="button"
