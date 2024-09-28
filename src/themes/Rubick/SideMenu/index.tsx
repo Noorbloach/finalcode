@@ -72,11 +72,14 @@ function Main() {
     <li className="my-6 side-nav__divider" key={menuKey}></li>
   ) : (
     // Hide "Users" and "Clients" only for employees
-    (menu.title !== "Users" && menu.title !== "Clients" && menu.title !== "Dashboard") || (userRole === "admin" || userRole === "superadmin") ? (
+    ( 
+      (userRole === "admin" && menu.title !== "Dashboard" && menu.title !== "Clients") || 
+      (userRole === "superadmin" && menu.title !== "Dashboard" && menu.title !== "Users") ||
+      (userRole === "employee" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Clients"))&& (
       <li key={menuKey}>
         <Tippy
           as="a"
-          content={menu.title}
+          content={menu.title}  
           options={{
             placement: "right",
           }}
@@ -122,7 +125,14 @@ function Main() {
               })}
             >
               {menu.subMenu.map((subMenu, subMenuKey) => (
-                (subMenu.title !== "Add Project") || (userRole === "admin" || userRole === "superadmin") ? (
+                 // Hide "Login Error Page" and "Change Password" for all roles
+                // Hide "Register" for employee
+                // Hide "Add Project" for employee and admin
+                (subMenu.title !== "Login" && subMenu.title !== "Error Page" &&
+                  subMenu.title !== "Change Password" &&
+                  !(userRole === "employee" && subMenu.title === "Register") &&
+                  !(userRole !== "superadmin" && subMenu.title === "Add Project") // "Add Project" only for superadmin
+                  ) && (
                   <li key={subMenuKey}>
                     <Tippy
                       as="a"
@@ -220,14 +230,14 @@ function Main() {
                     )}
                     {/* END: Third Child */}
                   </li>
-                ) : null
+                ) 
               ))}
             </ul>
           </Transition>
         )}
         {/* END: Second Child */}
       </li>
-    ) : null
+    ) 
   )
 )}
 

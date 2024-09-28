@@ -11,6 +11,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import Button from "@/components/Base/Button";
 import clsx from "clsx";
+import { jwtDecode } from "jwt-decode";
 
 function Main() {
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,9 @@ function Main() {
       const response = await axios.post('http://localhost:3000/api/auth/login', values);
       const { token } = response.data;
       localStorage.setItem('token', token); // Save the JWT token
+       // Decode the JWT token to extract user role
+       const decodedToken = jwtDecode(token);
+       const userRole = decodedToken.role; 
       setLoading(false);
 
       // Success popup using SweetAlert2
@@ -41,7 +45,20 @@ function Main() {
         timer: 1500,
       });
 
-      navigate('/'); // Redirect to the home page or dashboard
+     // Redirect based on user role
+     if (userRole === 'employee') {
+      navigate('/project-approved'); // Employee role redirects to 'projects-approved'
+    } 
+    else if (userRole === "admin") {
+      navigate("/product-list"); // Redirect employee to project-approved
+    }
+    else if (userRole === "superadmin") {
+      navigate("/add-product"); // Redirect employee to project-approved
+    }
+    
+    else {
+      navigate('/'); // Other roles go to home/dashboard
+    } // Redirect to the home page or dashboard
     } catch (error) {
       setLoading(false);
       console.error('Login failed:', error);
