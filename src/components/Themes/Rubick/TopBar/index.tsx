@@ -126,7 +126,12 @@ function Main() {
         prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
       ); // Mark notification as clicked
       setUnreadCount(prev => prev - 1);
-      navigate('/project-approved'); // Navigate to the desired route
+       // Navigate based on user role
+    if (userData.role === "admin") {
+      navigate('/product-list');
+    } else if (userData.role === "employee") {
+      navigate('/project-approved');
+    } // Navigate to the desired route
     } catch (error) {
       console.error('Error marking notification as read:', error);
       // You can also set an error state if needed
