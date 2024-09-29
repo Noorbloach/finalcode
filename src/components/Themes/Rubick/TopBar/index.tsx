@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 interface Notification {
   _id: string;
   message: string;
+  read: boolean;
 }
 
 function Main() {
@@ -21,7 +22,8 @@ function Main() {
   const [error, setError] = useState<string | null>(null);
   const [notificationsLimit, setNotificationsLimit] = useState(5); // Control the number of notifications shown initially
   const [notificationsOpened, setNotificationsOpened] = useState(false);
-  const [clickedNotifications, setClickedNotifications] = useState<string[]>([]);
+
+  const [unreadCount, setUnreadCount] = useState(0);
 
   
   const navigate = useNavigate();
@@ -87,6 +89,8 @@ function Main() {
         try {
           const response = await axios.get<{ data: Notification[] }>(`http://localhost:3000/notifications/user/${userId}`);
           setNotifications(response.data.data);
+          const unread = response.data.data.filter(n => !n.read).length;
+          setUnreadCount(unread);
           setLoadingNotifications(false);
         } catch (err) {
           setError('Failed to load notifications');
@@ -112,10 +116,28 @@ function Main() {
     navigate('/register');
   };
 
-  const handleNotificationClick = (notification: Notification) => {
-    setClickedNotifications((prev) => [...prev, notification._id]); // Mark notification as clicked
-    navigate('/product-list');
+  const handleNotificationClick = async (notification: Notification) => {
+    try {
+      // Call the API to mark the notification as read
+      await axios.put(`http://localhost:3000/notifications/mark-read/${notification._id}`);
+      
+      // Update the state to reflect that this notification has been read
+      setNotifications(prev => 
+        prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
+      ); // Mark notification as clicked
+      setUnreadCount(prev => prev - 1);
+       // Navigate based on user role
+    if (userData.role === "admin") {
+      navigate('/product-list');
+    } else if (userData.role === "employee") {
+      navigate('/project-approved');
+    } // Navigate to the desired route
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      // You can also set an error state if needed
+    }
   };
+  
 
   // Handler for Profile menu item
   const handleProfileClick = () => {
@@ -145,7 +167,7 @@ function Main() {
               onClick={() => setNotificationsOpened(true)}
             >
               <Lucide icon="Bell" className="w-5 h-5 dark:text-slate-500" />
-              {!notificationsOpened && notifications.length > 0 && (
+              {unreadCount > 0 && !notificationsOpened && ( // Only show the red dot if there are unread notifications and notifications are closed
                 <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-danger"></span>
               )}
             </Popover.Button>
@@ -157,12 +179,12 @@ function Main() {
                 ) : error ? (
                   <div className="text-red-500">{error}</div>
                 ) : notifications.length > 0 ? (
-                  notifications.slice(0, notificationsLimit).map((notification) => (
+                  notifications.map((notification) => (
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
                       className={`flex items-center mt-2 p-2 rounded-lg transition-all ${
-                        clickedNotifications.includes(notification._id) ? 'bg-white' : 'bg-gray-100'
+                        notification.read ? 'bg-white' : 'bg-gray-100'
                       } hover:bg-blue-100`}
                     >
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">
@@ -175,16 +197,6 @@ function Main() {
                   <div>No notifications</div>
                 )}
               </div>
-              {notifications.length > notificationsLimit && (
-                <div className="mt-2 text-center text-blue-600 cursor-pointer">
-                  <button
-                    onClick={loadMoreNotifications}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
             </Popover.Panel>
           </Popover>
         )}

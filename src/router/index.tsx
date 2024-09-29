@@ -101,6 +101,10 @@ function Router() {
     if (role === "superadmin" && restrictedPathsForSuperAdmin.includes(path)) {
       return false; // Superadmins are not allowed to access these paths
     }
+     // Allow all routes for management role
+     if (role === "management") {
+      return true;
+    }
 
     return true; // All other paths are allowed
   };
