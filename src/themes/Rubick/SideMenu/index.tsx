@@ -43,6 +43,7 @@ function Main() {
     });
   }, [menuStore, location.pathname]);
 
+
   return (
     <div
       className={clsx([
@@ -71,15 +72,17 @@ function Main() {
   menu === "divider" ? (
     <li className="my-6 side-nav__divider" key={menuKey}></li>
   ) : (
-    // Hide "Users" and "Clients" only for employees
-    ( 
-      (userRole === "admin" && menu.title !== "Dashboard" && menu.title !== "Clients") || 
+    // Show all menus if the user is in the management role
+    userRole === "management" ||
+    (
+      (userRole === "admin" && menu.title !== "Dashboard" && menu.title !== "Clients") ||
       (userRole === "superadmin" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Profile") ||
-      (userRole === "employee" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Clients"))&& (
+      (userRole === "employee" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Clients")
+    ) ? (
       <li key={menuKey}>
         <Tippy
           as="a"
-          content={menu.title}  
+          content={menu.title}
           options={{
             placement: "right",
           }}
@@ -90,9 +93,7 @@ function Main() {
             linkTo(menu, navigate);
             setFormattedMenu([...formattedMenu]);
           }}
-          className={clsx([
-            menu.active ? "side-menu side-menu--active" : "side-menu",
-          ])}
+          className={clsx([menu.active ? "side-menu side-menu--active" : "side-menu"])}
         >
           <div className="side-menu__icon">
             <Lucide icon={menu.icon} />
@@ -100,12 +101,7 @@ function Main() {
           <div className="side-menu__title">
             {menu.title}
             {menu.subMenu && (
-              <div
-                className={clsx([
-                  "side-menu__sub-icon",
-                  { "transform rotate-180": menu.activeDropdown },
-                ])}
-              >
+              <div className={clsx(["side-menu__sub-icon", { "transform rotate-180": menu.activeDropdown }])}>
                 <Lucide icon="ChevronDown" />
               </div>
             )}
@@ -113,33 +109,21 @@ function Main() {
         </Tippy>
         {/* BEGIN: Second Child */}
         {menu.subMenu && (
-          <Transition
-            in={menu.activeDropdown}
-            onEnter={enter}
-            onExit={leave}
-            timeout={300}
-          >
-            <ul
-              className={clsx({
-                "side-menu__sub-open": menu.activeDropdown,
-              })}
-            >
+          <Transition in={menu.activeDropdown} onEnter={enter} onExit={leave} timeout={300}>
+            <ul className={clsx({ "side-menu__sub-open": menu.activeDropdown })}>
               {menu.subMenu.map((subMenu, subMenuKey) => (
-                 // Hide "Login Error Page" and "Change Password" for all roles
-                // Hide "Register" for employee
-                // Hide "Add Project" for employee and admin
-                (subMenu.title !== "Login" && subMenu.title !== "Error Page" &&
+                (userRole === "management" || (
+                  subMenu.title !== "Login" &&
+                  subMenu.title !== "Error Page" &&
                   subMenu.title !== "Change Password" &&
                   !(userRole === "employee" && subMenu.title === "Register") &&
-                  !(userRole !== "superadmin" && subMenu.title === "Add Project") // "Add Project" only for superadmin
-                  ) && (
+                  !(userRole !== "superadmin" && subMenu.title === "Add Project")
+                )) && (
                   <li key={subMenuKey}>
                     <Tippy
                       as="a"
                       content={subMenu.title}
-                      options={{
-                        placement: "right",
-                      }}
+                      options={{ placement: "right" }}
                       disable={windowWidth > 1260}
                       href={subMenu.subMenu ? "#" : subMenu.pathname}
                       onClick={(event: React.MouseEvent) => {
@@ -147,11 +131,7 @@ function Main() {
                         linkTo(subMenu, navigate);
                         setFormattedMenu([...formattedMenu]);
                       }}
-                      className={clsx([
-                        subMenu.active
-                          ? "side-menu side-menu--active"
-                          : "side-menu",
-                      ])}
+                      className={clsx([subMenu.active ? "side-menu side-menu--active" : "side-menu"])}
                     >
                       <div className="side-menu__icon">
                         <Lucide icon={subMenu.icon} />
@@ -159,12 +139,7 @@ function Main() {
                       <div className="side-menu__title">
                         {subMenu.title}
                         {subMenu.subMenu && (
-                          <div
-                            className={clsx([
-                              "side-menu__sub-icon",
-                              { "transform rotate-180": subMenu.activeDropdown },
-                            ])}
-                          >
+                          <div className={clsx(["side-menu__sub-icon", { "transform rotate-180": subMenu.activeDropdown }])}>
                             <Lucide icon="ChevronDown" />
                           </div>
                         )}
@@ -172,74 +147,53 @@ function Main() {
                     </Tippy>
                     {/* BEGIN: Third Child */}
                     {subMenu.subMenu && (
-                      <Transition
-                        in={subMenu.activeDropdown}
-                        onEnter={enter}
-                        onExit={leave}
-                        timeout={300}
-                      >
-                        <ul
-                          className={clsx({
-                            "side-menu__sub-open": subMenu.activeDropdown,
-                          })}
-                        >
-                          {subMenu.subMenu.map(
-                            (lastSubMenu, lastSubMenuKey) => (
-                              (lastSubMenu.title !== "Project List") || (userRole === "admin" || userRole === "superadmin") ? (
-                                <li key={lastSubMenuKey}>
-                                  <Tippy
-                                    as="a"
-                                    content={lastSubMenu.title}
-                                    options={{
-                                      placement: "right",
-                                    }}
-                                    disable={windowWidth > 1260}
-                                    href={
-                                      lastSubMenu.subMenu
-                                        ? "#"
-                                        : lastSubMenu.pathname
-                                    }
-                                    onClick={(
-                                      event: React.MouseEvent
-                                    ) => {
-                                      event.preventDefault();
-                                      linkTo(lastSubMenu, navigate);
-                                      setFormattedMenu([
-                                        ...formattedMenu,
-                                      ]);
-                                    }}
-                                    className={clsx([
-                                      lastSubMenu.active
-                                        ? "side-menu side-menu--active"
-                                        : "side-menu",
-                                    ])}
-                                  >
-                                    <div className="side-menu__icon">
-                                      <Lucide icon={lastSubMenu.icon} />
-                                    </div>
-                                    <div className="side-menu__title">
-                                      {lastSubMenu.title}
-                                    </div>
-                                  </Tippy>
-                                </li>
-                              ) : null
-                            )
-                          )}
+                      <Transition in={subMenu.activeDropdown} onEnter={enter} onExit={leave} timeout={300}>
+                        <ul className={clsx({ "side-menu__sub-open": subMenu.activeDropdown })}>
+                          {subMenu.subMenu.map((lastSubMenu, lastSubMenuKey) => (
+                            userRole === "management" || (
+                              lastSubMenu.title !== "Project List" ||
+                              (userRole === "admin" || userRole === "superadmin")
+                            ) ? (
+                              <li key={lastSubMenuKey}>
+                                <Tippy
+                                  as="a"
+                                  content={lastSubMenu.title}
+                                  options={{ placement: "right" }}
+                                  disable={windowWidth > 1260}
+                                  href={lastSubMenu.subMenu ? "#" : lastSubMenu.pathname}
+                                  onClick={(event: React.MouseEvent) => {
+                                    event.preventDefault();
+                                    linkTo(lastSubMenu, navigate);
+                                    setFormattedMenu([...formattedMenu]);
+                                  }}
+                                  className={clsx([lastSubMenu.active ? "side-menu side-menu--active" : "side-menu"])}
+                                >
+                                  <div className="side-menu__icon">
+                                    <Lucide icon={lastSubMenu.icon} />
+                                  </div>
+                                  <div className="side-menu__title">
+                                    {lastSubMenu.title}
+                                  </div>
+                                </Tippy>
+                              </li>
+                            ) : null
+                          ))}
                         </ul>
                       </Transition>
                     )}
                     {/* END: Third Child */}
                   </li>
-                ) 
+                )
               ))}
             </ul>
           </Transition>
         )}
         {/* END: Second Child */}
       </li>
-    ) 
+    ) : null
   )
 )}
+
 
 
             {/* END: First Child */}

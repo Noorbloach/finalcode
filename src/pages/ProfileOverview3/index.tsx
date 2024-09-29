@@ -27,8 +27,11 @@ const [totalProjects, setTotalProjects] = useState(0);
 
 const [userData, setUserData] = useState({
   name: "",
+  email: "",
   role: "",
- 
+  address: "",
+  phoneNo: "",
+  profilePic: "",
 });
 
  // Fetch user data from the backend
@@ -44,9 +47,11 @@ const [userData, setUserData] = useState({
       const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
       setUserData({
         name: response.data.user.name,
-       
+        email: response.data.user.email,
         role: response.data.user.role,
-   
+        address: response.data.user.address,
+        phoneNo: response.data.user.phoneNo,
+        profilePic: response.data.user.profilePic,
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -154,7 +159,7 @@ const prevProject = () => {
                 <img
                   alt="Midone Tailwind HTML Admin Template"
                   className="rounded-full"
-                  src={fakerData[0].photos[0]}
+                  src={`http://localhost:3000/uploads/${userData.profilePic || 'user.jpg'}`}
                 />
               </div>
               <div className="ml-4 mr-auto">

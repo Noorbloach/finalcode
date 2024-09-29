@@ -122,7 +122,7 @@ const handleImageChange = (e) => {
               <img
                   alt="Profile"
                   className="rounded-full"
-                  src={`http://localhost:3000/uploads/${userData.profilePic || 'default-profile.png'}`}// Construct full URL
+                  src={`http://localhost:3000/uploads/${userData.profilePic || 'user.jpg'}`}// Construct full URL
                 />
               </div>
               <div className="ml-4 mr-auto">

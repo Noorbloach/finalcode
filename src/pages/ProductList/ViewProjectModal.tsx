@@ -69,10 +69,10 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
                 </div>
                 <div style={formGroupStyles}>
                   <label style={labelStyles}>Project Description:</label>
-                  <textarea
+                  <div
                     name="description"
-                    value={stripHtmlTags(project.description)}
-                    style={textareaStyles}
+                    dangerouslySetInnerHTML={{ __html: project.description }}
+                    style={divStyles}
                     disabled
                   />
                 </div>
@@ -161,10 +161,11 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
                 </div>
                 <div style={formGroupStyles}>
                   <label style={labelStyles}>Project Description:</label>
-                  <textarea
+                  <div
                     name="description"
-                    value={stripHtmlTags(project.description)}
-                    style={textareaStyles}
+                    style={divStyles}
+                    dangerouslySetInnerHTML={{ __html: project.description }}
+                    
                     disabled
                   />
                 </div>
@@ -210,6 +211,15 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
     </>
   );
 };
+
+const divStyles = {
+  border: "1px solid #ccc",
+  padding: "10px",
+  minHeight: "100px",
+  overflowY: "auto",
+  backgroundColor: "#f9f9f9",
+};
+
 
 // Styles for overlay, modal container, and modal
 const overlayStyles: React.CSSProperties = {
