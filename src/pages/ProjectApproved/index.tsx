@@ -220,18 +220,21 @@ function Main() {
   };
 
   // Function to handle project update
-  const handleUpdateProject = async () => {
-    if (selectedProject) {
+  const handleUpdate = async () => {
+    // This function is called after the project is updated
+    const fetchUpdatedProject = async () => {
       try {
-        await axios.put(`http://localhost:3000/api/projects/${selectedProject._id}`, selectedProject);
-        // Update the project in the state
-        setProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
-        setFilteredProjects(prevProjects => prevProjects.map(p => p._id === selectedProject._id ? selectedProject : p));
+        const response = await axios.get(`http://localhost:3000/api/projects/${selectedProject._id}`);
+        setProjects(prevProjects =>
+          prevProjects.map(p => (p._id === selectedProject._id ? selectedProject : p))
+        );
         setEditModalOpen(false);
       } catch (error) {
-        console.error("Error updating project:", error);
+        console.error("Error fetching updated project:", error);
       }
-    }
+    };
+
+    fetchUpdatedProject();
   };
 
   // Handle input change for the form
@@ -492,7 +495,7 @@ function Main() {
         onClose={() => setEditModalOpen(false)}
         project={selectedProject}
         onInputChange={handleInputChange}
-        onUpdate={handleUpdateProject}
+        onUpdate={handleUpdate}
         role={role}
         employees={employees} 
       />
