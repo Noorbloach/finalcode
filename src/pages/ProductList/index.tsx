@@ -358,11 +358,12 @@ const ensureProtocol = (url: string) => {
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
           {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
-          <Table.Td className="text-center"> {role === 'admin' || role === "management" && project.status === 'Proposal Sent'
+          <Table.Td className="text-center"> {(role === 'admin' || role === "management") && project.status === 'Proposal Sent'
                       ? 'On Hold'
                       : project.status}</Table.Td>
         
           
+
           
           <Table.Td className="text-center">
   <a 
