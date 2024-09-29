@@ -244,7 +244,7 @@ const prevProject = () => {
             {/* BEGIN: Projects */}
             <div className="col-span-12 intro-y box 2xl:col-span-6">
               <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 className="mr-auto text-base font-medium">Projects</h2>
+                <h2 className="mr-auto text-base font-medium">Projects Assigned To You</h2>
               </div>
               <div className="flex justify-between items-center p-5">
                 <Button
