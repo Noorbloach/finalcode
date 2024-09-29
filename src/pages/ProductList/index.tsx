@@ -324,7 +324,7 @@ function Main() {
       <h2 className="mt-10 text-lg font-medium intro-y">Project List</h2>
       <div className="grid grid-cols-12 gap-6 mt-5">
         <div className="flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap">
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
           <Button variant="primary" className="mr-2 shadow-md" onClick={() => navigate('/add-product')}>
             Add New Project
           </Button>)}
@@ -369,14 +369,14 @@ function Main() {
     <Table.Thead>
       <Table.Tr>
         <Table.Th className=" text-center border-b-0 whitespace-nowrap">Project Title</Table.Th>
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">ClientName</Table.Th>
       )}
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
-        {(role === "admin" || role === "employee") && (
+        {(role === "admin" || role === "employee" || role === "management") && (
   <Table.Th className="text-center border-b-0 whitespace-nowrap">
     {role === "admin" ? "Ops Due Date" : "Due Date"}
   </Table.Th>
@@ -395,13 +395,13 @@ function Main() {
       {currentProjects.map((project) => (
         <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
           <Table.Td className="text-center">{project.projectName}</Table.Td>
-          {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
-          {(role === "superadmin") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
-          {(role === "superadmin") && (
+          {(role === "superadmin" || role === "management") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
+          {(role === "superadmin" || role === "management") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
+          {(role === "superadmin" || role === "management") && (
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
           {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
-          <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
+          <Table.Td className="text-center"> {role === 'admin' || role === "management" && project.status === 'Proposal Sent'
                       ? 'On Hold'
                       : project.status}</Table.Td>
         
@@ -425,11 +425,11 @@ function Main() {
               <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
                 <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
               </a>
-              {(role === "superadmin" || role === "admin" ) && (
+              {(role === "superadmin" || role === "admin" || role === "management" ) && (
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
               </a>)}
-              {(role === "superadmin" ) && (
+              {(role === "superadmin" || role === "management" ) && (
               <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
               </a>)}
