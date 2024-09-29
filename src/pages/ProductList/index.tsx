@@ -15,30 +15,20 @@ import Tippy from "@/components/Base/Tippy";
 import EditProjectModal from "./EditProjectModal";
 import ViewProjectModal from "./ViewProjectModal";
 
+
+
 interface Project {
   _id: string;
   projectName: string;
-  status:
-    | "ETA"
-    | "Proposal Sent"
-    | "Approved"
-    | "Rejected"
-    | "Project Started"
-    | "Project Rejected";
-  adminStatus:
-    | "Pending"
-    | "Takeoff In Progress"
-    | "Pending In Progress"
-    | "Completed"
-    | "On Hold"
-    | "Revision";
-  subcategory: "Geoglyphs" | "Stellar" | "Perfect";
-  projectType: "Residential" | "Commercial" | "Industrial";
+  status: 'ETA' | 'Proposal Sent' | 'Approved' | 'Rejected' | 'Project Started' | 'Project Rejected';
+  adminStatus: 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision';
+  subcategory: 'Geoglyphs' | 'Stellar' | 'Perfect';
+  projectType: 'Residential' | 'Commercial' | 'Industrial';
   clientDueDate: Date;
   opsDueDate: Date;
   initialAmount: number;
-  totalAmount: number;
-  remainingAmount: number;
+  totalAmount:number;
+  remainingAmount:number;
   clientPermanentNotes: string;
   projectLink:string;
   estimatorLink:string;
@@ -80,25 +70,19 @@ function Main() {
   const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
   const [employees, setEmployees] = useState<Employee[]>([]);
 
-  const statuses = [
-    "Pending",
-    "Takeoff In Progress",
-    "Pending In Progress",
-    "Completed",
-    "On Hold",
-    "Revision",
-  ];
-  const projectTypes = ["Residential", "Commercial", "Industrial"];
+  const statuses = ['Pending', 'Takeoff In Progress', 'Pending In Progress', 'Completed', 'On Hold', 'Revision'];
+  const projectTypes = ['Residential', 'Commercial', 'Industrial'];
 
   // Utility function to ensure URL has a protocol
-  const ensureProtocol = (url: string) => {
-    // If the URL starts with "http://" or "https://", return it as is
-    if (/^https?:\/\//i.test(url)) {
-      return url;
-    }
-    // Otherwise, prepend "http://" to the URL
-    return `http://${url}`;
-  };
+const ensureProtocol = (url: string) => {
+  // If the URL starts with "http://" or "https://", return it as is
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  // Otherwise, prepend "http://" to the URL
+  return `http://${url}`;
+};
+
 
   // Decode JWT to check if the user is an admin
   useEffect(() => {
@@ -156,19 +140,14 @@ function Main() {
 
     fetchProjects();
   }, []);
-  console.log(projects);
 
   const handleDeleteClick = async (projectId: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this project?"
-    );
+    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
     if (confirmDelete) {
       try {
         await axios.delete(`http://localhost:3000/api/projects/${projectId}`);
         // Update the projects state by filtering out the deleted project
-        setProjects((prevProjects) =>
-          prevProjects.filter((project) => project._id !== projectId)
-        );
+        setProjects(prevProjects => prevProjects.filter(project => project._id !== projectId));
         alert("Project deleted successfully.");
       } catch (error) {
         console.error("Error deleting project:", error);
@@ -179,62 +158,49 @@ function Main() {
 
   const handleStatusFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(event.target.value);
-    console.log("Selected Status Filter:", event.target.value); // Debugging output
+    console.log('Selected Status Filter:', event.target.value); // Debugging output
   };
+  
 
   // Filter projects based on the selected status
   const filteredProjects = statusFilter
     ? projects.filter((project) => project.adminStatus === statusFilter)
     : projects;
 
-  console.log("Filtered Projects:", filteredProjects);
+  console.log("Filtered Projects:", filteredProjects); 
 
   useEffect(() => {
-    console.log("Projects:", projects); // Debugging output
+    console.log('Projects:', projects); // Debugging output
   }, [projects]);
+  
 
-  const handleAdminStatusChange = async (
-    event: ChangeEvent<HTMLSelectElement>,
-    projectId: string
-  ) => {
-    const newAdminStatus = event.target.value as
-      | "Pending"
-      | "Takeoff In Progress"
-      | "Pending In Progress"
-      | "Completed"
-      | "On Hold"
-      | "Revision"; // Type assertion
 
+  const handleAdminStatusChange = async (event: ChangeEvent<HTMLSelectElement>, projectId: string) => {
+    const newAdminStatus = event.target.value as 'Pending' | 'Takeoff In Progress' | 'Pending In Progress' | 'Completed' | 'On Hold' | 'Revision'; // Type assertion
+  
     try {
-      await axios.put(
-        `http://localhost:3000/api/projects/${projectId}/admin-status`,
-        {
-          adminStatus: newAdminStatus,
-        }
-      );
-
+      await axios.put(`http://localhost:3000/api/projects/${projectId}/admin-status`, {
+        adminStatus: newAdminStatus,
+      });
+  
       // Update the project in the state
       setProjects((prevProjects) =>
         prevProjects.map((project) =>
-          project._id === projectId
-            ? { ...project, adminStatus: newAdminStatus }
-            : project
+          project._id === projectId ? { ...project, adminStatus: newAdminStatus } : project
         )
       );
-
-      alert("Project admin status updated successfully.");
+  
+      alert('Project admin status updated successfully.');
     } catch (error) {
-      console.error("Error updating admin status:", error);
-      alert("Failed to update admin status.");
+      console.error('Error updating admin status:', error);
+      alert('Failed to update admin status.');
     }
   };
 
   // Function to open the edit modal and fetch project details
   const handleEditClick = async (projectId: string) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/projects/${projectId}`
-      );
+      const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
       const projectData = response.data.data;
       setSelectedProject(projectData);
       setEditModalOpen(true);
@@ -246,9 +212,7 @@ function Main() {
   // Function to open the view modal and fetch project details
   const handleViewClick = async (projectId: string) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/projects/${projectId}`
-      );
+      const response = await axios.get(`http://localhost:3000/api/projects/${projectId}`);
       const projectData = response.data.data;
       setSelectedProject(projectData);
       setViewModalOpen(true);
@@ -276,9 +240,7 @@ function Main() {
   };
 
   // Handle input change for the form
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (selectedProject) {
       setSelectedProject({
         ...selectedProject,
@@ -299,20 +261,18 @@ function Main() {
   };
   const isFieldDisabled = role === "employee";
 
+
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   let currentProjects = filteredProjects;
-
+  
   if (searchTerm.trim() !== "") {
-    currentProjects = currentProjects.filter((project) =>
+    currentProjects = currentProjects.filter(project =>
       project.projectName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }
 
-  currentProjects = currentProjects.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  currentProjects = currentProjects.slice(startIndex, startIndex + itemsPerPage);
   const endIndex = Math.min(startIndex + itemsPerPage, filteredProjects.length);
 
   if (loading) {
@@ -330,8 +290,7 @@ function Main() {
           </Button>)}
           
           <div className="hidden mx-auto md:block text-slate-500">
-            Showing {startIndex + 1} to {endIndex} of {filteredProjects.length}{" "}
-            entries
+            Showing {startIndex + 1} to {endIndex} of {filteredProjects.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0">
             <div className="relative w-56 text-slate-500">
@@ -355,10 +314,8 @@ function Main() {
               className="w-36 !box"
             >
               <option value="All">All Types</option>
-              {projectTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
+              {projectTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
               ))}
             </FormSelect>
           </div>
@@ -401,7 +358,7 @@ function Main() {
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
           {(role === "admin" || role === "employee") && (
           <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
-          <Table.Td className="text-center"> {role === 'admin' || role === "management" && project.status === 'Proposal Sent'
+          <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
                       ? 'On Hold'
                       : project.status}</Table.Td>
         
