@@ -13,6 +13,7 @@ interface User {
   email: string;
   address?: string;
   phoneNo?: string;
+  profilePic:string;
 }
 
 const UserModal = ({ user, onClose }: { user: User | null; onClose: () => void }) => {
@@ -157,7 +158,7 @@ function Main() {
                   <img
                     alt="User Avatar"
                     className="rounded-full"
-                    src={`src/pages/Clients/612.jpg`} // Updated image path
+                    src={`http://localhost:3000/uploads/${user.profilePic || 'user.jpg'}`} // Updated image path
                   />
                 </div>
                 <div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:text-left lg:mt-0">

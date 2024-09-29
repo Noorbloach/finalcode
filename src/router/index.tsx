@@ -40,21 +40,71 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 function Router() {
-
   const [role, setRole] = useState<string>("");
 
-   // Decode JWT to check if the user is an admin
-   useEffect(() => {
-    const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded: DecodedToken = jwtDecode(token);
-        setRole(decoded.role); // Set role directly based on decoded token
+        setRole(decoded.role);
       } catch (error) {
         console.error("Invalid token", error);
       }
     }
   }, []);
+
+  // Function to check if the user can access the route
+
+    // Function to check if the user can access the route
+  const isAllowed = (path: string) => {
+    const restrictedPathsForEmployee = [
+      "/add-product",
+      "/product-list",
+      "/clients",
+      "/users-layout-2",
+      "/notification",
+      "/accordion",
+      "/progress-bar",
+      "/icon",
+      "/loading-icon",
+      "/wysiwyg-editor",
+      "/chart",
+      "/register",
+      "/otp",
+      "/error-page",
+      "/resetpassword/:token"
+    ];
+
+    const restrictedPathsForAdmin = [
+      "/dashboard-overview-1",
+      "/add-product",
+      "/clients",
+    ];
+
+    const restrictedPathsForSuperAdmin = [
+      "/dashboard-overview-1",
+      "/users-layout-2",
+    ];
+
+    // Employee restrictions
+    if (role === "employee" && restrictedPathsForEmployee.includes(path)) {
+      return false; // Employees are not allowed to access these paths
+    }
+
+    // Admin restrictions
+    if (role === "admin" && restrictedPathsForAdmin.includes(path)) {
+      return false; // Admins are not allowed to access these paths
+    }
+    
+    // Superadmin restrictions
+    if (role === "superadmin" && restrictedPathsForSuperAdmin.includes(path)) {
+      return false; // Superadmins are not allowed to access these paths
+    }
+
+    return true; // All other paths are allowed
+  };
+  
 
   const routes = [
     {
@@ -67,12 +117,11 @@ function Router() {
       children: [
         {
           path: "/",
-          element: <boardOverview1Dash />,
+          element: isAllowed("/") ? <DashboardOverview1 /> : <Navigate to="/error-page" />,
         },
-        
         {
           path: "add-product",
-          element: <AddProduct />,
+          element: isAllowed("/add-product") ? <AddProduct /> : <Navigate to="/error-page" />,
         },
         {
           path: "project-approved",
@@ -80,26 +129,22 @@ function Router() {
         },
         {
           path: "product-list",
-          element: <ProductList />,
+          element: isAllowed("/product-list") ? <ProductList /> : <Navigate to="/error-page" />,
         },
-           
-              
+        
         {
           path: "chat",
           element: <Chat />,
         },
-       
         {
           path: "clients",
-          element: <Clients />,
+          element: isAllowed("/clients") ? <Clients /> : <Navigate to="/error-page" />,
         },
-     
+      
         {
           path: "users-layout-2",
-          element: <UsersLayout2 />,
+          element: isAllowed("/users-layout-2") ? <UsersLayout2 /> : <Navigate to="/error-page" />,
         },
-       
-       
         {
           path: "profile-overview-3",
           element: <ProfileOverview3 />,
@@ -111,39 +156,37 @@ function Router() {
         
         {
           path: "notification",
-          element: <Notification />,
+          element: isAllowed("/notification") ? <Notification /> : <Navigate to="/error-page" />,
         },
         
         {
           path: "accordion",
-          element: <Accordion />,
+          element: isAllowed("/accordion") ? <Accordion /> : <Navigate to="/error-page" />,
         },
         
         {
           path: "progress-bar",
-          element: <ProgressBar />,
+          element: isAllowed("/progress-bar") ? <ProgressBar /> : <Navigate to="/error-page" />,
         },
         
         {
           path: "icon",
-          element: <Icon />,
+          element: isAllowed("/icon") ? <Icon /> : <Navigate to="/error-page" />,
         },
         {
           path: "loading-icon",
-          element: <LoadingIcon />,
+          element: isAllowed("/loading-icon") ? <LoadingIcon /> : <Navigate to="/error-page" />,
         },
-       
-        
+      
         {
           path: "wysiwyg-editor",
-          element: <WysiwygEditor />,
+          element: isAllowed("/wysiwyg-editor") ? <WysiwygEditor /> : <Navigate to="/error-page" />,
         },
         
         {
           path: "chart",
-          element: <Chart />,
+          element: isAllowed("/chart") ? <Chart /> : <Navigate to="/error-page" />,
         },
-       
       ],
     },
     {
@@ -152,19 +195,19 @@ function Router() {
     },
     {
       path: "/register",
-      element: <Register />,
+      element: isAllowed("/register") ? <Register /> : <Navigate to="/error-page" />,
     },
     {
       path: "/forgot-password",
-      element: <ForgotPassword />,  // Public route for Forgot Password
+      element: <ForgotPassword />,
     },
     {
       path: "/otp",
-      element: <OTP />,  // Public route for Forgot Password
+      element: isAllowed("/otp") ? <OTP /> : <Navigate to="/error-page" />,
     },
     {
       path: "/resetpassword/:token",
-      element: <NewPassword />,  // Public route for Forgot Password
+      element:  <NewPassword /> 
     },
     {
       path: "/error-page",
@@ -180,3 +223,4 @@ function Router() {
 }
 
 export default Router;
+

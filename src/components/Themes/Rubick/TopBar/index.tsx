@@ -20,7 +20,8 @@ function Main() {
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notificationsLimit, setNotificationsLimit] = useState(5); // Control the number of notifications shown initially
-
+  const [notificationsOpened, setNotificationsOpened] = useState(false);
+  const [clickedNotifications, setClickedNotifications] = useState<string[]>([]);
 
   
   const navigate = useNavigate();
@@ -111,13 +112,9 @@ function Main() {
     navigate('/register');
   };
 
-  const handleNotificationClick = (notification) => {
-    // You can check the notification type or any specific condition to navigate
-    // For this case, we're simply navigating to '/product-list' when a notification is clicked.
+  const handleNotificationClick = (notification: Notification) => {
+    setClickedNotifications((prev) => [...prev, notification._id]); // Mark notification as clicked
     navigate('/product-list');
-    
-    // Optionally, you can mark the notification as 'read' after clicking it
-    // updateNotificationReadStatus(notification._id);
   };
 
   // Handler for Profile menu item
@@ -141,58 +138,63 @@ function Main() {
        
         {/* END: Search */}
         {/* BEGIN: Notifications */}
-        <Popover className="mr-auto intro-x sm:mr-6">
-          <Popover.Button
-            className="
-              relative text-slate-600 outline-none block
-              before:content-[''] before:w-[8px] before:h-[8px] before:rounded-full before:absolute before:top-[-2px] before:right-0 before:bg-danger
-            "
-          >
-            <Lucide icon="Bell" className="w-5 h-5 dark:text-slate-500" />
-          </Popover.Button>
-          <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2 bg-white shadow-lg rounded-lg border border-slate-200 overflow-hidden">
-            <div className="mb-5 font-medium">Notifications</div>
-            <div className="max-h-[300px] overflow-y-auto">
-              {loadingNotifications ? (
-                <div>Loading...</div>
-              ) : error ? (
-                <div className="text-red-500">{error}</div>
-              ) : notifications.length > 0 ? (
-                notifications.slice(0, notificationsLimit).map((notification) => (
-                  <div
-                    key={notification._id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className="flex items-center mt-2 p-2 rounded-lg hover:bg-blue-100 transition-all"
-                  >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">
-                      <Lucide icon="Bell" className="w-4 h-4" />
-                    </div>
-                    <div className="ml-3">{notification.message}</div>
-                  </div>
-                ))
-              ) : (
-                <div>No notifications</div>
+        {userData.role !== "management" && (
+          <Popover className="mr-auto intro-x sm:mr-6">
+            <Popover.Button
+              className="relative text-slate-600 outline-none block"
+              onClick={() => setNotificationsOpened(true)}
+            >
+              <Lucide icon="Bell" className="w-5 h-5 dark:text-slate-500" />
+              {!notificationsOpened && notifications.length > 0 && (
+                <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-danger"></span>
               )}
-            </div>
-            {notifications.length > notificationsLimit && (
-              <div className="mt-2 text-center text-blue-600 cursor-pointer">
-                <button
-                  onClick={loadMoreNotifications}
-                  className="text-blue-600 hover:underline"
-                >
-                  Load More
-                </button>
+            </Popover.Button>
+            <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2 bg-white shadow-lg rounded-lg border border-slate-200 overflow-hidden">
+              <div className="mb-5 font-medium">Notifications</div>
+              <div className="max-h-[300px] overflow-y-auto">
+                {loadingNotifications ? (
+                  <div>Loading...</div>
+                ) : error ? (
+                  <div className="text-red-500">{error}</div>
+                ) : notifications.length > 0 ? (
+                  notifications.slice(0, notificationsLimit).map((notification) => (
+                    <div
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`flex items-center mt-2 p-2 rounded-lg transition-all ${
+                        clickedNotifications.includes(notification._id) ? 'bg-white' : 'bg-gray-100'
+                      } hover:bg-blue-100`}
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary/80">
+                        <Lucide icon="Bell" className="w-4 h-4" />
+                      </div>
+                      <div className="ml-3">{notification.message}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div>No notifications</div>
+                )}
               </div>
-            )}
-          </Popover.Panel>
-        </Popover>
+              {notifications.length > notificationsLimit && (
+                <div className="mt-2 text-center text-blue-600 cursor-pointer">
+                  <button
+                    onClick={loadMoreNotifications}
+                    className="text-blue-600 hover:underline"
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </Popover.Panel>
+          </Popover>
+        )}
         {/* END: Notifications */}
         {/* BEGIN: Account Menu */}
         <Menu>
           <Menu.Button className="block w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
             <img
               alt="Midone Tailwind HTML Admin Template"
-              src={`http://localhost:3000/uploads/${userData.profilePic || 'default-profile.png'}`}
+              src={`http://localhost:3000/uploads/${userData.profilePic || 'user.jpg'}`}
             />
           </Menu.Button>
           <Menu.Items className="w-56 mt-px text-white bg-primary">
