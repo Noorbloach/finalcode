@@ -90,17 +90,17 @@ function Router() {
       "/register",
       "/otp",
       "/error-page",
-      
+      "/",
     ];
 
     const restrictedPathsForAdmin = [
-      
+      "/",
       "/add-product",
       "/clients",
     ];
 
     const restrictedPathsForSuperAdmin = [
-      
+      "/",
       "/users-layout-2",
     ];
 
