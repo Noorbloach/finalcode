@@ -234,12 +234,7 @@ function Main() {
                 <Lucide icon="FilePenLine" className="w-4 h-4 mr-2" /> Add
                 Account
               </Menu.Item>
-              <Menu.Item className="hover:bg-white/5">
-                <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Reset Password
-              </Menu.Item>
-              <Menu.Item className="hover:bg-white/5">
-                <Lucide icon="HelpCircle" className="w-4 h-4 mr-2" /> Help
-              </Menu.Item>
+              
               <Menu.Divider className="bg-white/[0.08]" />
               <Menu.Item className="hover:bg-white/5">
                 <Lucide icon="ToggleRight" className="w-4 h-4 mr-2" /> Logout

@@ -1,3 +1,4 @@
+
 import _ from "lodash";
 import clsx from "clsx";
 import { useRef } from "react";
@@ -19,6 +20,10 @@ function Main() {
   const newProjectsRef = useRef<TinySliderElement>();
   const todaySchedulesRef = useRef<TinySliderElement>();
 const [currentIndex, setCurrentIndex] = useState(0);
+const [userId, setUserId] = useState(null);
+
+const [statusCounts, setStatusCounts] = useState([]);
+const [totalProjects, setTotalProjects] = useState(0);
 
 const [userData, setUserData] = useState({
   name: "",
@@ -57,7 +62,7 @@ const [userData, setUserData] = useState({
     const token = localStorage.getItem("token"); // Fetch the token from localStorage (or sessionStorage)
     if (token) {
       const decodedToken = jwtDecode(token); // Decode the token
-      
+      setUserId(decodedToken.userId)
       return decodedToken.userId; // Extract and return userId
     }
     return null;
@@ -77,6 +82,24 @@ const [userData, setUserData] = useState({
 
     fetchProjects();
   }, []);
+
+  useEffect(() => {
+    const fetchAdminStatusCounts = async () => {
+      try {
+        const employeeId = getUserIdFromToken(); 
+        const response = await axios.get(`http://localhost:3000/api/projects/admin-status-count/${employeeId}`);
+        setStatusCounts(response.data.statusCounts);
+        setTotalProjects(response.data.totalProjects);
+      } catch (error) {
+        console.error('Error fetching status counts:', error);
+      }
+    };
+
+    fetchAdminStatusCounts();
+  }, [userId]);
+
+  const pendingCount = statusCounts.find(status => status._id === 'Pending')?.count || 0;
+  const completedCount = statusCounts.find(status => status._id === 'Completed')?.count || 0;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -140,69 +163,17 @@ const prevProject = () => {
                 </div>
                 <div className="text-slate-500">{userData.role}</div>
               </div>
-              <Menu>
-                <Menu.Button as="a" className="block w-5 h-5">
-                  <Lucide
-                    icon="MoreHorizontal"
-                    className="w-5 h-5 text-slate-500"
-                  />
-                </Menu.Button>
-                <Menu.Items className="w-56">
-                  <Menu.Header>Export Options</Menu.Header>
-                  <Menu.Divider />
-                  <Menu.Item>
-                    <Lucide icon="Activity" className="w-4 h-4 mr-2" />
-                    English
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="Box" className="w-4 h-4 mr-2" />
-                    Indonesia
-                    <div className="px-1 ml-auto text-xs text-white rounded-full bg-danger">
-                      10
-                    </div>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="PanelsTopLeft" className="w-4 h-4 mr-2" />
-                    English
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Lucide icon="PanelLeft" className="w-4 h-4 mr-2" />
-                    Indonesia
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Footer>
-                    <Button
-                      variant="primary"
-                      type="button"
-                      className="px-2 py-1"
-                    >
-                      Settings
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      className="px-2 py-1 ml-auto"
-                    >
-                      View Profile
-                    </Button>
-                  </Menu.Footer>
-                </Menu.Items>
-              </Menu>
+             
             </div>
             <div className="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
               <a className="flex items-center font-medium text-primary" href="">
                 <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Personal
                 Information
               </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Box" className="w-4 h-4 mr-2" /> Account Settings
-              </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Change Password
-              </a>
-              <a className="flex items-center mt-5" href="">
-                <Lucide icon="Settings" className="w-4 h-4 mr-2" /> User
-                Settings
+              
+              <a className="flex items-center mt-5" href="/update-profile">
+                <Lucide icon="Settings" className="w-4 h-4 mr-2" />
+                Update Profile
               </a>
             </div>
             
@@ -256,7 +227,7 @@ const prevProject = () => {
              <div className="col-span-12 intro-y box 2xl:col-span-6">
               <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
                 <h2 className="mr-auto text-base font-medium">
-                  Today Schedules
+                  Projects Assigned Today
                 </h2>
                 <Button
                   variant="outline-secondary"
@@ -359,104 +330,84 @@ const prevProject = () => {
             {/* END: Today Schedules */}
             {/* BEGIN: Work In Progress */}
             <Tab.Group className="col-span-12 intro-y box 2xl:col-span-6">
-              <div className="flex items-center px-5 py-5 border-b sm:py-0 border-slate-200/60 dark:border-darkmode-400">
-                <h2 className="mr-auto text-base font-medium">
-                  Work In Progress
-                </h2>
-                <Menu className="ml-auto sm:hidden">
-                  <Menu.Button as="a" className="block w-5 h-5">
-                    <Lucide
-                      icon="MoreHorizontal"
-                      className="w-5 h-5 text-slate-500"
-                    />
-                  </Menu.Button>
-                  <Menu.Items className="w-40">
-                    <Menu.Item className="w-full" as={HeadlessTab}>
-                    Report
-                    </Menu.Item>
-                    
-                  </Menu.Items>
-                </Menu>
-                <Tab.List
-                  variant="link-tabs"
-                  className="hidden w-auto ml-auto sm:flex"
-                >
-                  <Tab fullWidth={false}>
-                    <Tab.Button className="py-5 cursor-pointer">Report</Tab.Button>
-                  </Tab>
-                  <Tab fullWidth={false}>
-                    
-                  </Tab>
-                </Tab.List>
+      <div className="flex items-center px-5 py-5 border-b sm:py-0 border-slate-200/60 dark:border-darkmode-400">
+        <h2 className="mr-auto text-base font-medium">Work In Progress</h2>
+        <Menu className="ml-auto sm:hidden">
+          <Menu.Button as="a" className="block w-5 h-5">
+            <Lucide icon="MoreHorizontal" className="w-5 h-5 text-slate-500" />
+          </Menu.Button>
+          <Menu.Items className="w-40">
+            <Menu.Item className="w-full" as="a">
+              Report
+            </Menu.Item>
+          </Menu.Items>
+        </Menu>
+        <Tab.List variant="link-tabs" className="hidden w-auto ml-auto sm:flex">
+          <Tab fullWidth={false}>
+            <Tab.Button className="py-5 cursor-pointer">Report</Tab.Button>
+          </Tab>
+        </Tab.List>
+      </div>
+      <div className="p-5">
+        <Tab.Panels>
+          <Tab.Panel>
+            {/* Pending Tasks Section */}
+            <div>
+              <div className="flex">
+                <div className="mr-auto">Pending Tasks</div>
+                <div>{pendingCount} / {totalProjects}</div> {/* Display pending/total */}
               </div>
-              <div className="p-5">
-                <Tab.Panels>
-                  <Tab.Panel>
-                    <div>
-                      <div className="flex">
-                        <div className="mr-auto">Pending Tasks</div>
-                        <div>20%</div>
-                      </div>
-                      <Progress className="h-1 mt-2">
-                        <Progress.Bar
-                          className="w-1/2 bg-primary"
-                          role="progressbar"
-                          aria-valuenow={0}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></Progress.Bar>
-                      </Progress>
-                    </div>
-                    <div className="mt-5">
-                      <div className="flex">
-                        <div className="mr-auto">Completed Tasks</div>
-                        <div>2 / 20</div>
-                      </div>
-                      <Progress className="h-1 mt-2">
-                        <Progress.Bar
-                          className="w-1/4 bg-primary"
-                          role="progressbar"
-                          aria-valuenow={0}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></Progress.Bar>
-                      </Progress>
-                    </div>
-                    <div className="mt-5">
-                      <div className="flex">
-                        <div className="mr-auto">Tasks In Progress</div>
-                        <div>42</div>
-                      </div>
-                      <Progress className="h-1 mt-2">
-                        <Progress.Bar
-                          className="w-3/4 bg-primary"
-                          role="progressbar"
-                          aria-valuenow={0}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></Progress.Bar>
-                      </Progress>
-                    </div>
-                    <div className="mt-5">
-                      <div className="flex">
-                        <div className="mr-auto">Tasks In Review</div>
-                        <div>70%</div>
-                      </div>
-                      <Progress className="h-1 mt-2">
-                        <Progress.Bar
-                          className="w-4/5 bg-primary"
-                          role="progressbar"
-                          aria-valuenow={0}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></Progress.Bar>
-                      </Progress>
-                    </div>
-                    
-                  </Tab.Panel>
-                </Tab.Panels>
+              <Progress className="h-1 mt-2">
+                <Progress.Bar
+                  className="w-1/2 bg-primary"
+                  role="progressbar"
+                  aria-valuenow={pendingCount}
+                  aria-valuemin={0}
+                  aria-valuemax={totalProjects}
+                  style={{ width: `${(pendingCount / totalProjects) * 100}%` }}
+                ></Progress.Bar>
+              </Progress>
+            </div>
+
+            {/* Completed Tasks Section */}
+            <div className="mt-5">
+              <div className="flex">
+                <div className="mr-auto">Completed Tasks</div>
+                <div>{completedCount} / {totalProjects}</div> {/* Display completed/total */}
               </div>
-            </Tab.Group>
+              <Progress className="h-1 mt-2">
+                <Progress.Bar
+                  className="w-1/4 bg-primary"
+                  role="progressbar"
+                  aria-valuenow={completedCount}
+                  aria-valuemin={0}
+                  aria-valuemax={totalProjects}
+                  style={{ width: `${(completedCount / totalProjects) * 100}%` }}
+                ></Progress.Bar>
+              </Progress>
+            </div>
+
+            {/* Dummy Sections (In Progress / In Review) */}
+            <div className="mt-5">
+              <div className="flex">
+                <div className="mr-auto">Tasks In Progress</div>
+                <div>42</div>
+              </div>
+              <Progress className="h-1 mt-2">
+                <Progress.Bar
+                  className="w-3/4 bg-primary"
+                  role="progressbar"
+                  aria-valuenow={75}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                ></Progress.Bar>
+              </Progress>
+            </div>
+          
+          </Tab.Panel>
+        </Tab.Panels>
+      </div>
+    </Tab.Group>
             {/* END: Work In Progress */}
           </div>
         </div>

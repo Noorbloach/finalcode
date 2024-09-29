@@ -21,6 +21,8 @@ function Main() {
   const [error, setError] = useState<string | null>(null);
   const [notificationsLimit, setNotificationsLimit] = useState(5); // Control the number of notifications shown initially
 
+
+  
   const navigate = useNavigate();
 
   const showSearchDropdown = () => setSearchDropdown(true);
@@ -30,8 +32,13 @@ function Main() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userData, setUserData] = useState({
     name: "",
+    email: "",
     role: "",
+    address: "",
+    phoneNo: "",
+    profilePic: "",
   });
+  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -50,17 +57,21 @@ function Main() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userId = getUserIdFromToken();
+      const userId = getUserIdFromToken(); // Get the userId from the token
       if (!userId) {
         console.error("User is not authenticated");
         return;
       }
 
       try {
-        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`);
+        const response = await axios.get(`http://localhost:3000/api/auth/user-details/${userId}`); // Fetch user details by userId
         setUserData({
           name: response.data.user.name,
+          email: response.data.user.email,
           role: response.data.user.role,
+          address: response.data.user.address,
+          phoneNo: response.data.user.phoneNo,
+          profilePic: response.data.user.profilePic,
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -69,7 +80,6 @@ function Main() {
 
     fetchUserData();
   }, []);
-
   useEffect(() => {
     if (userId) {
       const fetchNotifications = async () => {
@@ -182,7 +192,7 @@ function Main() {
           <Menu.Button className="block w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
             <img
               alt="Midone Tailwind HTML Admin Template"
-              src={fakerData[9].photos[0]}
+              src={`http://localhost:3000/uploads/${userData.profilePic || 'default-profile.png'}`}
             />
           </Menu.Button>
           <Menu.Items className="w-56 mt-px text-white bg-primary">
@@ -209,7 +219,6 @@ function Main() {
               className="hover:bg-white/5"
               onClick={handleResetPasswordClick}
             >
-              <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Reset Password
             </Menu.Item>
             <Menu.Divider className="bg-white/[0.08]" />
             <Menu.Item className="hover:bg-white/5">

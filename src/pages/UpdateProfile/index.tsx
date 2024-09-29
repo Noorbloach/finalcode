@@ -17,8 +17,9 @@ function Main() {
     role: "",
     address: "",
     phoneNo: "",
+    profilePic: "",
   });
-
+  const [selectedImage, setSelectedImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false); // State to manage edit mode
 
   // Decode the JWT token and extract the userId
@@ -49,6 +50,7 @@ function Main() {
           role: response.data.user.role,
           address: response.data.user.address,
           phoneNo: response.data.user.phoneNo,
+          profilePic: response.data.user.profilePic,
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -66,66 +68,79 @@ function Main() {
       [name]: value,
     });
   };
-
+// Handle image selection
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  setSelectedImage(file);
+};
   // Enable edit mode for address and phoneNo
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
   // Update user details
-  const handleUpdateClick = async () => {
-    const userId = getUserIdFromToken(); // Get the userId from the token
-    try {
-      const response = await axios.put(`http://localhost:3000/api/auth/update-details/${userId}`, {
-        name:userData.name,
-        phoneNo: userData.phoneNo,
-        address: userData.address,
-      });
-      setIsEditing(false); // Disable editing after update
-      console.log("User details updated:", response.data);
-    } catch (error) {
-      console.error("Error updating user details:", error);
-    }
-  };
+ // Update user details, including the profile image
+ const handleUpdateClick = async () => {
+  const userId = getUserIdFromToken();
+  const formData = new FormData();
+  
+  // Append form data
+  formData.append("name", userData.name);
+  formData.append("phoneNo", userData.phoneNo);
+  formData.append("address", userData.address);
+  if (selectedImage) {
+    formData.append("profileImage", selectedImage); // Append the selected image
+  }
+
+  try {
+    const response = await axios.put(`http://localhost:3000/api/auth/update-details/${userId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    setIsEditing(false); // Disable editing after update
+    console.log("User details updated:", response.data);
+  } catch (error) {
+    console.error("Error updating user details:", error);
+  }
+};
+
 
   return (
     <>
       <div className="flex items-center mt-8 intro-y">
         <h2 className="mr-auto text-lg font-medium">Update Profile</h2>
       </div>
+      {console.log(userData.profilePic)}
       <div className="grid grid-cols-12 gap-6">
         {/* BEGIN: Profile Menu */}
-        <div className="flex flex-col-reverse col-span-12 lg:col-span-4 2xl:col-span-3 lg:block">
+         {/* Profile Menu */}
+         <div className="flex flex-col-reverse col-span-12 lg:col-span-4 2xl:col-span-3 lg:block">
           <div className="mt-5 intro-y box">
             <div className="relative flex items-center p-5">
               <div className="w-12 h-12 image-fit">
-                <img
-                  alt="Midone Tailwind HTML Admin Template"
+              <img
+                  alt="Profile"
                   className="rounded-full"
-                 
+                  src={`http://localhost:3000/uploads/${userData.profilePic || 'default-profile.png'}`}// Construct full URL
                 />
               </div>
               <div className="ml-4 mr-auto">
-                <div className="text-base font-medium">
-                  {userData.name}
-                </div>
-                <div className="text-slate-500">{}</div>
+                <div className="text-base font-medium">{userData.name}</div>
+                <div className="text-slate-500">{userData.email}</div>
               </div>
-              
             </div>
             <div className="p-5 border-t border-slate-200/60 dark:border-darkmode-400">
-              <a className="flex items-center font-medium text-primary" href="">
-                <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Personal
-                Information
-              </a>
-             
-              <a className="flex items-center mt-5" href="/change-password">
-                <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Change Password
-              </a>
-              
-            </div>
-            
-            
+  <a className="flex items-center mt-5" href="/profile-overview-3">
+    <Lucide icon="Activity" className="w-4 h-4 mr-2" /> Personal Information
+  </a>
+  
+  <a className="flex items-center mt-5 font-medium text-primary" href="/update-profile">
+    <Lucide icon="Settings" className="w-4 h-4 mr-2" />
+    Update Profile
+  </a>
+</div>
+
           </div>
         </div>
         <div className="col-span-12 lg:col-span-8 2xl:col-span-9">
@@ -197,6 +212,16 @@ function Main() {
                           value={userData.address}
                           onChange={handleInputChange}
                           disabled={!isEditing} // Enable only in edit mode
+                        />
+                      </div>
+                      <div className="mt-3">
+                        <FormLabel htmlFor="profilePic">Profile Image</FormLabel>
+                        <FormInput
+                          id="profilePic"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          disabled={!isEditing}
                         />
                       </div>
                     </div>

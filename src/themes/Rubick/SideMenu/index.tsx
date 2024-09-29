@@ -74,7 +74,7 @@ function Main() {
     // Hide "Users" and "Clients" only for employees
     ( 
       (userRole === "admin" && menu.title !== "Dashboard" && menu.title !== "Clients") || 
-      (userRole === "superadmin" && menu.title !== "Dashboard" && menu.title !== "Users") ||
+      (userRole === "superadmin" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Profile") ||
       (userRole === "employee" && menu.title !== "Dashboard" && menu.title !== "Users" && menu.title !== "Clients"))&& (
       <li key={menuKey}>
         <Tippy
