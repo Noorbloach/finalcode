@@ -333,7 +333,7 @@ const ensureProtocol = (url: string) => {
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
         {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
-        {(role === "admin" || role === "employee" || role === "management") && (
+        {(role === "admin" || role === "employee" ) && (
   <Table.Th className="text-center border-b-0 whitespace-nowrap">
     {role === "admin" ? "Ops Due Date" : "Due Date"}
   </Table.Th>

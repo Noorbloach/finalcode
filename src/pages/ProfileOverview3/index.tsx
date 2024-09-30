@@ -25,6 +25,25 @@ const [userId, setUserId] = useState(null);
 const [statusCounts, setStatusCounts] = useState([]);
 const [totalProjects, setTotalProjects] = useState(0);
 
+const [approvedProjects, setApprovedProjects] = useState([]);
+const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+
+// Fetch approved projects from the backend
+useEffect(() => {
+  const fetchApprovedProjects = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/approved-projects');
+      console.log(response.data)
+      setApprovedProjects(response.data);
+    } catch (error) {
+      console.error('Error fetching approved projects:', error);
+    }
+  };
+
+  fetchApprovedProjects();
+}, []);
+
+
 const [userData, setUserData] = useState({
   name: "",
   email: "",
@@ -231,106 +250,40 @@ const prevProject = () => {
              {/* BEGIN: Today Schedules */}
              <div className="col-span-12 intro-y box 2xl:col-span-6">
               <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 className="mr-auto text-base font-medium">
-                  Projects Assigned Today
-                </h2>
-                <Button
-                  variant="outline-secondary"
-                  className="px-2 mr-2"
-                  onClick={prevTodaySchedules}
-                >
-                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
-                </Button>
+                <h2 className="mr-auto text-base font-medium">Projects Approved</h2>
+              </div>
+              <div className="flex justify-between items-center p-5">
                 <Button
                   variant="outline-secondary"
                   className="px-2"
-                  onClick={nextTodaySchedules}
+                  onClick={prevProject}
+                  disabled={currentIndex === 0}
+                >
+                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
+                </Button>
+                <div className="flex-1 text-center">
+                  {approvedProjects.length > 0 ? (
+                    <>
+                      <div className="text-lg font-medium">
+                        {approvedProjects[currentIndex].projectName}
+                      </div>
+                      <div className="mt-2 text-slate-600 dark:text-slate-500">
+                        {approvedProjects[currentIndex].description.replace(/<\/?p>/g, "")}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-slate-600">No projects available</div>
+                  )}
+                </div>
+                <Button
+                  variant="outline-secondary"
+                  className="px-2"
+                  onClick={nextProject}
+                  disabled={currentIndex === projects.length - 1}
                 >
                   <Lucide icon="ChevronRight" className="w-4 h-4" />
                 </Button>
               </div>
-              <TinySlider
-                getRef={(el) => {
-                  todaySchedulesRef.current = el;
-                }}
-                className="py-5"
-              >
-                <div className="px-5 text-center sm:text-left">
-                  <div className="text-lg font-medium">
-                    Developing rest API with Laravel 7
-                  </div>
-                  <div className="mt-2 text-slate-600 dark:text-slate-500">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry
-                  </div>
-                  <div className="mt-2">11:15AM - 12:30PM</div>
-                  <div className="flex flex-col items-center mt-5 sm:flex-row">
-                    <div className="flex items-center text-slate-500">
-                      <Lucide
-                        icon="MapPin"
-                        className="hidden w-4 h-4 mr-2 sm:block"
-                      />
-                      1396 Pooh Bear Lane, New Market
-                    </div>
-                    <Button
-                      variant="secondary"
-                      className="px-2 py-1 mt-3 sm:ml-auto sm:mt-0sm:ml-auto sm:mt-0"
-                    >
-                      View On Map
-                    </Button>
-                  </div>
-                </div>
-                <div className="px-5 text-center sm:text-left">
-                  <div className="text-lg font-medium">
-                    Developing rest API with Laravel 7
-                  </div>
-                  <div className="mt-2 text-slate-600 dark:text-slate-500">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry
-                  </div>
-                  <div className="mt-2">11:15AM - 12:30PM</div>
-                  <div className="flex flex-col items-center mt-5 sm:flex-row">
-                    <div className="flex items-center text-slate-500">
-                      <Lucide
-                        icon="MapPin"
-                        className="hidden w-4 h-4 mr-2 sm:block"
-                      />
-                      1396 Pooh Bear Lane, New Market
-                    </div>
-                    <Button
-                      variant="secondary"
-                      className="px-2 py-1 mt-3 sm:ml-auto sm:mt-0sm:ml-auto sm:mt-0"
-                    >
-                      View On Map
-                    </Button>
-                  </div>
-                </div>
-                <div className="px-5 text-center sm:text-left">
-                  <div className="text-lg font-medium">
-                    Developing rest API with Laravel 7
-                  </div>
-                  <div className="mt-2 text-slate-600 dark:text-slate-500">
-                    Lorem Ipsum is simply dummy text of the printing and
-                    typesetting industry
-                  </div>
-                  <div className="mt-2">11:15AM - 12:30PM</div>
-                  <div className="flex flex-col items-center mt-5 sm:flex-row">
-                    <div className="flex items-center text-slate-500">
-                      <Lucide
-                        icon="MapPin"
-                        className="hidden w-4 h-4 mr-2 sm:block"
-                      />
-                      1396 Pooh Bear Lane, New Market
-                    </div>
-                    <Button
-                      variant="secondary"
-                      className="px-2 py-1 mt-3 sm:ml-auto sm:mt-0sm:ml-auto sm:mt-0"
-                    >
-                      View On Map
-                    </Button>
-                  </div>
-                </div>
-              </TinySlider>
             </div>
             {/* END: Today Schedules */}
             {/* BEGIN: Work In Progress */}
