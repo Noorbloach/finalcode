@@ -316,14 +316,14 @@ function Main() {
             <Table.Thead>
             <Table.Tr>
         <Table.Th className="border-b-0 whitespace-nowrap">Project Title</Table.Th>
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">ClientName</Table.Th>
       )}
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Budget</Table.Th>)}
-        {(role === "superadmin") && (
+        {(role === "superadmin" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Due Date</Table.Th>)}
-        {(role === "admin" || role === "employee") && (
+        {(role === "admin" || role === "employee" || role === "management") && (
   <Table.Th className="text-center border-b-0 whitespace-nowrap">
     {role === "admin" ? "Ops Due Date" : "Due Date"}
   </Table.Th>
@@ -334,14 +334,14 @@ function Main() {
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Status (Cloned)</Table.Th>
       )}
       
-        {(role === "admin" || role === "employee") && (
+        {(role === "admin" || role === "employee" || role === "management") && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Joined Members</Table.Th>)}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Project (admin) Link</Table.Th>
-        {(role === "admin" || role === "employee" ) && (
+        {(role === "admin" || role === "employee" || role === "management" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Estimator Link</Table.Th>
       )}
       {/* Conditionally render Template column */}
-      {(role === "admin" || role === "employee" ) && (
+      {(role === "admin" || role === "employee" || role === "management" ) && (
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Template</Table.Th>
       )}
         <Table.Th className="text-center border-b-0 whitespace-nowrap">Actions</Table.Th>
@@ -351,11 +351,11 @@ function Main() {
       {currentProjects.map((project) => (
         <Table.Tr key={project._id} className="intro-x bg-white mb-2"> {/* Removed box and shadow classes */}
           <Table.Td className="text-center">{project.projectName}</Table.Td>
-          {(role === "superadmin") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
-          {(role === "superadmin") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
-          {(role === "superadmin") && (
+          {(role === "superadmin" || role === "management") && (<Table.Td className="text-center">{project.client.name}</Table.Td>)} {/* Added column */}
+          {(role === "superadmin" || role === "management") && (<Table.Td className="text-center">${project.totalAmount}</Table.Td>)}
+          {(role === "superadmin" || role === "management") && (
           <Table.Td className="text-center">{new Date(project.clientDueDate).toLocaleDateString()}</Table.Td>)}
-          {(role === "admin" || role === "employee") && (
+          {(role === "admin" || role === "employee" || role === "management") && (
           <Table.Td className="text-center">{new Date(project.opsDueDate).toLocaleDateString()}</Table.Td>)}
           <Table.Td className="text-center"> {role === 'admin' && project.status === 'Proposal Sent'
                       ? 'On Hold'
@@ -377,7 +377,7 @@ function Main() {
           </Table.Td>
         )}
           
-          {(role === "admin" || role === "employee") && (
+          {(role === "admin" || role === "employee" || role === "management") && (
           <Table.Td className="text-center max-w-[60px]">
             <div className="relative flex">
             <FormSelect className="!box w-56" >
@@ -401,7 +401,7 @@ function Main() {
 </Table.Td>
 <Table.Td className="text-center">
   {project.estimatorLink ? (
-    (role === "admin" || role === "employee") && (
+    (role === "admin" || role === "employee" || role === "management") && (
       <a 
         href={ensureProtocol(project.estimatorLink)} 
         className="underline text-blue-500 hover:text-blue-700" 
@@ -418,7 +418,7 @@ function Main() {
 
 
         {/* Conditionally render Template field */}
-        {(role === "admin" || role === "employee") && (
+        {(role === "admin" || role === "employee" || role === "management") && (
           <Table.Td className="text-center">{project.template}</Table.Td>
         )}
         
@@ -427,11 +427,11 @@ function Main() {
               <a className="flex items-center mr-3" href="#" onClick={() => handleViewClick(project._id)}>
                 <Lucide icon="Eye" className="w-4 h-4 mr-1" /> View
               </a>
-              {(role === "superadmin" || role === "admin" ) && (
+              {(role === "superadmin" || role === "admin" || role === "management" ) && (
               <a className="flex items-center mr-3" href="#" onClick={() => handleEditClick(project._id)}>
                 <Lucide icon="CheckSquare" className="w-4 h-4 mr-1" /> Edit
               </a>)}
-              {(role === "superadmin") && (
+              {(role === "superadmin" || role === "management") && (
               <a className="flex items-center text-danger" href="#" onClick={() => handleDeleteClick(project._id)}>
                 <Lucide icon="Trash2" className="w-4 h-4 mr-1" /> Delete
               </a>)}

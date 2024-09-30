@@ -90,17 +90,17 @@ function Router() {
       "/register",
       "/otp",
       "/error-page",
-      "/",
+      
     ];
 
     const restrictedPathsForAdmin = [
-      "/",
+      
       "/add-product",
       "/clients",
     ];
 
     const restrictedPathsForSuperAdmin = [
-      "/",
+      "/profile-overview-3",
       "/users-layout-2",
     ];
 
@@ -178,7 +178,7 @@ function Router() {
         },
         {
           path: "profile-overview-3",
-          element: <ProfileOverview3 />,
+          element: isAllowed("/profile-overview-3") ? <ProfileOverview3 /> : <Navigate to="/error-page" />,
         },
         {
           path: "update-profile",
