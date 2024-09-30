@@ -49,13 +49,20 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
   };
 
   const handleTagRemove = (memberId: string) => {
-    setSelectedMembers(selectedMembers.filter(id => id !== memberId));
+    setSelectedMembers(prevMembers => {
+      const updatedMembers = prevMembers.filter(id => id !== memberId);
+      console.log("Updated Members after removal:", updatedMembers); // Debugging step
+      return updatedMembers;
+    });
   };
-
+  
+  
+  
   const handleUpdate = async () => {
     try {
       const updatedProject = {
         ...project,
+        // Always update the members field, even if it's an empty array
         members: selectedMembers,
       };
 
@@ -277,43 +284,48 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 <div style={formGroupStyles}>
                   <label style={labelStyles}>Select Members:</label>
                   <FormSelect
-                    name="selectedMember"
-                    value=""
-                    onChange={handleSelectChange}
-                    style={selectStyles}
-                  >
-                    <option value="">Select a Member</option>
-                    {employees.map(employee => (
-                      <option key={employee._id} value={employee._id}>
-                        {employee.name}
-                      </option>
-                    ))}
-                  </FormSelect>
+  name="selectedMember"
+  value="" // Reset dropdown after selection
+  onChange={handleSelectChange}
+  style={selectStyles}
+>
+  <option value="">Select a Member</option>
+  {employees.map(employee => (
+    <option key={employee._id} value={employee._id}>
+      {employee.name}
+    </option>
+  ))}
+</FormSelect>
+
                 </div>
 
                 <div style={formGroupStyles}>
-                  <label style={labelStyles}>Selected Members:</label>
-                  <div style={tagsContainerStyles}>
-                    {selectedMembers.map(memberId => {
-                      const member = employees.find(m => m._id === memberId);
-                      return (
-                        member && (
-                          <div key={member._id} style={tagStyles}>
-                            {member.name}
-                            <button
-                              type="button"
-                              style={removeButtonStyles}
-                              onClick={() => handleTagRemove(member._id)}
-                            >
-                              &times;
-                            </button>
-                          </div>
-                        )
-                      );
-                    })}
-
-              </div>
+  <label style={labelStyles}>Selected Members:</label>
+  <div style={tagsContainerStyles}>
+    {selectedMembers.length > 0 ? (
+      selectedMembers.map(memberId => {
+        const member = employees.find(m => m._id === memberId);
+        return (
+          member && (
+            <div key={member._id} style={tagStyles}>
+              {member.name}
+              <button
+                type="button"
+                style={removeButtonStyles}
+                onClick={() => handleTagRemove(member._id)}
+              >
+                &times;
+              </button>
             </div>
+          )
+        );
+      })
+    ) : (
+      <p>No members selected</p> // Display when array is empty
+    )}
+  </div>
+</div>
+
               </>
             )}
 
