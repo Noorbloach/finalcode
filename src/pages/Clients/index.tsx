@@ -1,11 +1,11 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
-import _ from 'lodash';
-import Button from '@/components/Base/Button';
-import Pagination from '@/components/Base/Pagination';
-import { FormInput, FormSelect } from '@/components/Base/Form';
-import Lucide from '@/components/Base/Lucide';
-import axios from 'axios'; // For making HTTP requests
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useEffect, useState, ChangeEvent } from "react";
+import _ from "lodash";
+import Button from "@/components/Base/Button";
+import Pagination from "@/components/Base/Pagination";
+import { FormInput, FormSelect } from "@/components/Base/Form";
+import Lucide from "@/components/Base/Lucide";
+import axios from "axios"; // For making HTTP requests
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface Client {
   name: string;
@@ -21,18 +21,20 @@ function Main() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get<Client[]>('http://localhost:3000/api/clients/clients');
+        const response = await axios.get<Client[]>(
+          "http://localhost:3000/api/clients/clients"
+        );
         setClients(response.data.clients);
         setFilteredClients(response.data.clients);
       } catch (error) {
-        console.error('Error fetching clients:', error);
+        console.error("Error fetching clients:", error);
       } finally {
         setLoading(false);
       }
@@ -48,10 +50,10 @@ function Main() {
     setCurrentPage(1);
 
     // Filter clients based on name
-    if (value.trim() === '') {
+    if (value.trim() === "") {
       setFilteredClients(clients); // Reset to all clients if search term is empty
     } else {
-      const filtered = clients.filter(client =>
+      const filtered = clients.filter((client) =>
         client.name.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredClients(filtered);
@@ -74,7 +76,9 @@ function Main() {
     setCurrentPage(page);
   };
 
-  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleItemsPerPageChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setItemsPerPage(Number(e.target.value));
     setCurrentPage(1);
   };
@@ -83,9 +87,11 @@ function Main() {
     <>
       <h2 className="mt-10 text-lg font-medium intro-y">Clients Data</h2>
       <div className="grid grid-cols-12 gap-6 mt-5">
-      <div className="flex justify-between items-center col-span-12 mt-2 intro-y">
-        <div className="text-slate-500 text-center flex-1">
-            Showing {itemsPerPage * (currentPage - 1) + 1} to {Math.min(currentPage * itemsPerPage, filteredClients.length)} of {filteredClients.length} entries
+        <div className="flex justify-between items-center col-span-12 mt-2 intro-y">
+          <div className="text-slate-500 text-center flex-1">
+            Showing {itemsPerPage * (currentPage - 1) + 1} to{" "}
+            {Math.min(currentPage * itemsPerPage, filteredClients.length)} of{" "}
+            {filteredClients.length} entries
           </div>
           <div className="w-full mt-3 sm:w-auto sm:mt-0 sm:ml-3">
             <div className="relative w-56 text-slate-500">
@@ -113,7 +119,9 @@ function Main() {
                     alt="Client Avatar"
                     className="rounded-full"
                     src={`src/pages/Clients/612.jpg`} // Updated to new image path
-                    onError={(e) => (e.currentTarget.src = 'src/pages/Clients/612.jpg')} // Fallback to new image if needed
+                    onError={(e) =>
+                      (e.currentTarget.src = "src/pages/Clients/612.jpg")
+                    } // Fallback to new image if needed
                   />
                 </div>
                 <div className="mt-4 text-center">
@@ -158,7 +166,7 @@ function Main() {
               <button
                 key={index}
                 className={`${
-                  index + 1 === currentPage ? 'active' : ''
+                  index + 1 === currentPage ? "active" : ""
                 } pagination-link`}
                 onClick={() => handlePageChange(index + 1)}
               >

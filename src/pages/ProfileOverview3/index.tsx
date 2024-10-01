@@ -210,81 +210,79 @@ const prevProject = () => {
           <div className="grid grid-cols-12 gap-6">
             {/* BEGIN: Projects */}
             <div className="col-span-12 intro-y box 2xl:col-span-6">
-              <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 className="mr-auto text-base font-medium">Projects Assigned To You</h2>
-              </div>
-              <div className="flex justify-between items-center p-5">
-                <Button
-                  variant="outline-secondary"
-                  className="px-2"
-                  onClick={prevProject}
-                  disabled={currentIndex === 0}
-                >
-                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
-                </Button>
-                <div className="flex-1 text-center">
-                  {projects.length > 0 ? (
-                    <>
-                      <div className="text-lg font-medium">
-                        {projects[currentIndex].projectName}
-                      </div>
-                      <div className="mt-2 text-slate-600 dark:text-slate-500">
-                        {projects[currentIndex].description.replace(/<\/?p>/g, "")}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-slate-600">No projects available</div>
-                  )}
-                </div>
-                <Button
-                  variant="outline-secondary"
-                  className="px-2"
-                  onClick={nextProject}
-                  disabled={currentIndex === projects.length - 1}
-                >
-                  <Lucide icon="ChevronRight" className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+  <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
+    <h2 className="mr-auto text-base font-medium">Projects Assigned To You</h2>
+  </div>
+  <div className="flex justify-between items-center p-5">
+    <Button
+      variant="outline-secondary"
+      className="px-2"
+      onClick={prevProject}
+      disabled={currentIndex === 0}
+    >
+      <Lucide icon="ChevronLeft" className="w-4 h-4" />
+    </Button>
+    <div className="flex-1 text-center">
+      {projects.length > 0 ? (
+        <>
+          <div className="text-lg font-medium">
+            {projects[currentIndex].projectName}
+          </div>
+          {/* Removed the description */}
+        </>
+      ) : (
+        <div className="text-slate-600">No projects available</div>
+      )}
+    </div>
+    <Button
+      variant="outline-secondary"
+      className="px-2"
+      onClick={nextProject}
+      disabled={currentIndex === projects.length - 1}
+    >
+      <Lucide icon="ChevronRight" className="w-4 h-4" />
+    </Button>
+  </div>
+</div>
+
             {/* END: Projects */}
              {/* BEGIN: Today Schedules */}
              <div className="col-span-12 intro-y box 2xl:col-span-6">
-              <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 className="mr-auto text-base font-medium">Projects Approved</h2>
-              </div>
-              <div className="flex justify-between items-center p-5">
-                <Button
-                  variant="outline-secondary"
-                  className="px-2"
-                  onClick={prevProject}
-                  disabled={currentIndex === 0}
-                >
-                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
-                </Button>
-                <div className="flex-1 text-center">
-                  {approvedProjects.length > 0 ? (
-                    <>
-                      <div className="text-lg font-medium">
-                        {approvedProjects[currentIndex].projectName}
-                      </div>
-                      <div className="mt-2 text-slate-600 dark:text-slate-500">
-                        {approvedProjects[currentIndex].description.replace(/<\/?p>/g, "")}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-slate-600">No projects available</div>
-                  )}
-                </div>
-                <Button
-                  variant="outline-secondary"
-                  className="px-2"
-                  onClick={nextProject}
-                  disabled={currentIndex === projects.length - 1}
-                >
-                  <Lucide icon="ChevronRight" className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+  <div className="flex items-center px-5 py-3 border-b border-slate-200/60 dark:border-darkmode-400">
+    <h2 className="mr-auto text-base font-medium">Projects Approved</h2>
+  </div>
+  <div className="flex justify-between items-center p-5">
+    <Button
+      variant="outline-secondary"
+      className="px-2"
+      onClick={prevProject}
+      disabled={currentIndex === 0}
+    >
+      <Lucide icon="ChevronLeft" className="w-4 h-4" />
+    </Button>
+    <div className="flex-1 text-center">
+      {approvedProjects.length > 0 ? (
+        <>
+          <div className="text-lg font-medium">
+            {approvedProjects[currentIndex].projectName}
+          </div>
+          {/* Removed the description */}
+        </>
+      ) : (
+        <div className="text-slate-600">No projects available</div>
+      )}
+    </div>
+    <Button
+      variant="outline-secondary"
+      className="px-2"
+      onClick={nextProject}
+      disabled={currentIndex === projects.length - 1}
+    >
+      <Lucide icon="ChevronRight" className="w-4 h-4" />
+    </Button>
+  </div>
+</div>
+
             {/* END: Today Schedules */}
             {/* BEGIN: Work In Progress */}
             <Tab.Group className="col-span-12 intro-y box 2xl:col-span-6">

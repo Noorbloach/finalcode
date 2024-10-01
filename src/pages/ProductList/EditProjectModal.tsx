@@ -79,7 +79,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
 
   // Render status options based on role
   const renderStatusOptions = () => {
-    if (role === 'superadmin') {
+    if (role === 'superadmin'||role === 'management' ) {
       if (project.status === 'Proposal Sent') {
         return (
           <>
@@ -100,7 +100,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
       );
     }
 
-    if (role === 'admin') {
+    if (role === 'admin' ) {
       if (project.status === 'Proposal Sent') {
         return (
           <option value={project.status} disabled>{project.status}</option>
@@ -135,7 +135,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
     );
   };
 
-  const isFieldDisabled = role === "admin";
+  const isFieldDisabled = role === "admin" ;
   
   // Dropdown options
   const memberOptions = [
@@ -153,7 +153,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
           <h2 style={headingStyles}>Edit Project</h2>
           <div style={formContainerStyles}>
             {/* Conditionally render fields based on the role */}
-            {role === 'superadmin' && (
+            {role === 'superadmin' || role === 'management' && (
               <>
                 <div style={formGroupStyles}>
                   <label style={labelStyles}>Project Name:</label>
@@ -247,7 +247,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({
               </>
             )}
 
-            {(role === 'admin' || role === 'employee') && (
+            {(role === 'admin' || role === 'employee' ) && (
               <>
               <div style={formGroupStyles}>
                   <label style={labelStyles}>Status:</label>

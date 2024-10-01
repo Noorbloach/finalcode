@@ -73,16 +73,18 @@ function Router() {
       "/register",
       "/otp",
       "/error-page",
+      "/",
       
     ];
 
     const restrictedPathsForAdmin = [
-      
+      "/",
       "/add-product",
       "/clients",
     ];
 
     const restrictedPathsForSuperAdmin = [
+      "/",
       "/profile-overview-3",
       "/users-layout-2",
     ];

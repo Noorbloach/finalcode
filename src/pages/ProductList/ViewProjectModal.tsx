@@ -43,7 +43,7 @@ const ViewProjectModal: React.FC<ViewProjectModalProps> = ({ open, onClose, proj
           <h2 style={headingStyles}>View Project</h2>
           <div style={formContainerStyles}>
             {/* Conditionally render content based on the role */}
-            {role === "admin" || role === "employee" ? (
+            {role === "admin" || role === "employee" || role === 'management' ? (
               <>
                 {/* Show only project name and description */}
                 <div style={formGroupStyles}>
